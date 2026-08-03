@@ -3,7 +3,6 @@ import { fetchNews } from "@/lib/fetchNews";
 import {
   generateSummary,
   generateCategory,
-  generateScore,
 } from "@/lib/ai";
 import { getImage } from "@/lib/getImage";
 
@@ -22,12 +21,34 @@ export async function syncNews() {
       },
     });
 
-    if (exists) continue;
+    // 既に記事がある場合は画像だけ追加
+    if (exists) {
+      if (!exists.image) {
+        try {
+          const image = await getImage(sourceUrl);
 
-  const summary = await generateSummary(title);
-  const category = await generateCategory(title);
-  const score = 50;
-  const image = await getImage(sourceUrl);
+          await prisma.news.update({
+            where: {
+              sourceUrl,
+            },
+            data: {
+              image,
+            },
+          });
+
+          console.log("画像追加:", title);
+        } catch (error) {
+          console.error("画像更新エラー:", error);
+        }
+      }
+
+      continue;
+    }
+
+    const summary = await generateSummary(title);
+    const category = await generateCategory(title);
+    const score = 50;
+    const image = await getImage(sourceUrl);
 
     await prisma.news.create({
       data: {
@@ -43,6 +64,8 @@ export async function syncNews() {
           : null,
       },
     });
+
+    console.log("追加:", title);
   }
 
   return {
