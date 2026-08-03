@@ -1,36 +1,44 @@
-"use client";
-
 import { Flame } from "lucide-react";
+import Link from "next/link";
+import { prisma } from "@/lib/prisma";
 
-const topics = [
-  "大谷翔平",
-  "台風情報",
-  "日経平均",
-  "OpenAI",
-  "サッカー日本代表",
-  "芸能速報",
-  "政治",
-  "AI",
-  "テクノロジー",
-];
+export default async function TrendingBar() {
+  const news = await prisma.news.findMany({
+    orderBy: {
+      publishedAt: "desc",
+    },
+    take: 10,
+  });
 
-export default function TrendingBar() {
+  const topics = Array.from(
+    new Set(
+      news.flatMap((item) => {
+        return item.title
+          .replace(/[【】「」()（）:：]/g, "")
+          .split(/[\s、・,]/)
+          .filter((word) => word.length >= 3)
+          .slice(0, 2);
+      })
+    )
+  ).slice(0, 8);
+
   return (
-    <section className="rounded-full bg-slate-100 px-5 py-3 text-gray-400">
-      <div className="max-w-7xl mx-auto flex items-center gap-4 px-6 py-3 overflow-x-auto scrollbar-hide">
+    <section className="rounded-full bg-slate-100 px-5 py-3 text-gray-500">
+      <div className="mx-auto flex max-w-7xl items-center gap-4 overflow-x-auto px-6 py-3">
 
-        <div className="flex items-center gap-2 text-red-500 font-bold whitespace-nowrap">
+        <div className="flex items-center gap-2 whitespace-nowrap font-bold text-red-500">
           <Flame size={18} />
           急上昇
         </div>
 
         {topics.map((topic) => (
-          <button
+          <Link
             key={topic}
-            className="whitespace-nowrap rounded-full bg-slate-100 hover:bg-blue-600 hover:text-white transition px-4 py-2 text-sm font-medium"
+            href={`/search?q=${encodeURIComponent(topic)}`}
+            className="whitespace-nowrap rounded-full bg-white px-4 py-2 text-sm font-semibold shadow transition hover:bg-blue-600 hover:text-white"
           >
             #{topic}
-          </button>
+          </Link>
         ))}
 
       </div>

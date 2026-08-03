@@ -13,25 +13,25 @@ const menu = [
 
 export default function Header() {
   return (
-    <header className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-gray-200">
+    <header className="sticky top-0 z-50 border-b border-gray-200 bg-white/95 backdrop-blur">
 
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
 
         {/* Logo */}
 
-        <Link href="/" className="flex items-center gap-3">
+        <Link href="/" className="flex items-center gap-4">
 
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-2xl font-black text-white">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-2xl font-black text-white shadow-lg">
             N
           </div>
 
           <div>
 
-            <h1 className="text-2xl font-black tracking-tight">
+            <h1 className="text-2xl font-black tracking-tight text-slate-900">
               NEWS AI
             </h1>
 
-            <p className="text-xs text-gray-500">
+            <p className="text-sm text-slate-500">
               AI News Platform
             </p>
 
@@ -41,14 +41,14 @@ export default function Header() {
 
         {/* Menu */}
 
-        <nav className="hidden lg:flex items-center gap-8">
+        <nav className="hidden items-center gap-8 lg:flex">
 
           {menu.map((item) => (
 
             <Link
               key={item}
               href="#"
-              className="font-semibold text-gray-700 transition hover:text-blue-600"
+              className="font-semibold text-slate-700 transition hover:text-blue-600"
             >
               {item}
             </Link>
@@ -61,19 +61,17 @@ export default function Header() {
 
         <div className="flex items-center gap-3">
 
-          <button className="hidden md:flex items-center gap-2 rounded-full bg-slate-100 px-5 py-3 transition hover:bg-blue-600 hover:text-white">
+          <button className="hidden items-center gap-2 rounded-full bg-slate-100 px-5 py-3 transition hover:bg-blue-600 hover:text-white md:flex">
 
             <Search size={18} />
 
             <span className="text-sm font-medium">
-
               検索
-
             </span>
 
           </button>
 
-                    <button className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 transition hover:bg-blue-600 hover:text-white">
+          <button className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 transition hover:bg-blue-600 hover:text-white">
             <Bell size={20} />
           </button>
 
