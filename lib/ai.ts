@@ -4,6 +4,7 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+// AI要約だけOpenAIを使用
 export async function generateSummary(title: string) {
   try {
     const response = await openai.chat.completions.create({
@@ -30,56 +31,56 @@ export async function generateSummary(title: string) {
   }
 }
 
-export async function generateCategory(title: string) {
-  try {
-    const response = await openai.chat.completions.create({
-      model: "gpt-4.1-mini",
-      messages: [
-        {
-          role: "system",
-          content:
-            "ニュースタイトルを次のどれか1つだけで分類してください。\n\n国内\n国際\n経済\nスポーツ\nエンタメ\nテクノロジー",
-        },
-        {
-          role: "user",
-          content: title,
-        },
-      ],
-      temperature: 0,
-      max_tokens: 20,
-    });
+// カテゴリはAIを使わない
+export function generateCategory(title: string) {
+  const t = title.toLowerCase();
 
-    return response.choices[0]?.message?.content?.trim() ?? "国内";
-  } catch (error) {
-    console.error("カテゴリ生成エラー:", error);
+  if (/(大谷|野球|サッカー|jリーグ|mlb|npb)/i.test(t))
+    return "スポーツ";
+
+  if (/(株|日経|円|ドル|為替|決算|金融)/i.test(t))
+    return "経済";
+
+  if (
+    /(ai|openai|chatgpt|google|apple|microsoft|iphone|android|半導体|nvidia)/i.test(
+      t
+    )
+  )
+    return "テクノロジー";
+
+  if (/(首相|国会|選挙|政治)/i.test(t))
     return "国内";
-  }
+
+  if (/(中国|アメリカ|ロシア|ウクライナ|欧州|北朝鮮)/i.test(t))
+    return "国際";
+
+  if (/(芸能|俳優|女優|映画|ドラマ|音楽|アイドル)/i.test(t))
+    return "エンタメ";
+
+  return "国内";
 }
 
-export async function generateScore(title: string) {
-  try {
-    const response = await openai.chat.completions.create({
-      model: "gpt-4.1-mini",
-      messages: [
-        {
-          role: "system",
-          content:
-            "ニュースタイトルの重要度を0〜100の数字だけで返してください。数字以外は書かないでください。",
-        },
-        {
-          role: "user",
-          content: title,
-        },
-      ],
-      temperature: 0,
-      max_tokens: 5,
-    });
+// スコアもAIを使わない
+export function generateScore(title: string) {
+  const t = title.toLowerCase();
 
-    const score = Number(response.choices[0]?.message?.content);
+  if (/(地震|津波|噴火|台風|豪雨|災害)/i.test(t))
+    return 98;
 
-    return Number.isNaN(score) ? 50 : score;
-  } catch (error) {
-    console.error("スコア生成エラー:", error);
-    return 50;
-  }
+  if (/(戦争|ミサイル|首相|大統領|日銀|frb|利上げ)/i.test(t))
+    return 95;
+
+  if (/(株|日経|円安|円高|決算|経済)/i.test(t))
+    return 90;
+
+  if (/(ai|openai|chatgpt|google|apple|microsoft|半導体)/i.test(t))
+    return 88;
+
+  if (/(大谷|野球|サッカー|五輪|オリンピック)/i.test(t))
+    return 80;
+
+  if (/(芸能|映画|ドラマ|音楽)/i.test(t))
+    return 72;
+
+  return 60;
 }
