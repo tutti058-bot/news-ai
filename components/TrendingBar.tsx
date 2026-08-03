@@ -1,27 +1,17 @@
+"use client";
+
 import { Flame } from "lucide-react";
-import Link from "next/link";
-import { prisma } from "@/lib/prisma";
 
-export default async function TrendingBar() {
-  const news = await prisma.news.findMany({
-    orderBy: {
-      publishedAt: "desc",
-    },
-    take: 10,
-  });
+const topics = [
+  "国内",
+  "経済",
+  "スポーツ",
+  "テクノロジー",
+  "国際",
+  "AI",
+];
 
-  const topics = Array.from(
-    new Set(
-      news.flatMap((item) => {
-        return item.title
-          .replace(/[【】「」()（）:：]/g, "")
-          .split(/[\s、・,]/)
-          .filter((word) => word.length >= 3)
-          .slice(0, 2);
-      })
-    )
-  ).slice(0, 8);
-
+export default function TrendingBar() {
   return (
     <section className="rounded-full bg-slate-100 px-5 py-3 text-gray-500">
       <div className="mx-auto flex max-w-7xl items-center gap-4 overflow-x-auto px-6 py-3">
@@ -32,13 +22,12 @@ export default async function TrendingBar() {
         </div>
 
         {topics.map((topic) => (
-          <Link
+          <button
             key={topic}
-            href={`/search?q=${encodeURIComponent(topic)}`}
             className="whitespace-nowrap rounded-full bg-white px-4 py-2 text-sm font-semibold shadow transition hover:bg-blue-600 hover:text-white"
           >
             #{topic}
-          </Link>
+          </button>
         ))}
 
       </div>
