@@ -15,6 +15,7 @@ model News {
   image       String?
   category    String?
   score       Int       @default(50)
+  views       Int       @default(0)
   source      String?
   sourceUrl   String    @unique
   publishedAt DateTime?
