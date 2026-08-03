@@ -16,18 +16,6 @@ export default async function NewsDetail({ params }: Props) {
     },
   });
 
-  if (news) {
-  await prisma.news.update({
-    where: {
-      id: news.id,
-    },
-    data: {
-      views: {
-        increment: 1,
-      },
-    },
-  });
-}
 
   if (!news) {
     return (
