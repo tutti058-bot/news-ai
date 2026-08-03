@@ -24,10 +24,10 @@ export async function syncNews() {
 
     if (exists) continue;
 
-    const summary = await generateSummary(title);
-    const category = await generateCategory(title);
-    const score = 50;
-    const image = null;
+  const summary = await generateSummary(title);
+  const category = await generateCategory(title);
+  const score = 50;
+  const image = await getImage(sourceUrl);
 
     await prisma.news.create({
       data: {

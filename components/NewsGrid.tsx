@@ -62,7 +62,7 @@ export default async function NewsGrid({
             id={item.id}
             title={item.title}
             summary={item.summary ?? ""}
-            image={item.image ?? "/news.jpg"}
+            image={item.image || "/news.jpg"}
             category={item.category ?? "国内"}
             date={
               item.publishedAt
