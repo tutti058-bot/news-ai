@@ -31,6 +31,8 @@ export default async function NewsGrid({
     take: 30,
   });
 
+  console.log("News count:", news.length);
+
   return (
     <section>
       <div className="mb-10 flex items-center justify-between">
