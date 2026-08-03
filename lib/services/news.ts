@@ -3,17 +3,21 @@ import { fetchNews } from "@/lib/fetchNews";
 import {
   generateSummary,
   generateCategory,
+  generateScore,
 } from "@/lib/ai";
 import { getImage } from "@/lib/getImage";
 
 export async function syncNews() {
   const items = await fetchNews();
 
+  let added = 0;
+  let updated = 0;
+
   for (const item of items) {
     const title = item.title ?? "";
     const sourceUrl = item.link ?? "";
 
-    if (!sourceUrl) continue;
+    if (!title || !sourceUrl) continue;
 
     const exists = await prisma.news.findUnique({
       where: {
@@ -21,33 +25,42 @@ export async function syncNews() {
       },
     });
 
-    // 既に記事がある場合は画像だけ追加
-    if (exists) {
-      if (!exists.image) {
-        try {
-          const image = await getImage(sourceUrl);
+    // 既存記事なら不足データを補完
+if (exists) {
+  const image =
+    exists.image ?? (await getImage(sourceUrl));
 
-          await prisma.news.update({
-            where: {
-              sourceUrl,
-            },
-            data: {
-              image,
-            },
-          });
+  const summary =
+    exists.summary || (await generateSummary(title));
 
-          console.log("画像追加:", title);
-        } catch (error) {
-          console.error("画像更新エラー:", error);
-        }
-      }
+  const category =
+    exists.category || (await generateCategory(title));
 
-      continue;
-    }
+  const score =
+    exists.score === 50
+      ? await generateScore(title)
+      : exists.score;
+
+  await prisma.news.update({
+    where: {
+      sourceUrl,
+    },
+    data: {
+      image,
+      summary,
+      category,
+      score,
+    },
+  });
+
+  updated++;
+  console.log("更新:", title);
+
+  continue;
+}
 
     const summary = await generateSummary(title);
     const category = await generateCategory(title);
-    const score = 50;
     const image = await getImage(sourceUrl);
 
     await prisma.news.create({
@@ -55,21 +68,24 @@ export async function syncNews() {
         title,
         summary,
         category,
-        score,
+        score: await generateScore(title),
         image,
+        source: item.source ?? "RSS",
         sourceUrl,
-        source: "Google News",
         publishedAt: item.pubDate
           ? new Date(item.pubDate)
           : null,
       },
     });
 
+    added++;
     console.log("追加:", title);
   }
 
   return {
     success: true,
-    count: items.length,
+    added,
+    updated,
+    total: items.length,
   };
 }

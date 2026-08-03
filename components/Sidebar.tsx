@@ -1,25 +1,5 @@
-const ranking = [
-  {
-    title: "大谷翔平が今季31号ホームラン",
-    time: "5分前",
-  },
-  {
-    title: "日経平均株価が大幅上昇",
-    time: "15分前",
-  },
-  {
-    title: "台風7号 関東接近",
-    time: "30分前",
-  },
-  {
-    title: "OpenAI 新AIモデル公開",
-    time: "1時間前",
-  },
-  {
-    title: "サッカー日本代表 最新情報",
-    time: "2時間前",
-  },
-];
+import Link from "next/link";
+import { getRanking } from "@/lib/ranking";
 
 const medalColor = [
   "bg-yellow-500",
@@ -29,22 +9,25 @@ const medalColor = [
   "bg-blue-600",
 ];
 
-export default function Sidebar() {
+export default async function Sidebar() {
+  const ranking = await getRanking();
+
   return (
     <aside className="space-y-8">
 
       <div className="rounded-3xl border border-gray-200 bg-white p-8 shadow-lg">
 
         <h2 className="mb-8 text-3xl font-black text-slate-900">
-          🔥 人気ランキング
+          🔥 AI重要度ランキング
         </h2>
 
         <div className="space-y-5">
 
           {ranking.map((item, index) => (
 
-            <div
-              key={index}
+            <Link
+              key={item.id}
+              href={`/news/${item.id}`}
               className="flex items-start gap-4 border-b border-gray-100 pb-5 last:border-none"
             >
 
@@ -56,17 +39,17 @@ export default function Sidebar() {
 
               <div className="flex-1">
 
+                <div className="mb-2 inline-block rounded-full bg-red-100 px-3 py-1 text-xs font-bold text-red-600">
+                  AI {item.score}点
+                </div>
+
                 <h3 className="font-bold leading-6 text-slate-900 transition hover:text-blue-600">
                   {item.title}
                 </h3>
 
-                <p className="mt-2 text-sm text-slate-500">
-                  {item.time}
-                </p>
-
               </div>
 
-            </div>
+            </Link>
 
           ))}
 
@@ -74,7 +57,7 @@ export default function Sidebar() {
 
       </div>
 
-            {/* カテゴリー */}
+      {/* カテゴリー */}
 
       <div className="rounded-3xl border border-gray-200 bg-white p-8 shadow-lg">
 
@@ -86,18 +69,16 @@ export default function Sidebar() {
 
           {[
             "国内",
-            "芸能",
-            "スポーツ",
-            "経済",
-            "テクノロジー",
-            "政治",
             "国際",
-            "ライフ"
+            "経済",
+            "スポーツ",
+            "エンタメ",
+            "テクノロジー",
           ].map((category) => (
 
             <button
               key={category}
-              className="rounded-full border border-slate-200 bg-slate-100 px-5 py-3 font-bold text-slate-900 transition duration-300 hover:bg-blue-600 hover:text-white"
+              className="rounded-full border border-slate-200 bg-slate-100 px-5 py-3 font-bold text-slate-900 transition hover:bg-blue-600 hover:text-white"
             >
               {category}
             </button>
