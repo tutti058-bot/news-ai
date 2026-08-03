@@ -1,6 +1,7 @@
 "use client";
 
 import { Flame } from "lucide-react";
+import Link from "next/link";
 
 const topics = [
   "国内",
@@ -22,12 +23,13 @@ export default function TrendingBar() {
         </div>
 
         {topics.map((topic) => (
-          <button
+          <Link
             key={topic}
+            href={`/search?q=${encodeURIComponent(topic)}`}
             className="whitespace-nowrap rounded-full bg-white px-4 py-2 text-sm font-semibold shadow transition hover:bg-blue-600 hover:text-white"
           >
             #{topic}
-          </button>
+          </Link>
         ))}
 
       </div>
