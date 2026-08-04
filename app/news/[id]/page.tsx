@@ -7,7 +7,9 @@ type Props = {
   }>;
 };
 
-export default async function NewsDetail({ params }: Props) {
+export default async function NewsDetail({
+  params,
+}: Props) {
   const { id } = await params;
 
   const news = await prisma.news.findUnique({
@@ -16,11 +18,10 @@ export default async function NewsDetail({ params }: Props) {
     },
   });
 
-
   if (!news) {
     return (
-      <main className="mx-auto max-w-4xl p-10">
-        <h1 className="text-3xl font-bold">
+      <main className="mx-auto max-w-5xl p-10">
+        <h1 className="text-3xl font-black">
           記事が見つかりません
         </h1>
       </main>
@@ -37,86 +38,155 @@ export default async function NewsDetail({ params }: Props) {
     orderBy: {
       publishedAt: "desc",
     },
-    take: 4,
+    take: 3,
   });
 
   return (
-    <main className="mx-auto max-w-5xl px-6 py-10">
+    <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
+
       <Link
         href="/"
-        className="text-blue-600 hover:underline"
+        className="text-sm font-semibold text-blue-600 hover:underline"
       >
         ← トップへ戻る
       </Link>
 
-      <img
-        src={news.image ?? "/news.jpg"}
-        alt={news.title}
-        className="mt-8 h-[420px] w-full rounded-3xl object-cover"
-      />
+      <div className="mt-6 flex flex-wrap gap-3">
 
-      <div className="mt-8 flex gap-3">
-        <span className="rounded-full bg-red-500 px-4 py-2 text-white">
+        <span className="rounded-full bg-red-600 px-4 py-2 text-sm font-bold text-white">
           {news.category}
         </span>
 
-        <span className="rounded-full bg-amber-400 px-4 py-2 font-bold">
-          AI {news.score}点
+        <span className="rounded-full bg-amber-400 px-4 py-2 text-sm font-bold text-slate-900">
+          🤖 AI {news.score}点
         </span>
+
+        <span className="rounded-full bg-slate-100 px-4 py-2 text-sm text-slate-700">
+          📅{" "}
+          {news.publishedAt
+            ? new Date(news.publishedAt).toLocaleDateString("ja-JP")
+            : ""}
+        </span>
+
       </div>
 
-      <h1 className="mt-6 text-5xl font-black leading-tight">
+      <h1 className="mt-6 text-3xl font-black leading-tight sm:text-4xl lg:text-5xl">
         {news.title}
       </h1>
 
-      <p className="mt-8 whitespace-pre-wrap text-xl leading-10 text-slate-700">
-        {news.summary}
-      </p>
+      <img
+        src={news.image ?? "/news.jpg"}
+        alt={news.title}
+        className="mt-8 h-64 w-full rounded-3xl object-cover sm:h-80 lg:h-[460px]"
+      />
 
-      {news.sourceUrl && (
-        <a
-          href={news.sourceUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-10 inline-flex rounded-full bg-blue-600 px-8 py-4 font-bold text-white hover:bg-blue-700"
-        >
-          元記事を読む →
-        </a>
-      )}
+            <div className="mt-8 rounded-3xl bg-white p-6 shadow-lg sm:p-8">
 
-      <section className="mt-20">
-        <h2 className="mb-8 text-3xl font-black">
+        <h2 className="mb-4 text-xl font-black">
+          AI要約
+        </h2>
+
+        <p className="whitespace-pre-wrap text-base leading-8 text-slate-700 sm:text-lg">
+          {news.summary}
+        </p>
+
+        {news.sourceUrl && (
+          <a
+            href={news.sourceUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-8 inline-flex items-center rounded-full bg-blue-600 px-6 py-3 font-bold text-white transition hover:bg-blue-700"
+          >
+            元記事を読む →
+          </a>
+        )}
+
+      </div>
+
+      <div className="mt-8 rounded-3xl bg-white p-6 shadow-lg">
+
+        <h2 className="mb-4 text-xl font-black">
+          この記事をシェア
+        </h2>
+
+        <div className="flex flex-wrap gap-3">
+
+          <a
+            href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(news.title)}&url=${encodeURIComponent(`https://tutti-news-ai-bay.vercel.app/news/${news.id}`)}`}
+            target="_blank"
+            className="rounded-full bg-black px-5 py-3 font-bold text-white"
+          >
+            𝕏 で共有
+          </a>
+
+          <a
+            href={`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(`https://tutti-news-ai-bay.vercel.app/news/${news.id}`)}`}
+            target="_blank"
+            className="rounded-full bg-green-500 px-5 py-3 font-bold text-white"
+          >
+            LINEで共有
+          </a>
+
+        </div>
+
+      </div>
+
+      <section className="mt-14">
+
+        <h2 className="mb-8 text-2xl font-black">
           関連記事
         </h2>
 
-        <div className="grid gap-6 md:grid-cols-2">
-          {related.map((item) => (
+        <div className="grid gap-6 md:grid-cols-3">
+
+  {related.map((item) => (
             <Link
               key={item.id}
               href={`/news/${item.id}`}
-              className="rounded-2xl border bg-white p-6 shadow transition hover:-translate-y-1 hover:shadow-xl"
+              className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow transition hover:-translate-y-1 hover:shadow-xl"
             >
-              <p className="text-sm font-semibold text-blue-600">
-                {item.category}
-              </p>
+              <img
+                src={item.image ?? "/news.jpg"}
+                alt={item.title}
+                className="aspect-video w-full object-cover transition duration-300 group-hover:scale-105"
+              />
 
-              <h3 className="mt-2 text-lg font-bold">
-                {item.title}
-              </h3>
+              <div className="p-5">
 
-              <p className="mt-3 line-clamp-3 text-sm text-slate-600">
-                {item.summary}
-              </p>
+                <div className="mb-3 flex items-center gap-2">
 
-              <p className="mt-4 text-sm text-slate-400">
-                {item.publishedAt
-                  ? new Date(item.publishedAt).toLocaleDateString("ja-JP")
-                  : ""}
-              </p>
+                  <span className="rounded-full bg-blue-600 px-3 py-1 text-xs font-bold text-white">
+                    {item.category}
+                  </span>
+
+                  <span className="rounded-full bg-amber-400 px-3 py-1 text-xs font-bold text-slate-900">
+                    AI {item.score}点
+                  </span>
+
+                </div>
+
+                <h3 className="line-clamp-2 text-lg font-bold text-slate-900 transition group-hover:text-blue-600">
+                  {item.title}
+                </h3>
+
+                <p className="mt-3 line-clamp-2 text-sm leading-6 text-slate-600">
+                  {item.summary}
+                </p>
+
+                <p className="mt-4 text-sm text-slate-400">
+                  {item.publishedAt
+                    ? new Date(item.publishedAt).toLocaleDateString("ja-JP")
+                    : ""}
+                </p>
+
+              </div>
+
             </Link>
           ))}
         </div>
+
       </section>
-    </main>
+
+          </main>
   );
 }

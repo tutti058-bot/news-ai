@@ -2,90 +2,111 @@ import Link from "next/link";
 
 const categories = [
   "国内",
-  "芸能",
-  "スポーツ",
+  "国際",
   "経済",
+  "スポーツ",
+  "芸能",
   "テクノロジー",
 ];
 
 export default function Footer() {
   return (
-    <footer className="mt-20 bg-slate-900 text-white">
+    <footer className="mt-16 border-t border-slate-200 bg-slate-950 text-white">
 
-      <div className="mx-auto grid max-w-7xl gap-10 px-6 py-16 md:grid-cols-3">
+      <div className="mx-auto max-w-7xl px-5 py-12">
 
-        {/* Logo */}
+        <div className="grid gap-10 md:grid-cols-3">
 
-        <div>
+          {/* Logo */}
 
-          <h2 className="text-4xl font-black">
-            NEWS AI
-          </h2>
+          <div>
 
-          <p className="mt-4 leading-8 text-slate-300">
+            <h2 className="text-3xl font-black">
+              NEWS AI
+            </h2>
 
-            AIが国内ニュースを収集・要約し、
-            分かりやすく配信するニュースメディア。
+            <p className="mt-4 leading-7 text-slate-400">
+              AIが最新ニュースを収集・要約し、
+              分かりやすく配信するニュースメディアです。
+            </p>
 
-          </p>
+          </div>
 
-        </div>
+          {/* Category */}
 
-        {/* Category */}
+          <div>
 
-        <div>
+            <h3 className="mb-5 text-lg font-bold">
+              カテゴリー
+            </h3>
 
-          <h3 className="mb-6 text-xl font-bold">
+            <div className="grid grid-cols-2 gap-3">
 
-            カテゴリー
+              {categories.map((category) => (
 
-          </h3>
+                <Link
+                  key={category}
+                  href={`/search?q=${encodeURIComponent(category)}`}
+                  className="text-slate-400 transition hover:text-white"
+                >
+                  {category}
+                </Link>
 
-          <div className="space-y-4">
+              ))}
 
-            {categories.map((category) => (
+            </div>
+
+          </div>
+
+          {/* Menu */}
+
+          <div>
+
+            <h3 className="mb-5 text-lg font-bold">
+              NEWS AI
+            </h3>
+
+            <div className="space-y-3">
 
               <Link
-                key={category}
-                href="#"
-                className="block transition hover:text-blue-400"
+                href="/"
+                className="block text-slate-400 transition hover:text-white"
               >
-                {category}
+                ホーム
               </Link>
 
-            ))}
+              <Link
+                href="/search"
+                className="block text-slate-400 transition hover:text-white"
+              >
+                ニュース検索
+              </Link>
+
+              <a
+                href="#"
+                className="block text-slate-400 transition hover:text-white"
+              >
+                お問い合わせ
+              </a>
+
+              <a
+                href="#"
+                className="block text-slate-400 transition hover:text-white"
+              >
+                プライバシーポリシー
+              </a>
+
+            </div>
 
           </div>
 
         </div>
 
-        {/* Contact */}
+        <div className="mt-10 border-t border-slate-800 pt-6 text-center text-sm text-slate-500">
 
-        <div>
-
-          <h3 className="mb-6 text-xl font-bold">
-
-            NEWS AI
-
-          </h3>
-
-          <p className="leading-8 text-slate-300">
-
-            AI × RSS × OpenAI × n8n
-
-            <br />
-
-            最新ニュースを24時間自動配信。
-
-          </p>
+          © 2026 NEWS AI. All Rights Reserved.
 
         </div>
-
-      </div>
-
-      <div className="border-t border-slate-800 py-6 text-center text-sm text-slate-400">
-
-        © 2026 NEWS AI. All Rights Reserved.
 
       </div>
 
