@@ -5,15 +5,21 @@ import HomeLayout from "@/components/HomeLayout";
 export default async function Home({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<{
+    q?: string;
+    page?: string;
+  }>;
 }) {
-  const { q = "" } = await searchParams;
+  const { q = "", page = "1" } = await searchParams;
 
   return (
     <>
       <Header />
       <TrendingBar />
-      <HomeLayout keyword={q} />
+      <HomeLayout
+        keyword={q}
+        page={Number(page)}
+      />
     </>
   );
 }

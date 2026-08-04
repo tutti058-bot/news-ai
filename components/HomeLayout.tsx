@@ -6,9 +6,13 @@ import Footer from "./Footer";
 
 type Props = {
   keyword: string;
+  page: number;
 };
 
-export default function HomeLayout({ keyword }: Props) {
+export default function HomeLayout({
+  keyword,
+  page,
+}: Props) {
   return (
     <main className="bg-slate-100">
       <div className="mx-auto max-w-7xl px-6 py-8">
@@ -18,7 +22,10 @@ export default function HomeLayout({ keyword }: Props) {
 
         <div className="mt-10 grid grid-cols-1 gap-8 lg:grid-cols-3">
           <div className="lg:col-span-2">
-            <NewsGrid keyword={keyword} />
+            <NewsGrid
+              keyword={keyword}
+              page={page}
+            />
           </div>
 
           <Sidebar />
