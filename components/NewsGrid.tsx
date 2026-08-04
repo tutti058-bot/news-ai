@@ -45,6 +45,9 @@ export default async function NewsGrid({
 
   const totalPages = Math.ceil(total / PER_PAGE);
 
+  const start = (page - 1) * PER_PAGE + 1;
+  const end = Math.min(page * PER_PAGE, total);
+
   return (
     <section>
       <div className="mb-10">
@@ -57,7 +60,7 @@ export default async function NewsGrid({
         </h2>
 
         <p className="mt-2 text-slate-600">
-          AIが選んだ最新ニュースをリアルタイムで表示
+          全{total}件中 {start}〜{end}件を表示
         </p>
       </div>
 
@@ -80,24 +83,34 @@ export default async function NewsGrid({
       </div>
 
       {totalPages > 1 && (
-        <div className="mt-12 flex items-center justify-center gap-2 flex-wrap">
+        <div className="mt-12 flex flex-wrap items-center justify-center gap-2">
           {page > 1 && (
             <Link
               href={`/?page=${page - 1}${keyword ? `&q=${encodeURIComponent(keyword)}` : ""}`}
-              className="rounded-lg border px-4 py-2 hover:bg-slate-100"
+              className="rounded-xl border px-5 py-3 font-semibold transition hover:bg-slate-100"
             >
               ← 前へ
             </Link>
           )}
 
-          {Array.from({ length: totalPages }).map((_, i) => {
-            const p = i + 1;
+                    {Array.from({ length: Math.min(totalPages, 5) }).map((_, i) => {
+            let p = page;
+
+            if (page <= 3) {
+              p = i + 1;
+            } else if (page >= totalPages - 2) {
+              p = totalPages - 4 + i;
+            } else {
+              p = page - 2 + i;
+            }
+
+            if (p < 1 || p > totalPages) return null;
 
             return (
               <Link
                 key={p}
                 href={`/?page=${p}${keyword ? `&q=${encodeURIComponent(keyword)}` : ""}`}
-                className={`rounded-lg px-4 py-2 ${
+                className={`rounded-xl px-5 py-3 font-semibold transition ${
                   p === page
                     ? "bg-blue-600 text-white"
                     : "border hover:bg-slate-100"
@@ -108,9 +121,23 @@ export default async function NewsGrid({
             );
           })}
 
+          {page < totalPages - 2 && (
+            <>
+              <span className="px-2 text-slate-500">…</span>
+
+              <Link
+                href={`/?page=${totalPages}${keyword ? `&q=${encodeURIComponent(keyword)}` : ""}`}
+                className="rounded-xl border px-5 py-3 font-semibold transition hover:bg-slate-100"
+              >
+                {totalPages}
+              </Link>
+            </>
+          )}
+
           {page < totalPages && (
-            <Link href={`/?page=${page + 1}${keyword ? `&q=${encodeURIComponent(keyword)}` : ""}`}
-              className="rounded-lg border px-4 py-2 hover:bg-slate-100"
+            <Link
+              href={`/?page=${page + 1}${keyword ? `&q=${encodeURIComponent(keyword)}` : ""}`}
+              className="rounded-xl border px-5 py-3 font-semibold transition hover:bg-slate-100"
             >
               次へ →
             </Link>
@@ -120,4 +147,3 @@ export default async function NewsGrid({
     </section>
   );
 }
-             
