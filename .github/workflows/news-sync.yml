@@ -1,0 +1,15 @@
+name: News Sync
+
+on:
+  schedule:
+    - cron: "0 */2 * * *"
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Sync News
+        run: |
+          curl -X GET https://tutti-news-ai-bay.vercel.app/api/news/sync
