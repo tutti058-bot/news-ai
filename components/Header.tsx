@@ -45,22 +45,32 @@ export default function Header() {
           ))}
         </nav>
 
-        {/* Search + Mobile Menu */}
-        <div className="flex items-center gap-3">
-          <Link
-            href="/search"
-            className="hidden items-center gap-2 rounded-full bg-slate-100 px-5 py-3 transition hover:bg-blue-600 hover:text-white md:flex"
-          >
-            <Search size={18} />
-            <span className="text-sm font-medium">
-              検索
-            </span>
-          </Link>
+        {/* Search */}
+        <form
+          action="/search"
+          className="hidden md:flex items-center rounded-full bg-slate-100 px-4 py-2"
+        >
+          <Search size={18} className="text-gray-500" />
 
-          <button className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 transition hover:bg-blue-600 hover:text-white lg:hidden">
-            <Menu size={20} />
+          <input
+            type="text"
+            name="q"
+            placeholder="ニュースを検索..."
+            className="ml-2 w-48 bg-transparent outline-none"
+          />
+
+          <button
+            type="submit"
+            className="ml-3 rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700"
+          >
+            検索
           </button>
-        </div>
+        </form>
+
+        {/* Mobile Menu */}
+        <button className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 transition hover:bg-blue-600 hover:text-white lg:hidden">
+          <Menu size={20} />
+        </button>
       </div>
     </header>
   );
