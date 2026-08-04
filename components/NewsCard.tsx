@@ -27,69 +27,58 @@ export default function NewsCard({
 }: NewsCardProps) {
   return (
     <Link href={`/news/${id}`}>
-      <article className="group overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-md transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl">
-        <div className="relative overflow-hidden">
+      <article className="group overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">
+
+        <div className="relative">
+
           <img
             src={image}
             alt={title}
-            className="h-64 w-full object-cover transition duration-500 group-hover:scale-110"
+            className="aspect-video w-full object-cover transition duration-500 group-hover:scale-105"
           />
 
-          <div className="absolute left-5 top-5">
+          <div className="absolute left-3 top-3 flex flex-wrap gap-2">
+
             <span
-              className={`rounded-full px-4 py-2 text-xs font-bold text-white ${
+              className={`rounded-full px-3 py-1 text-xs font-bold text-white ${
                 categoryColor[category] ?? "bg-slate-700"
               }`}
             >
               {category}
             </span>
-          </div>
-        </div>
 
-        <div className="p-6">
-          <div className="mb-4 flex items-center justify-between">
-            <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-700">
+            <span className="rounded-full bg-emerald-500 px-3 py-1 text-xs font-bold text-white">
               AI要約
             </span>
 
-            <span className="text-sm font-medium text-slate-500">
-              {date}
-            </span>
           </div>
 
-          <h3 className="line-clamp-2 text-2xl font-bold leading-snug text-slate-900 transition group-hover:text-blue-600">
+        </div>
+
+        <div className="p-5 sm:p-6">
+
+          <h3 className="line-clamp-2 text-xl font-black leading-snug text-slate-900 transition group-hover:text-blue-600 sm:text-2xl">
             {title}
           </h3>
 
-          <p className="mt-4 line-clamp-3 leading-7 text-slate-700">
+          <p className="mt-3 line-clamp-3 text-sm leading-7 text-slate-600 sm:text-base">
             {summary}
           </p>
 
-          <div className="mt-8 flex items-center justify-between">
-            <button className="rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition duration-300 hover:bg-blue-600">
-              続きを読む
-            </button>
+                    <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-4">
 
-            <button className="flex items-center gap-2 text-sm font-bold text-blue-600 transition duration-300 group-hover:translate-x-1">
-              詳しく見る
+            <span className="text-sm text-slate-500">
+              📅 {date}
+            </span>
 
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-            </button>
+            <span className="rounded-full bg-blue-600 px-4 py-2 text-sm font-bold text-white transition duration-300 group-hover:bg-slate-900">
+              続きを読む →
+            </span>
+
           </div>
+
         </div>
+
       </article>
     </Link>
   );

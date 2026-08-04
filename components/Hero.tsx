@@ -37,22 +37,22 @@ export default async function Hero() {
 
           <div className="mt-6 flex flex-wrap gap-3">
 
-            <span className="rounded-full bg-blue-600 px-4 py-2 text-sm font-bold">
-              {top.category}
-            </span>
+  <span className="rounded-full bg-blue-600 px-4 py-2 text-sm font-bold">
+    {top.category}
+  </span>
 
-            <span className="rounded-full bg-amber-500 px-4 py-2 text-sm font-bold text-slate-900">
-              AI {top.score}点
-            </span>
+  <span className="rounded-full bg-amber-500 px-4 py-2 text-sm font-bold text-slate-900">
+    AI {top.score}点
+  </span>
 
-                      <Link
-            href={`/news/${top.id}`}
-            className="mt-8 inline-flex w-fit items-center justify-center rounded-full bg-white px-7 py-3 font-bold text-slate-900 transition hover:bg-blue-600 hover:text-white"
-          >
-            続きを読む →
-          </Link>
+</div>
 
-        </div>
+<Link
+  href={`/news/${top.id}`}
+  className="mt-8 inline-flex w-fit items-center justify-center rounded-full bg-white px-7 py-3 font-bold text-slate-900 transition hover:bg-blue-600 hover:text-white"
+>
+  続きを読む →
+</Link>
 
         </div>
 

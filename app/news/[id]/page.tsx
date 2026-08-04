@@ -1,11 +1,52 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
+import type { Metadata } from "next";
 
 type Props = {
   params: Promise<{
     id: string;
   }>;
 };
+
+export async function generateMetadata({
+  params,
+}: Props): Promise<Metadata> {
+  const { id } = await params;
+
+  const news = await prisma.news.findUnique({
+    where: {
+      id: Number(id),
+    },
+  });
+
+  if (!news) {
+    return {
+      title: "NEWS AI",
+    };
+  }
+
+  return {
+    title: news.title,
+    description: news.summary ?? "",
+    openGraph: {
+      title: news.title,
+      description: news.summary ?? "",
+      images: [
+  {
+    url: `https://tutti-news-ai-bay.vercel.app/api/og?id=${news.id}`,
+    width: 1200,
+    height: 630,
+  },
+]
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: news.title,
+      description: news.summary ?? "",
+      images: [`/api/og?id=${news.id}`],
+    },
+  };
+}
 
 export default async function NewsDetail({
   params,

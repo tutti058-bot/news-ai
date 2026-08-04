@@ -1,21 +1,19 @@
-import type { Metadata } from "next";
 import "./globals.css";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "News AI",
-  description: "AIニュースサイト",
+  title: "NEWS AI",
+  description: "AIが選ぶ最新ニュース",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="ja">
-      <body className="min-h-screen flex flex-col">
-        {children}
-      </body>
+      <body>{children}</body>
     </html>
   );
 }
