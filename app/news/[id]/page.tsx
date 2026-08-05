@@ -25,25 +25,27 @@ export async function generateMetadata({
     };
   }
 
-  return {
+    return {
     title: news.title,
     description: news.summary ?? "",
     openGraph: {
       title: news.title,
       description: news.summary ?? "",
       images: [
-  {
-    url: `https://tutti-news-ai-bay.vercel.app/api/og?id=${news.id}`,
-    width: 1200,
-    height: 630,
-  },
-]
+        {
+          url: `https://tutti-news-ai-bay.vercel.app/api/og?id=${news.id}`,
+          width: 1200,
+          height: 630,
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title: news.title,
       description: news.summary ?? "",
-      images: [`/api/og?id=${news.id}`],
+      images: [
+        `https://tutti-news-ai-bay.vercel.app/api/og?id=${news.id}`,
+      ],
     },
   };
 }

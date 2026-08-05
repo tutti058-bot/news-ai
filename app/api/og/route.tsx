@@ -2,34 +2,33 @@ import { ImageResponse } from "@vercel/og";
 import { prisma } from "@/lib/prisma";
 
 export async function GET(request: Request) {
-const { searchParams } = new URL(request.url);
+  const { searchParams } = new URL(request.url);
 
-const id = Number(searchParams.get("id"));
+  const id = Number(searchParams.get("id"));
 
-if (!id) {
-  return new Response("Missing id", {
-    status: 400,
+  if (!id) {
+    return new Response("Missing id", {
+      status: 400,
+    });
+  }
+
+  const news = await prisma.news.findUnique({
+    where: {
+      id,
+    },
   });
-}
-
-const news = await prisma.news.findUnique({
-  where: {
-    id,
-  },
-});
 
   if (!news) {
-  return new Response("News not found", {
-    status: 404,
-  });
-}
+    return new Response("News not found", {
+      status: 404,
+    });
+  }
 
   const logo = new URL("/logo.png", request.url).toString();
   const bg = new URL("/og-bg.png", request.url).toString();
 
   return new ImageResponse(
-
-        (
+    (
       <div
         style={{
           width: "1200px",
@@ -42,7 +41,7 @@ const news = await prisma.news.findUnique({
           backgroundPosition: "center",
           padding: "60px",
           color: "#ffffff",
-          position: "relative", 
+          position: "relative",
         }}
       >
         <img
@@ -70,45 +69,40 @@ const news = await prisma.news.findUnique({
           >
             {news.title}
           </div>
-                  <div
-          style={{
-            marginTop: "40px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: "#2563EB",
-            color: "#FFFFFF",
-            borderRadius: "999px",
-            width: "140px",
-            height: "44px",
-            fontSize: "20px",
-            fontWeight: 700,
-          }}
-        >
-          {news.category ?? ""}
+
+          <div
+            style={{
+              marginTop: "40px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: "#2563EB",
+              color: "#FFFFFF",
+              borderRadius: "999px",
+              width: "140px",
+              height: "44px",
+              fontSize: "20px",
+              fontWeight: 700,
+            }}
+          >
+            {news.category ?? ""}
+          </div>
         </div>
 
         <div
           style={{
-            flex: 1,
+            position: "absolute",
+            right: "60px",
+            bottom: "40px",
+            fontSize: "18px",
+            color: "#E2E8F0",
+            fontWeight: 600,
           }}
-        />
-
-        <div
-  style={{
-    position: "absolute",
-    right: "60px",
-    bottom: "40px",
-    fontSize: "18px",
-    color: "#E2E8F0",
-    fontWeight: 600,
-  }}
->
+        >
           news-ai.jp
         </div>
       </div>
-      </div> 
-          ),
+    ),
     {
       width: 1200,
       height: 630,
