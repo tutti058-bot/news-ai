@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 import Link from "next/link";
 import { Menu, Search, X } from "lucide-react";
@@ -21,19 +22,15 @@ export default function Header() {
 
         <Link href="/" className="flex items-center gap-3">
 
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 text-xl font-black text-white">
-            N
-          </div>
-
-          <div>
-            <h1 className="text-xl font-black leading-none">
-              NEWS AI
-            </h1>
-
-            <p className="text-[11px] text-slate-500">
-              AI News Platform
-            </p>
-          </div>
+          
+          <Image
+  src="/logo02.png"
+  alt="NEWS AI"
+  width={190}
+  height={48}
+  priority
+  className="h-14 w-auto"
+/>
 
         </Link>
 
