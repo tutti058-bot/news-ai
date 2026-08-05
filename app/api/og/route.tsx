@@ -24,8 +24,8 @@ export async function GET(request: Request) {
     });
   }
 
-  const logo = new URL("/logo.png", request.url).toString();
-  const bg = new URL("/og-bg.png", request.url).toString();
+  //const logo = new URL("/logo.png", request.url).toString();
+  //const bg = new URL("/og-bg.png", request.url).toString();
 
   return new ImageResponse(
     (
@@ -36,21 +36,12 @@ export async function GET(request: Request) {
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
-          backgroundImage: `url(${bg})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
+          backgroundColor: "#0f172a",
           padding: "60px",
           color: "#ffffff",
           position: "relative",
         }}
       >
-        <img
-          src={logo}
-          style={{
-            width: "110px",
-            height: "60px",
-          }}
-        />
 
         <div
           style={{
