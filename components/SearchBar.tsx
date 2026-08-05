@@ -23,15 +23,15 @@ export default function SearchBar() {
         />
 
         <input
-          type="text"
-          value={keyword}
-          onChange={(e) => setKeyword(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") search();
-          }}
-          placeholder="ニュース・キーワードを検索..."
-          className="h-14 flex-1 bg-transparent px-4 text-base outline-none"
-        />
+  type="text"
+  value={keyword}
+  onChange={(e) => setKeyword(e.target.value)}
+  onKeyDown={(e) => {
+    if (e.key === "Enter") search();
+  }}
+  placeholder="ニュース・キーワードを検索..."
+  className="h-14 flex-1 bg-transparent px-4 text-base text-slate-900 placeholder:text-slate-500 outline-none"
+/>
 
         <button
           onClick={search}
