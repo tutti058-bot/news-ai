@@ -11,6 +11,10 @@ export const metadata: Metadata = {
   description:
     "AIが国内外の最新ニュースをわかりやすく要約・分析。テクノロジー・経済・国際・スポーツなどを毎日更新。",
 
+    verification: {
+  google: "q32C9II99s52eLn7AgCdhIt6j3aRMIA82mfJ4vjyKQA",
+},
+
   icons: {
     icon: "/favicon.ico",
     shortcut: "/favicon.ico",
