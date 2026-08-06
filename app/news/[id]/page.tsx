@@ -30,27 +30,33 @@ export async function generateMetadata({
     description: news.summary ?? "",
 
     openGraph: {
-      title: news.title,
-      description: news.summary ?? "",
-      images: [
-        {
-          url: `https://tutti-news-ai-bay.vercel.app/api/og?id=${news.id}`,
-          width: 1200,
-          height: 630,
-          alt: news.title,
-        },
-      ],
+  title: news.title,
+  description: news.summary ?? "",
+  images: [
+    {
+      url: news.image ?? "https://tutti-news-ai-bay.vercel.app/news.jpg",
+      width: 1200,
+      height: 630,
+      alt: news.title,
     },
+  ],
+},
 
-    twitter: {
-      card: "summary_large_image",
-      title: news.title,
-      description: news.summary ?? "",
-      images: [
-        `https://tutti-news-ai-bay.vercel.app/api/og?id=${news.id}`,
-      ],
+twitter: {
+  card: "summary_large_image",
+  title: news.title,
+  description: news.summary ?? "",
+  images: [
+    {
+      url: news.image ?? "https://tutti-news-ai-bay.vercel.app/news.jpg",
+      width: 1200,
+      height: 630,
+      alt: news.title,
     },
-  };
+  ],
+},
+};
+
 }
 
 export default async function NewsDetail({
