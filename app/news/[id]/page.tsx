@@ -129,10 +129,14 @@ if (news.title.includes("Cloudflare")) hashtags.push("#Cloudflare");
 if (news.title.includes("Tesla")) hashtags.push("#Tesla");
 if (news.title.includes("Meta")) hashtags.push("#Meta");
 
-const tweetText = `🚨${news.title}
+const shortSummary =
+  (news.summary ?? "").slice(0, 100) +
+  ((news.summary ?? "").length > 100 ? "..." : "");
+
+const tweetText = `🚨 ${news.title}
 
 🤖 AI要約
-${news.summary ?? ""}
+${shortSummary}
 
 👇 詳細はこちら
 ${url}
