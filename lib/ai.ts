@@ -31,6 +31,32 @@ export async function generateSummary(title: string) {
   }
 }
 
+export async function generateTweet(title: string, summary: string) {
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4.1-mini",
+      messages: [
+        {
+          role: "system",
+          content:
+            "あなたはSNS運用のプロです。Xに投稿する自然で読みやすい文章を100文字以内で作成してください。ハッシュタグは付けないでください。",
+        },
+        {
+          role: "user",
+          content: `タイトル: ${title}\n要約: ${summary}`,
+        },
+      ],
+      temperature: 0.7,
+      max_tokens: 120,
+    });
+
+    return response.choices[0]?.message?.content ?? "";
+  } catch (error) {
+    console.error("AI投稿文エラー:", error);
+    return "";
+  }
+}
+
 // カテゴリはAIを使わない
 export function generateCategory(title: string) {
   const t = title.toLowerCase();
