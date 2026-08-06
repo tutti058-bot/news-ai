@@ -130,7 +130,7 @@ if (news.title.includes("Tesla")) hashtags.push("#Tesla");
 if (news.title.includes("Meta")) hashtags.push("#Meta");
 
 const shortSummary =
-  (news.summary ?? "").slice(0, 100) +
+  (news.summary ?? "").slice(0, 40) +
   ((news.summary ?? "").length > 100 ? "..." : "");
 
 const tweetText = `🚨 ${news.title}
