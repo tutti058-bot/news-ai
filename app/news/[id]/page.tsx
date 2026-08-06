@@ -131,8 +131,22 @@ if (news.title.includes("Meta")) hashtags.push("#Meta");
 
 const shortSummary =
   (news.summary ?? "").slice(0, 40) +
-  ((news.summary ?? "").length > 100 ? "..." : "");
+  ((news.summary ?? "").length > 40 ? "..." : "");
+let postScore = 3;
 
+if ((news.score ?? 0) >= 90) {
+  postScore = 5;
+} else if ((news.score ?? 0) >= 80) {
+  postScore = 4;
+} else if ((news.score ?? 0) >= 70) {
+  postScore = 3;
+} else if ((news.score ?? 0) >= 60) {
+  postScore = 2;
+} else {
+  postScore = 1;
+}
+
+const stars = "★".repeat(postScore) + "☆".repeat(5 - postScore);
 const tweetText = `🚨 ${news.title}
 
 🤖 AI要約
@@ -161,6 +175,9 @@ ${hashtags.join(" ")}`;
 
         <span className="rounded-full bg-amber-400 px-4 py-2 text-sm font-bold text-slate-900">
           🤖 AI {news.score}点
+          <span className="rounded-full bg-yellow-400 px-4 py-2 text-sm font-bold text-slate-900">
+  🔥 投稿おすすめ {stars}
+</span>
         </span>
 
         <span className="rounded-full bg-slate-100 px-4 py-2 text-sm text-slate-700">
