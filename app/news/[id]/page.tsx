@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { generateTweet } from "@/lib/ai";
 import Link from "next/link";
 import type { Metadata } from "next";
 
@@ -160,10 +161,9 @@ if (postScore === 5) {
 } else {
   aiComment = "📌 ニッチな話題です";
 }
-const tweetText = `🚨 ${news.title}
+const aiTweet = await generateTweet(news.title, shortSummary);
 
-🤖 AI要約
-${shortSummary}
+const tweetText = `${aiTweet}
 
 👇 詳細はこちら
 ${url}
