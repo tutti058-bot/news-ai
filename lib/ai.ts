@@ -37,14 +37,17 @@ export async function generateTweet(title: string, summary: string) {
       model: "gpt-4.1-mini",
       messages: [
         {
-          role: "system",
-          content:
-            "あなたはSNS運用のプロです。Xに投稿する自然で読みやすい文章を100文字以内で作成してください。ハッシュタグは付けないでください。",
-        },
-        {
-          role: "user",
-          content: `タイトル: ${title}\n要約: ${summary}`,
-        },
+
+  role: "system",
+  content: `あなたはX運用のプロです。ニュースを読んだ人がクリックしたくなる自然な投稿文を作成してください。
+
+条件:
+・本文は120文字以内
+・最後にニュース内容に合うハッシュタグを2〜3個付ける
+・「#ニュース」のような汎用タグは使わない
+・タイトルをそのまま繰り返さない
+・誇張や断定は避け、事実に沿って書く`,
+},
       ],
       temperature: 0.7,
       max_tokens: 120,
