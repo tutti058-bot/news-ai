@@ -147,6 +147,19 @@ if ((news.score ?? 0) >= 90) {
 }
 
 const stars = "★".repeat(postScore) + "☆".repeat(5 - postScore);
+let aiComment = "一般的なニュースです。";
+
+if (postScore === 5) {
+  aiComment = "🔥 Xで話題になりやすいニュースです";
+} else if (postScore === 4) {
+  aiComment = "📈 多くの人が興味を持ちそうです";
+} else if (postScore === 3) {
+  aiComment = "👍 注目度は平均的です";
+} else if (postScore === 2) {
+  aiComment = "ℹ️ 興味がある人向けのニュースです";
+} else {
+  aiComment = "📌 ニッチな話題です";
+}
 const tweetText = `🚨 ${news.title}
 
 🤖 AI要約
@@ -173,12 +186,17 @@ ${hashtags.join(" ")}`;
           {news.category}
         </span>
 
-        <span className="rounded-full bg-amber-400 px-4 py-2 text-sm font-bold text-slate-900">
-          🤖 AI {news.score}点
-          <span className="rounded-full bg-yellow-400 px-4 py-2 text-sm font-bold text-slate-900">
+      <span className="rounded-full bg-amber-400 px-4 py-2 text-sm font-bold text-slate-900">
+  🤖 AI {news.score}点
+</span>
+
+<span className="rounded-full bg-yellow-400 px-4 py-2 text-sm font-bold text-slate-900">
   🔥 投稿おすすめ {stars}
 </span>
-        </span>
+
+<p className="w-full text-sm text-slate-600">
+  🤖 {aiComment}
+</p>
 
         <span className="rounded-full bg-slate-100 px-4 py-2 text-sm text-slate-700">
           📅{" "}
