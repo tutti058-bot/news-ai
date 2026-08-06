@@ -1,9 +1,10 @@
 import "./globals.css";
 import type { Metadata } from "next";
 
+
 export const metadata: Metadata = {
-  title: "NEWS AI",
-  description: "AIが選ぶ最新ニュース",
+  title: "AI News ジャパン",
+  description: "AIが国内外の最新ニュースをAIがわかりやすく要約・分析するニュースメディア",
 
   icons: {
     icon: "/favicon.ico",
