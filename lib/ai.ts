@@ -11,6 +11,7 @@ export async function generateSummary(
 ) {
   try {
     const response = await openai.chat.completions.create({
+      
       model: "gpt-4.1-mini",
       messages: [
         {
@@ -18,6 +19,7 @@ export async function generateSummary(
           content:
             "あなたはニュース編集者です。ニュースのタイトルから、日本語で3〜4行の自然な要約を作成してください。",
         },
+        
         {
           role: "user",
           content: `タイトル:
@@ -161,7 +163,19 @@ ${article}`,
   temperature: 0.3,
 });
 
-  } catch (error) {
-    console.error(error);
-  }
+const content =
+  response.choices[0]?.message?.content ?? "{}";
+
+return JSON.parse(content);
+
+} catch (error) {
+  console.error(error);
+
+  return {
+    summary: "",
+    category: "国内",
+    score: 60,
+    tweet: "",
+  };
+}
 }

@@ -1,10 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { fetchNews } from "@/lib/fetchNews";
-import {
-  generateSummary,
-  generateCategory,
-  generateScore,
-} from "@/lib/ai";
+import { analyzeArticle } from "@/lib/ai";
 import { getImage } from "@/lib/getImage";
 import { getArticle } from "@/lib/getArticle";
 
@@ -26,54 +22,47 @@ export async function syncNews() {
       },
     });
 
-    // 既存記事なら不足データを補完
-if (exists) {
-  const image =
-    exists.image ?? (await getImage(sourceUrl));
+    const image =
+      exists?.image ?? (await getImage(sourceUrl));
 
-  const article = await getArticle(sourceUrl);
-
-const summary =
-  article.length > 300
-    ? await generateSummary(title, article)
-    : title;
-
-  const category =
-    exists.category || (await generateCategory(title));
-
-  const score =
-    exists.score === 50
-      ? await generateScore(title)
-      : exists.score;
-
-  await prisma.news.update({
-    where: {
-      sourceUrl,
-    },
-    data: {
-      image,
-      summary,
-      category,
-      score,
-    },
-  });
-
-  updated++;
-  console.log("更新:", title);
-
-  continue;
-}
     const article = await getArticle(sourceUrl);
-    const summary = await generateSummary(title, article);
-    const category = await generateCategory(title);
-    const image = await getImage(sourceUrl);
 
+    const ai =
+      article.length > 300
+        ? await analyzeArticle(title, article)
+        : {
+            summary: title,
+            category: "国内",
+            score: 60,
+            tweet: "",
+          };
+
+    // 既存記事なら更新
+    if (exists) {
+      await prisma.news.update({
+        where: {
+          sourceUrl,
+        },
+        data: {
+          image,
+          summary: ai.summary,
+          category: ai.category,
+          score: ai.score,
+        },
+      });
+
+      updated++;
+      console.log("更新:", title);
+      continue;
+    }
+
+    // 新規記事
     await prisma.news.create({
       data: {
         title,
-        summary,
-        category,
-        score: await generateScore(title),
+        summary: ai.summary,
+        category: ai.category,
+        score: ai.score,
         image,
         source: item.source ?? "RSS",
         sourceUrl,
