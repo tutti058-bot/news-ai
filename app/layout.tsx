@@ -3,8 +3,13 @@ import type { Metadata } from "next";
 
 
 export const metadata: Metadata = {
-  title: "AI News ジャパン",
-  description: "AIが国内外の最新ニュースをAIがわかりやすく要約・分析するニュースメディア",
+  title: {
+    default: "AI News ジャパン",
+    template: "%s | AI News ジャパン",
+  },
+
+  description:
+    "AIが国内外の最新ニュースをわかりやすく要約・分析。テクノロジー・経済・国際・スポーツなどを毎日更新。",
 
   icons: {
     icon: "/favicon.ico",
@@ -13,13 +18,17 @@ export const metadata: Metadata = {
   },
 
   openGraph: {
-    siteName: "NEWS AI",
+    title: "AI News ジャパン",
+    description:
+      "AIが国内外の最新ニュースをわかりやすく要約・分析。",
+    siteName: "AI News ジャパン",
   },
 
   twitter: {
     card: "summary_large_image",
   },
 };
+
 
 export default function RootLayout({
   children,

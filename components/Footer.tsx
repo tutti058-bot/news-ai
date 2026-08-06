@@ -22,7 +22,7 @@ export default function Footer() {
           <div>
 
             <h2 className="text-3xl font-black">
-              NEWS AI
+              AI News ジャパン
             </h2>
 
             <p className="mt-4 leading-7 text-slate-400">
@@ -63,7 +63,7 @@ export default function Footer() {
           <div>
 
             <h3 className="mb-5 text-lg font-bold">
-              NEWS AI
+              AI News ジャパン
             </h3>
 
             <div className="space-y-3">
@@ -104,7 +104,7 @@ export default function Footer() {
 
         <div className="mt-10 border-t border-slate-800 pt-6 text-center text-sm text-slate-500">
 
-          © 2026 NEWS AI. All Rights Reserved.
+          © 2026 AI News ジャパン. All Rights Reserved.
 
         </div>
 

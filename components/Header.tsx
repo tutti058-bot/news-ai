@@ -25,7 +25,7 @@ export default function Header() {
           
           <Image
   src="/logo02.png"
-  alt="NEWS AI"
+  alt="AI News ジャパン"
   width={190}
   height={48}
   priority

@@ -22,7 +22,7 @@ export async function generateMetadata({
 
   if (!news) {
     return {
-      title: "NEWS AI",
+      title: "AI News ジャパン",
     };
   }
 
