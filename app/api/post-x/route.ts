@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { getTwitterClient } from "@/lib/x";
 import { prisma } from "@/lib/prisma";
 
 export async function POST() {
@@ -30,19 +29,13 @@ ${news.summary ?? ""}
 ${url}
 
 #ニュース`;
-
-    const twitterClient = getTwitterClient();
-
-const tweetWithImage = news.image 
-  ? `${tweet}\n\n🖼️ ${news.image}`
-  : tweet;
-
-const result = await twitterClient.v2.tweet(tweetWithImage);
-
-    return NextResponse.json({
-      success: true,
-      id: result.data.id,
-    });
+return NextResponse.json({
+  success: true,
+  tweet,
+  intentUrl:
+    "https://twitter.com/intent/tweet?text=" +
+    encodeURIComponent(tweet),
+});
 
   } catch (error: any) {
   console.error(error);
