@@ -93,6 +93,52 @@ export default async function NewsDetail({
     take: 3,
   });
 
+  const url = `https://tutti-news-ai-bay.vercel.app/news/${news.id}`;
+
+const hashtags: string[] = [];
+
+// カテゴリー別
+switch (news.category) {
+  case "テクノロジー":
+    hashtags.push("#AI", "#テクノロジー");
+    break;
+
+  case "スポーツ":
+    hashtags.push("#スポーツ");
+    break;
+
+  case "芸能":
+    hashtags.push("#芸能");
+    break;
+
+  case "経済":
+    hashtags.push("#経済");
+    break;
+
+  default:
+    hashtags.push("#ニュース");
+}
+
+// タイトルから自動追加
+if (news.title.includes("OpenAI")) hashtags.push("#OpenAI");
+if (news.title.includes("ChatGPT")) hashtags.push("#ChatGPT");
+if (news.title.includes("Google")) hashtags.push("#Google");
+if (news.title.includes("Apple")) hashtags.push("#Apple");
+if (news.title.includes("Microsoft")) hashtags.push("#Microsoft");
+if (news.title.includes("Cloudflare")) hashtags.push("#Cloudflare");
+if (news.title.includes("Tesla")) hashtags.push("#Tesla");
+if (news.title.includes("Meta")) hashtags.push("#Meta");
+
+const tweetText = `🚨${news.title}
+
+🤖 AI要約
+${news.summary ?? ""}
+
+👇 詳細はこちら
+${url}
+
+${hashtags.join(" ")}`;
+
   return (
     <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
 
@@ -164,12 +210,13 @@ export default async function NewsDetail({
         <div className="flex flex-wrap gap-3">
 
           <a
-            href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(news.title)}&url=${encodeURIComponent(`https://tutti-news-ai-bay.vercel.app/news/${news.id}`)}`}
-            target="_blank"
-            className="rounded-full bg-black px-5 py-3 font-bold text-white"
-          >
-            𝕏 で共有
-          </a>
+  href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`}
+  target="_blank"
+  rel="noopener noreferrer"
+  className="rounded-full bg-black px-5 py-3 font-bold text-white"
+>
+  🤖 AI投稿を作成
+</a>
 
           <a
             href={`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(`https://tutti-news-ai-bay.vercel.app/news/${news.id}`)}`}
