@@ -6,6 +6,7 @@ import {
   generateScore,
 } from "@/lib/ai";
 import { getImage } from "@/lib/getImage";
+import { getArticle } from "@/lib/getArticle";
 
 export async function syncNews() {
   const items = await fetchNews();
@@ -30,8 +31,10 @@ if (exists) {
   const image =
     exists.image ?? (await getImage(sourceUrl));
 
-  const summary =
-    exists.summary || (await generateSummary(title));
+  const article = await getArticle(sourceUrl);
+
+const summary =
+  exists.summary || (await generateSummary(title, article));
 
   const category =
     exists.category || (await generateCategory(title));
@@ -58,8 +61,8 @@ if (exists) {
 
   continue;
 }
-
-    const summary = await generateSummary(title);
+    const article = await getArticle(sourceUrl);
+    const summary = await generateSummary(title, article);
     const category = await generateCategory(title);
     const image = await getImage(sourceUrl);
 

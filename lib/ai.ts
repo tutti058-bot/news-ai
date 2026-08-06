@@ -5,7 +5,10 @@ const openai = new OpenAI({
 });
 
 // AI要約だけOpenAIを使用
-export async function generateSummary(title: string) {
+export async function generateSummary(
+  title: string,
+  article: string
+) {
   try {
     const response = await openai.chat.completions.create({
       model: "gpt-4.1-mini",
@@ -17,7 +20,13 @@ export async function generateSummary(title: string) {
         },
         {
           role: "user",
-          content: title,
+          content: `タイトル:
+${title}
+
+記事本文:
+${article}
+
+本文に基づいて、3〜4行で正確に要約してください。`,
         },
       ],
       temperature: 0.5,
