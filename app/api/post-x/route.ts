@@ -32,7 +32,12 @@ ${url}
 #ニュース`;
 
     const twitterClient = getTwitterClient();
-const result = await twitterClient.v2.tweet(tweet);
+
+const tweetWithImage = news.image 
+  ? `${tweet}\n\n🖼️ ${news.image}`
+  : tweet;
+
+const result = await twitterClient.v2.tweet(tweetWithImage);
 
     return NextResponse.json({
       success: true,
