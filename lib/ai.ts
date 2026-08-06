@@ -126,3 +126,42 @@ export function generateScore(title: string) {
 
   return 60;
 }
+
+export async function analyzeArticle(
+  title: string,
+  article: string
+) {
+  try {const response = await openai.chat.completions.create({
+  model: "gpt-4.1-mini",
+  messages: [
+    {
+      role: "system",
+      content: `
+あなたはプロのニュース編集者です。
+
+記事を分析して、必ずJSONだけ返してください。
+
+{
+  "summary": "",
+  "category": "",
+  "score": 0,
+  "tweet": ""
+}
+`,
+    },
+    {
+      role: "user",
+      content: `タイトル:
+${title}
+
+本文:
+${article}`,
+    },
+  ],
+  temperature: 0.3,
+});
+
+  } catch (error) {
+    console.error(error);
+  }
+}

@@ -34,7 +34,9 @@ if (exists) {
   const article = await getArticle(sourceUrl);
 
 const summary =
-  exists.summary || (await generateSummary(title, article));
+  article.length > 300
+    ? await generateSummary(title, article)
+    : title;
 
   const category =
     exists.category || (await generateCategory(title));
