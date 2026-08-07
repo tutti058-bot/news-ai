@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { generateTweet } from "@/lib/ai";
+import { generateYansuComment } from "@/lib/ai";
 import Link from "next/link";
 import type { Metadata } from "next";
 
@@ -158,15 +158,19 @@ if (postScore === 5) {
 } else {
   aiComment = "📌 ニッチな話題です";
 }
-const aiTweet = await generateTweet(
+const yansuComment = await generateYansuComment(
   news.title,
-  news.summary ?? ""
+  news.score ?? 60,
+  news.category ?? "国内"
 );
 
-const tweetText = `${aiTweet}
+const tweetText = `🚨 ${news.title}
 
 👇 詳細はこちら
-${url}`;
+${url}
+
+🤖 やんすAI
+「${yansuComment}」`;
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
@@ -252,7 +256,7 @@ ${url}`;
   rel="noopener noreferrer"
   className="rounded-full bg-black px-5 py-3 font-bold text-white"
 >
-  🤖 AI投稿を作成
+  🤖 Xでシェア
 </a>
 
           <a

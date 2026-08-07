@@ -232,7 +232,7 @@ const content =
 
 return JSON.parse(content);
 
- } catch (error) {
+} catch (error) {
   console.error(error);
 
   return {
@@ -242,4 +242,12 @@ return JSON.parse(content);
     tweet: "",
   };
 }
+}
+
+export async function generateYansuComment(
+  title: string,
+  score: number,
+  category: string
+) {
+  return `注目度${score}点でやんす🤖`;
 }
