@@ -249,52 +249,61 @@ export async function generateYansuComment(
   score: number,
   category: string
 ) {
-  // 超重要ニュース
+  const t = title.toLowerCase();
+
+  // タイトル優先
+  if (/(地震|津波|台風|豪雨|噴火|災害)/i.test(t)) {
+    return "🚨 安全第一でやんす‼️";
+  }
+
+  if (/(openai|chatgpt|ai|gemini|claude)/i.test(t)) {
+    return "🤖 AI業界が動くでやんす‼️";
+  }
+
+  if (/(apple|iphone|ios|mac)/i.test(t)) {
+    return "🍎 新発表が気になるでやんす‼️";
+  }
+
+  if (/(google|android)/i.test(t)) {
+    return "🔍 今後の展開に注目でやんす‼️";
+  }
+
+  if (/(tesla|ev)/i.test(t)) {
+    return "🚗 EV業界も動くでやんす‼️";
+  }
+
+  if (/(大谷|野球|mlb)/i.test(t)) {
+    return "⚾ 今日も注目でやんす‼️";
+  }
+
+  if (/(サッカー|jリーグ|ワールドカップ)/i.test(t)) {
+    return "⚽ 見逃せないでやんす‼️";
+  }
+
+  if (/(株|日経|為替|円安|円高|決算)/i.test(t)) {
+    return "💹 市場も気になるでやんす‼️";
+  }
+
+  if (/(映画|ドラマ|俳優|女優|芸能)/i.test(t)) {
+    return "🎬 話題になりそうでやんす‼⁉️";
+  }
+
+  // 点数で判定
   if (score >= 95) {
-    switch (category) {
-      case "テクノロジー":
-        return "🤖🔥 AI業界が動くでやんす‼️";
-      case "経済":
-        return "💹🔥 市場も大注目でやんす‼️";
-      case "スポーツ":
-        return "⚽🔥 見逃せない勝負でやんす‼️";
-      case "エンタメ":
-        return "🎬🔥 超話題でやんす‼️";
-      case "国内":
-        return "🇯🇵🔥 超注目でやんす‼️";
-      case "国際":
-        return "🌍🔥 世界が注目でやんす‼️";
-      default:
-        return "🔥 超注目でやんす‼️";
-    }
+    return "🔥 超注目でやんす‼️";
   }
 
-  // 重要ニュース
   if (score >= 85) {
-    switch (category) {
-      case "テクノロジー":
-        return "🤖⭐ AI好きは要チェックでやんす‼️";
-      case "経済":
-        return "💹⭐ 市場の動きに注目でやんす‼️";
-      case "スポーツ":
-        return "⚽⭐ 要チェックでやんす‼️";
-      case "エンタメ":
-        return "🎬⭐ 話題になりそうでやんす‼️";
-      default:
-        return "⭐ 要チェックでやんす‼️";
-    }
+    return "⭐ 要チェックでやんす‼️";
   }
 
-  // 普通
   if (score >= 70) {
     return "👀 気になるでやんす‼️";
   }
 
-  // やや低め
   if (score >= 60) {
-    return "📰 知っておきたいでやんす‼️";
+    return "📰 知っておきたいでやんす‼⁉️";
   }
 
-  // その他
   return "🙂 ちょっと気になるでやんす⁉️";
 }
