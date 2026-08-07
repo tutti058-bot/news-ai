@@ -1,5 +1,6 @@
 import "./globals.css";
 import type { Metadata } from "next";
+import Script from "next/script";
 
 
 export const metadata: Metadata = {
@@ -40,8 +41,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ja">
-      <body>
+  <html lang="ja">
+    <head>
+      <Script
+        id="adsense"
+        async
+        strategy="afterInteractive"
+        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6538997075638239"
+        crossOrigin="anonymous"
+      />
+    </head>
+
+    <body>
   {children}
 
   <footer className="mt-20 border-t bg-gray-50">
