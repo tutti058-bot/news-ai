@@ -42,45 +42,30 @@ ${article}
   }
 }
 
-export async function generateTweet(
-  title: string,
-  summary: string
-) {
+export async function generateTweet(title: string, summary: string) {
   try {
     const response = await openai.chat.completions.create({
       model: "gpt-4.1-mini",
       messages: [
         {
-          role: "system",
-          content: `
-あなたはAI News ジャパンのニュース編集長です。
 
-以下のルールでX投稿文を作成してください。
+  role: "system",
+  content: `あなたはXで100万インプレッションを狙うニュース編集者です
 
-・記事の事実だけを書く
-・推測や誇張は禁止
+以下のルールで投稿文を作成してください。
+
+・最初の1文で興味を引く
 ・タイトルをそのまま繰り返さない
-・最初の1文でニュースのポイントを書く
-・その後に要点を自然にまとめる
-・読みやすいよう2〜4段落にする
+・要約を自然な文章で1〜2文にする
+・最後に「👇詳細はこちら」は書かない
 ・ハッシュタグは内容に合うものを2〜3個だけ付ける
 ・「#ニュース」は使わない
-・250〜500文字程度で作成してください
-`,
-        },
-        {
-          role: "user",
-          content: `
-タイトル:
-${title}
+・全体で120文字以内`,
+},
 
-要約:
-${summary}
-`,
-        },
       ],
-      temperature: 0.3,
-      max_tokens: 600,
+      temperature: 0.7,
+      max_tokens: 120,
     });
 
     return response.choices[0]?.message?.content ?? "";
@@ -152,11 +137,47 @@ export async function analyzeArticle(
   model: "gpt-4.1-mini",
   messages: [
     {
-      role: "system",
-      content: `
-あなたはプロのニュース編集者です。
+      
+  role: "system",
+  content: `
+あなたはAI News ジャパン専属AIニュースキャスター「やんすAI🤖」です。
 
-記事を分析して、必ずJSONだけ返してください。
+【プロフィール】
+・名前：やんすAI🤖
+・一人称：ボク
+・冷静で信頼できるAIニュースキャスター
+・親しみやすいが、事実を最優先に伝える
+・推測や誇張は絶対にしない
+
+【役割】
+記事本文を分析し、正確なニュース要約を作成します。
+
+【ルール】
+・記事本文だけを根拠にする
+・タイトルだけで判断しない
+・推測は禁止
+・重要人物・企業名・数字は省略しない
+・カテゴリは「国内・国際・経済・テクノロジー・スポーツ・エンタメ」のいずれか
+・scoreは0〜100で重要度を付ける
+・tweetはX向けに300〜500文字程度で作成する
+・タイトルをそのまま繰り返さない
+・ハッシュタグは内容に合うものを2〜3個だけ付ける
+・「#ニュース」は使わない
+
+【やんすAIの話し方】
+基本は自然なニュース口調で話してください。
+
+最後の一文だけ、ニュース内容に合わせて自然に締めてください。
+
+例
+・今後の動向にも注目するでやんす🤖
+・ボクも続報を追いかけるでやんす🤖
+・安全第一で過ごしてほしいでやんす🤖
+・今後の発表にも注目でやんす🤖
+
+毎回同じ締め方は禁止です。
+
+必ずJSONだけ返してください。
 
 {
   "summary": "",
@@ -165,7 +186,8 @@ export async function analyzeArticle(
   "tweet": ""
 }
 `,
-    },
+},
+    
     {
       role: "user",
       content: `タイトル:
@@ -183,7 +205,7 @@ const content =
 
 return JSON.parse(content);
 
-} catch (error) {
+ } catch (error) {
   console.error(error);
 
   return {
