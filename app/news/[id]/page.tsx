@@ -130,9 +130,6 @@ if (news.title.includes("Cloudflare")) hashtags.push("#Cloudflare");
 if (news.title.includes("Tesla")) hashtags.push("#Tesla");
 if (news.title.includes("Meta")) hashtags.push("#Meta");
 
-const shortSummary =
-  (news.summary ?? "").slice(0, 40) +
-  ((news.summary ?? "").length > 40 ? "..." : "");
 let postScore = 3;
 
 if ((news.score ?? 0) >= 90) {
@@ -161,7 +158,10 @@ if (postScore === 5) {
 } else {
   aiComment = "📌 ニッチな話題です";
 }
-const aiTweet = await generateTweet(news.title, shortSummary);
+const aiTweet = await generateTweet(
+  news.title,
+  news.summary ?? ""
+);
 
 const tweetText = `${aiTweet}
 

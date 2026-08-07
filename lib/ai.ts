@@ -42,30 +42,45 @@ ${article}
   }
 }
 
-export async function generateTweet(title: string, summary: string) {
+export async function generateTweet(
+  title: string,
+  summary: string
+) {
   try {
     const response = await openai.chat.completions.create({
       model: "gpt-4.1-mini",
       messages: [
         {
+          role: "system",
+          content: `
+あなたはAI News ジャパンのニュース編集長です。
 
-  role: "system",
-  content: `あなたはXで100万インプレッションを狙うニュース編集者です
+以下のルールでX投稿文を作成してください。
 
-以下のルールで投稿文を作成してください。
-
-・最初の1文で興味を引く
+・記事の事実だけを書く
+・推測や誇張は禁止
 ・タイトルをそのまま繰り返さない
-・要約を自然な文章で1〜2文にする
-・最後に「👇詳細はこちら」は書かない
+・最初の1文でニュースのポイントを書く
+・その後に要点を自然にまとめる
+・読みやすいよう2〜4段落にする
 ・ハッシュタグは内容に合うものを2〜3個だけ付ける
 ・「#ニュース」は使わない
-・全体で120文字以内`,
-},
+・250〜500文字程度で作成してください
+`,
+        },
+        {
+          role: "user",
+          content: `
+タイトル:
+${title}
 
+要約:
+${summary}
+`,
+        },
       ],
-      temperature: 0.7,
-      max_tokens: 120,
+      temperature: 0.3,
+      max_tokens: 600,
     });
 
     return response.choices[0]?.message?.content ?? "";
