@@ -1,6 +1,6 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import Script from "next/script";
+
 
 
 export const metadata: Metadata = {
@@ -15,6 +15,11 @@ export const metadata: Metadata = {
     verification: {
   google: "q32C9II99s52eLn7AgCdhIt6j3aRMIA82mfJ4vjyKQA",
 },
+
+other: {
+    "google-adsense-account": "ca-pub-6538997075638239",
+  },
+
 
   icons: {
     icon: "/favicon.ico",
@@ -41,18 +46,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-  <html lang="ja">
-    <head>
-      <Script
-        id="adsense"
-        async
-        strategy="afterInteractive"
-        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6538997075638239"
-        crossOrigin="anonymous"
-      />
-    </head>
-
-    <body>
+    <html lang="ja">
+      <body>
   {children}
 
   <footer className="mt-20 border-t bg-gray-50">
