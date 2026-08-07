@@ -249,5 +249,5 @@ export async function generateYansuComment(
   score: number,
   category: string
 ) {
-  return `注目度${score}点でやんす🤖`;
+  return `注目度${score}点でやんす‼️`;
 }
