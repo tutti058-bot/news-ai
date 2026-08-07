@@ -249,5 +249,52 @@ export async function generateYansuComment(
   score: number,
   category: string
 ) {
-  return `注目度${score}点でやんす‼️`;
+  // 超重要ニュース
+  if (score >= 95) {
+    switch (category) {
+      case "テクノロジー":
+        return "🤖🔥 AI業界が動くでやんす‼️";
+      case "経済":
+        return "💹🔥 市場も大注目でやんす‼️";
+      case "スポーツ":
+        return "⚽🔥 見逃せない勝負でやんす‼️";
+      case "エンタメ":
+        return "🎬🔥 超話題でやんす‼️";
+      case "国内":
+        return "🇯🇵🔥 超注目でやんす‼️";
+      case "国際":
+        return "🌍🔥 世界が注目でやんす‼️";
+      default:
+        return "🔥 超注目でやんす‼️";
+    }
+  }
+
+  // 重要ニュース
+  if (score >= 85) {
+    switch (category) {
+      case "テクノロジー":
+        return "🤖⭐ AI好きは要チェックでやんす‼️";
+      case "経済":
+        return "💹⭐ 市場の動きに注目でやんす‼️";
+      case "スポーツ":
+        return "⚽⭐ 要チェックでやんす‼️";
+      case "エンタメ":
+        return "🎬⭐ 話題になりそうでやんす‼️";
+      default:
+        return "⭐ 要チェックでやんす‼️";
+    }
+  }
+
+  // 普通
+  if (score >= 70) {
+    return "👀 気になるでやんす‼️";
+  }
+
+  // やや低め
+  if (score >= 60) {
+    return "📰 知っておきたいでやんす‼️";
+  }
+
+  // その他
+  return "🙂 ちょっと気になるでやんす⁉️";
 }
