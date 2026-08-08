@@ -1,115 +1,71 @@
-import Link from "next/link";
-import { getRanking } from "@/lib/ranking";
+import { prisma } from "@/lib/prisma";
+import NewsCard from "@/components/NewsCard";
 
-const medalColor = [
-  "bg-yellow-500",
-  "bg-gray-400",
-  "bg-orange-500",
-  "bg-blue-600",
-  "bg-blue-600",
-];
+type Props = {
+  params: Promise<{
+    slug: string;
+  }>;
+};
 
-export default async function Sidebar() {
-  const ranking = await getRanking();
+export default async function CategoryPage({ params }: Props) {
+  const { slug } = await params;
+
+  const category = decodeURIComponent(slug);
+
+  const news = await prisma.news.findMany({
+    where: {
+      category: category,
+    },
+    orderBy: {
+      publishedAt: "desc",
+    },
+  });
 
   return (
-    <aside className="space-y-8">
+    <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+      <div className="mb-10">
+        <p className="text-sm font-bold text-blue-600">
+          AI NEWS ジャパン
+        </p>
 
-      {/* AI重要度ランキング */}
+        <h1 className="mt-2 text-4xl font-black text-slate-900">
+          {category}ニュース
+        </h1>
 
-      <div className="rounded-3xl border border-gray-200 bg-white p-8 shadow-lg">
+        <p className="mt-3 text-slate-500">
+          {category}に関する最新ニュースをAIがわかりやすくお届けします。
+        </p>
+      </div>
 
-        <h2 className="mb-8 text-3xl font-black text-slate-900">
-          🔥 AI重要度ランキング
-        </h2>
+      {news.length === 0 ? (
+        <div className="rounded-3xl border border-slate-200 bg-white p-10 text-center">
+          <p className="text-lg font-bold text-slate-700">
+            {category}のニュースはまだありません。
+          </p>
 
-        <div className="space-y-5">
-
-          {ranking.map((item, index) => (
-
-            <Link
+          <p className="mt-2 text-sm text-slate-500">
+            最新ニュースが追加されると、こちらに表示されます。
+          </p>
+        </div>
+      ) : (
+        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+          {news.map((item) => (
+            <NewsCard
               key={item.id}
-              href={`/news/${item.id}`}
-              className="flex items-start gap-4 border-b border-gray-100 pb-5 last:border-none"
-            >
-
-              <div
-                className={`flex h-11 w-11 items-center justify-center rounded-full text-sm font-black text-white ${medalColor[index]}`}
-              >
-                {index + 1}
-              </div>
-
-              <div className="flex-1">
-
-                <div className="mb-2 inline-block rounded-full bg-red-100 px-3 py-1 text-xs font-bold text-red-600">
-                  AI {item.score}点
-                </div>
-
-                <h3 className="font-bold leading-6 text-slate-900 transition hover:text-blue-600">
-                  {item.title}
-                </h3>
-
-              </div>
-
-            </Link>
-
+              id={item.id}
+              title={item.title}
+              summary={item.summary ?? ""}
+              image={item.image ?? "/news.jpg"}
+              category={item.category ?? "国内"}
+              date={
+                item.publishedAt
+                  ? item.publishedAt.toLocaleDateString("ja-JP")
+                  : ""
+              }
+            />
           ))}
-
         </div>
-
-      </div>
-
-      {/* カテゴリー */}
-
-      <div className="rounded-3xl border border-gray-200 bg-white p-8 shadow-lg">
-
-        <h2 className="mb-6 text-3xl font-black text-slate-900">
-          📂 カテゴリー
-        </h2>
-
-        <div className="flex flex-wrap gap-3">
-
-          {[
-            "国内",
-            "国際",
-            "経済",
-            "スポーツ",
-            "エンタメ",
-            "テクノロジー",
-          ].map((category) => (
-
-            <Link
-              key={category}
-              href={`/category/${encodeURIComponent(category)}`}
-              className="rounded-full border border-slate-200 bg-slate-100 px-5 py-3 font-bold text-slate-900 transition hover:bg-blue-600 hover:text-white"
-            >
-              {category}
-            </Link>
-
-          ))}
-
-        </div>
-
-      </div>
-
-      {/* 広告 */}
-
-      <div className="rounded-3xl bg-gradient-to-br from-blue-600 to-indigo-700 p-8 text-white shadow-xl">
-
-        <p className="text-sm font-bold uppercase tracking-[0.2em]">
-          Advertisement
-        </p>
-
-        <h2 className="mt-4 text-3xl font-black">
-          Google AdSense
-        </h2>
-
-        <p className="mt-4 leading-7 text-blue-100">
-          このエリアにGoogle AdSense広告を表示します。
-        </p>
-
-      </div>
-
-    </aside>
+      )}
+    </main>
   );
 }
