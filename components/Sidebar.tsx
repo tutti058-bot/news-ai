@@ -68,22 +68,23 @@ export default async function Sidebar() {
         <div className="flex flex-wrap gap-3">
 
           {[
-            "国内",
-            "国際",
-            "経済",
-            "スポーツ",
-            "エンタメ",
-            "テクノロジー",
-          ].map((category) => (
+  "国内",
+  "国際",
+  "経済",
+  "スポーツ",
+  "エンタメ",
+  "テクノロジー",
+].map((category) => (
 
-            <button
-              key={category}
-              className="rounded-full border border-slate-200 bg-slate-100 px-5 py-3 font-bold text-slate-900 transition hover:bg-blue-600 hover:text-white"
-            >
-              {category}
-            </button>
+  <Link
+    key={category}
+    href={`/category/${encodeURIComponent(category)}`}
+    className="rounded-full border border-slate-200 bg-slate-100 px-5 py-3 font-bold text-slate-900 transition hover:bg-blue-600 hover:text-white"
+  >
+    {category}
+  </Link>
 
-          ))}
+))}
 
         </div>
 
