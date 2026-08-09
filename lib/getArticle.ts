@@ -4,23 +4,46 @@ import * as cheerio from "cheerio";
 export async function getArticle(url: string) {
   try {
     // まず article-extractor を試す
-    const article = await extract(url);
+    try {
+      const article = await extract(url);
 
-    if (article?.content) {
-      return article.content
-        .replace(/<[^>]+>/g, " ")
-        .replace(/\s+/g, " ")
-        .trim()
-        .slice(0, 5000);
+      if (article?.content) {
+        return article.content
+          .replace(/<[^>]+>/g, " ")
+          .replace(/\s+/g, " ")
+          .trim()
+          .slice(0, 5000);
+      }
+    } catch (error) {
+      console.error("article-extractor error:", error);
     }
 
-    // 取得できなかったら従来の方法
-    const res = await fetch(url);
+    // article-extractorで取得できなかった場合
+    // fetchには10秒のタイムアウトを設定
+    const controller = new AbortController();
+
+    const timeout = setTimeout(() => {
+      controller.abort();
+    }, 10000);
+
+    let res: Response;
+
+    try {
+      res = await fetch(url, {
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/138.0 Safari/537.36",
+        },
+        redirect: "follow",
+        signal: controller.signal,
+      });
+    } finally {
+      clearTimeout(timeout);
+    }
 
     if (!res.ok) return "";
 
     const html = await res.text();
-
     const $ = cheerio.load(html);
 
     let text = "";
@@ -58,7 +81,7 @@ export async function getArticle(url: string) {
       .trim()
       .slice(0, 5000);
   } catch (error) {
-    console.error(error);
+    console.error("getArticle error:", error);
     return "";
   }
 }

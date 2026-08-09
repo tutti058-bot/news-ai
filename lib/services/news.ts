@@ -5,7 +5,7 @@ import { getImage } from "@/lib/getImage";
 import { getArticle } from "@/lib/getArticle";
 
 export async function syncNews() {
-  const items = await fetchNews();
+  const items = (await fetchNews()).slice(0, 20);
 
   let added = 0;
   let updated = 0;
