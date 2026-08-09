@@ -21,3 +21,11 @@ model News {
   createdAt   DateTime  @default(now())
   views       Int       @default(0)
 }
+
+model DailySummary {
+  id        Int      @id @default(autoincrement())
+  date      DateTime @unique
+  summary   String
+  newsIds   String
+  createdAt DateTime @default(now())
+}
