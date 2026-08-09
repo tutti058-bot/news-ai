@@ -8,7 +8,7 @@ export async function syncNews() {
   const items = (await fetchNews()).slice(0, 20);
 
   let added = 0;
-  let updated = 0;
+  let skipped = 0;
 
   for (const item of items) {
     const title = item.title ?? "";
@@ -16,14 +16,21 @@ export async function syncNews() {
 
     if (!title || !sourceUrl) continue;
 
+    // すでに存在する記事は処理しない
     const exists = await prisma.news.findUnique({
       where: {
         sourceUrl,
       },
     });
 
-    const image =
-      exists?.image ?? (await getImage(sourceUrl));
+    if (exists) {
+      skipped++;
+      console.log("スキップ:", title);
+      continue;
+    }
+
+    // 新規記事だけ重い処理を実行
+    const image = await getImage(sourceUrl);
 
     const article = await getArticle(sourceUrl);
 
@@ -37,26 +44,6 @@ export async function syncNews() {
             tweet: "",
           };
 
-    // 既存記事なら更新
-    if (exists) {
-      await prisma.news.update({
-        where: {
-          sourceUrl,
-        },
-        data: {
-          image,
-          summary: ai.summary,
-          category: ai.category,
-          score: ai.score,
-        },
-      });
-
-      updated++;
-      console.log("更新:", title);
-      continue;
-    }
-
-    // 新規記事
     await prisma.news.create({
       data: {
         title,
@@ -79,7 +66,7 @@ export async function syncNews() {
   return {
     success: true,
     added,
-    updated,
+    skipped,
     total: items.length,
   };
 }

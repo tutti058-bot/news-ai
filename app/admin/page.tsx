@@ -21,8 +21,8 @@ export default function AdminPage() {
     }
 
     setMessage(
-      `取得完了：新規 ${data.added}件 / 更新 ${data.updated}件 / 合計 ${data.total}件`
-    );
+  `取得完了：新規 ${data.added}件 / スキップ ${data.skipped}件 / 合計 ${data.total}件`
+);
   } catch (error) {
     console.error(error);
 
@@ -118,3 +118,4 @@ export default function AdminPage() {
     </main>
   );
 }
+
