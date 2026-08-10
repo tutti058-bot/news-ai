@@ -1,5 +1,6 @@
 import "./globals.css";
 import type { Metadata } from "next";
+import Script from "next/script";
 
 export const metadata: Metadata = {
   title: {
@@ -61,7 +62,13 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <body>
-        {children}
+  <Script
+    async
+    src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6538997075638239"
+    crossOrigin="anonymous"
+  />
+  
+  {children}
 
         <footer className="mt-12 border-t border-gray-200">
           <div className="mx-auto flex max-w-6xl justify-center gap-6 px-4 py-6 text-sm text-gray-500">
