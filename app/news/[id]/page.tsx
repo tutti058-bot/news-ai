@@ -31,33 +31,36 @@ export async function generateMetadata({
     description: news.summary ?? "",
 
     openGraph: {
-  title: news.title,
-  description: news.summary ?? "",
-  images: [
-    {
-      url: news.image ?? "https://tutti-news-ai-bay.vercel.app/news.jpg",
-      width: 1200,
-      height: 630,
-      alt: news.title,
+      title: news.title,
+      description: news.summary ?? "",
+      images: [
+        {
+          url:
+            news.image ??
+            "https://tutti-news-ai-bay.vercel.app/news.jpg",
+          width: 1200,
+          height: 630,
+          alt: news.title,
+        },
+      ],
     },
-  ],
-},
 
-twitter: {
-  card: "summary_large_image",
-  title: news.title,
-  description: news.summary ?? "",
-  images: [
-    {
-      url: news.image ?? "https://tutti-news-ai-bay.vercel.app/news.jpg",
-      width: 1200,
-      height: 630,
-      alt: news.title,
+    twitter: {
+      card: "summary_large_image",
+      title: news.title,
+      description: news.summary ?? "",
+      images: [
+        {
+          url:
+            news.image ??
+            "https://tutti-news-ai-bay.vercel.app/news.jpg",
+          width: 1200,
+          height: 630,
+          alt: news.title,
+        },
+      ],
     },
-  ],
-},
-};
-
+  };
 }
 
 export default async function NewsDetail({
@@ -73,13 +76,23 @@ export default async function NewsDetail({
 
   if (!news) {
     return (
-      <main className="mx-auto max-w-5xl p-10">
-        <h1 className="text-3xl font-black">
-          記事が見つかりません
-        </h1>
-      </main>
+      <div className="mx-auto max-w-6xl px-4 py-16">
+        <p>記事が見つかりません</p>
+      </div>
     );
   }
+
+  // 閲覧数を1回だけ増やす
+  await prisma.news.update({
+    where: {
+      id: news.id,
+    },
+    data: {
+      views: {
+        increment: 1,
+      },
+    },
+  });
 
   const related = await prisma.news.findMany({
     where: {
@@ -96,76 +109,79 @@ export default async function NewsDetail({
 
   const url = `https://tutti-news-ai-bay.vercel.app/news/${news.id}`;
 
-const hashtags: string[] = [];
+  const hashtags: string[] = [];
 
-// カテゴリー別
-switch (news.category) {
-  case "テクノロジー":
-    hashtags.push("#AI", "#テクノロジー");
-    break;
+  // カテゴリー別
+  switch (news.category) {
+    case "テクノロジー":
+      hashtags.push("#AI", "#テクノロジー");
+      break;
 
-  case "スポーツ":
-    hashtags.push("#スポーツ");
-    break;
+    case "スポーツ":
+      hashtags.push("#スポーツ");
+      break;
 
-  case "芸能":
-    hashtags.push("#芸能");
-    break;
+    case "芸能":
+      hashtags.push("#芸能");
+      break;
 
-  case "経済":
-    hashtags.push("#経済");
-    break;
+    case "経済":
+      hashtags.push("#経済");
+      break;
 
-  default:
-    hashtags.push("#ニュース");
-}
+    default:
+      hashtags.push("#ニュース");
+  }
 
-// タイトルから自動追加
-if (news.title.includes("OpenAI")) hashtags.push("#OpenAI");
-if (news.title.includes("ChatGPT")) hashtags.push("#ChatGPT");
-if (news.title.includes("Google")) hashtags.push("#Google");
-if (news.title.includes("Apple")) hashtags.push("#Apple");
-if (news.title.includes("Microsoft")) hashtags.push("#Microsoft");
-if (news.title.includes("Cloudflare")) hashtags.push("#Cloudflare");
-if (news.title.includes("Tesla")) hashtags.push("#Tesla");
-if (news.title.includes("Meta")) hashtags.push("#Meta");
+  // タイトルから自動追加
+  if (news.title.includes("OpenAI")) hashtags.push("#OpenAI");
+  if (news.title.includes("ChatGPT")) hashtags.push("#ChatGPT");
+  if (news.title.includes("Google")) hashtags.push("#Google");
+  if (news.title.includes("Apple")) hashtags.push("#Apple");
+  if (news.title.includes("Microsoft")) hashtags.push("#Microsoft");
+  if (news.title.includes("Cloudflare")) hashtags.push("#Cloudflare");
+  if (news.title.includes("Tesla")) hashtags.push("#Tesla");
+  if (news.title.includes("Meta")) hashtags.push("#Meta");
 
-let postScore = 3;
+  let postScore = 3;
 
-if ((news.score ?? 0) >= 90) {
-  postScore = 5;
-} else if ((news.score ?? 0) >= 80) {
-  postScore = 4;
-} else if ((news.score ?? 0) >= 70) {
-  postScore = 3;
-} else if ((news.score ?? 0) >= 60) {
-  postScore = 2;
-} else {
-  postScore = 1;
-}
+  if ((news.score ?? 0) >= 90) {
+    postScore = 5;
+  } else if ((news.score ?? 0) >= 80) {
+    postScore = 4;
+  } else if ((news.score ?? 0) >= 70) {
+    postScore = 3;
+  } else if ((news.score ?? 0) >= 60) {
+    postScore = 2;
+  } else {
+    postScore = 1;
+  }
 
-const stars = "★".repeat(postScore) + "☆".repeat(5 - postScore);
-let aiComment = "一般的なニュースです。";
+  const stars =
+    "★".repeat(postScore) + "☆".repeat(5 - postScore);
 
-if (postScore === 5) {
-  aiComment = "🔥 Xで話題になりやすいニュースです";
-} else if (postScore === 4) {
-  aiComment = "📈 多くの人が興味を持ちそうです";
-} else if (postScore === 3) {
-  aiComment = "👍 注目度は平均的です";
-} else if (postScore === 2) {
-  aiComment = "ℹ️ 興味がある人向けのニュースです";
-} else {
-  aiComment = "📌 ニッチな話題です";
-}
-const yansuComment = await generateYansuComment(
-  news.title,
-  news.summary ?? "",
-  news.score ?? 60,
-  news.category ?? "国内"
-);
+  let aiComment = "一般的なニュースです。";
 
-const tweetText = `🚨 ${news.title}
+  if (postScore === 5) {
+    aiComment = "🔥 Xで話題になりやすいニュースです";
+  } else if (postScore === 4) {
+    aiComment = "📈 多くの人が興味を持ちそうです";
+  } else if (postScore === 3) {
+    aiComment = "👍 注目度は平均的です";
+  } else if (postScore === 2) {
+    aiComment = "ℹ️ 興味がある人向けのニュースです";
+  } else {
+    aiComment = "📌 ニッチな話題です";
+  }
+
+  const yansuComment = await generateYansuComment(
+    news.title,
+    news.summary ?? "",
+    news.score ?? 60,
+    news.category ?? "国内"
+  );
+
+  const tweetText = `🚨 ${news.title}
 
 👇 詳細はこちら
 ${url}
@@ -174,7 +190,7 @@ ${url}
 「${yansuComment}」`;
 
   return (
-    <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
+    <main className="mx-auto max-w-6xl px-4 py-8 sm:py-10">
 
       <Link
         href="/"
@@ -189,23 +205,19 @@ ${url}
           {news.category}
         </span>
 
-      <span className="rounded-full bg-amber-400 px-4 py-2 text-sm font-bold text-slate-900">
-  🤖 AI {news.score}点
-</span>
-
-<span className="rounded-full bg-yellow-400 px-4 py-2 text-sm font-bold text-slate-900">
-  🔥 投稿おすすめ {stars}
-</span>
-
-<p className="w-full text-sm text-slate-600">
-  🤖 {aiComment}
-</p>
+        <span className="rounded-full bg-amber-400 px-4 py-2 text-sm font-bold text-slate-900">
+          🤖 AI {news.score}点
+        </span>
 
         <span className="rounded-full bg-slate-100 px-4 py-2 text-sm text-slate-700">
           📅{" "}
           {news.publishedAt
             ? new Date(news.publishedAt).toLocaleDateString("ja-JP")
             : ""}
+        </span>
+
+        <span className="rounded-full bg-slate-100 px-4 py-2 text-sm text-slate-700">
+          👁 {news.views ?? 0} views
         </span>
 
       </div>
@@ -220,7 +232,7 @@ ${url}
         className="mt-8 h-64 w-full rounded-3xl object-cover sm:h-80 lg:h-[460px]"
       />
 
-            <div className="mt-8 rounded-3xl bg-white p-6 shadow-lg sm:p-8">
+      <div className="mt-8 rounded-3xl bg-white p-6 shadow-lg sm:p-8">
 
         <h2 className="mb-4 text-xl font-black">
           AI要約
@@ -246,23 +258,50 @@ ${url}
       <div className="mt-8 rounded-3xl bg-white p-6 shadow-lg">
 
         <h2 className="mb-4 text-xl font-black">
+          やんすAIのコメント
+        </h2>
+
+        <div className="rounded-2xl bg-slate-50 p-5">
+
+          <div className="mb-3 flex items-center gap-2">
+            <span className="text-lg font-black">
+              🤖 やんすAI
+            </span>
+          </div>
+
+          <p className="text-base font-semibold leading-7 text-slate-700">
+            「{yansuComment}」
+          </p>
+
+        </div>
+
+      </div>
+
+      <div className="mt-8 rounded-3xl bg-white p-6 shadow-lg">
+
+        <h2 className="mb-4 text-xl font-black">
           この記事をシェア
         </h2>
 
         <div className="flex flex-wrap gap-3">
 
           <a
-  href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`}
-  target="_blank"
-  rel="noopener noreferrer"
-  className="rounded-full bg-black px-5 py-3 font-bold text-white"
->
-  🤖 Xでシェア
-</a>
+            href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
+              tweetText
+            )}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-full bg-black px-5 py-3 font-bold text-white"
+          >
+            🤖 Xでシェア
+          </a>
 
           <a
-            href={`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(`https://tutti-news-ai-bay.vercel.app/news/${news.id}`)}`}
+            href={`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(
+              url
+            )}`}
             target="_blank"
+            rel="noopener noreferrer"
             className="rounded-full bg-green-500 px-5 py-3 font-bold text-white"
           >
             LINEで共有
@@ -280,12 +319,13 @@ ${url}
 
         <div className="grid gap-6 md:grid-cols-3">
 
-  {related.map((item) => (
+          {related.map((item) => (
             <Link
               key={item.id}
               href={`/news/${item.id}`}
               className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow transition hover:-translate-y-1 hover:shadow-xl"
             >
+
               <img
                 src={item.image ?? "/news.jpg"}
                 alt={item.title}
@@ -314,20 +354,31 @@ ${url}
                   {item.summary}
                 </p>
 
-                <p className="mt-4 text-sm text-slate-400">
-                  {item.publishedAt
-                    ? new Date(item.publishedAt).toLocaleDateString("ja-JP")
-                    : ""}
-                </p>
+                <div className="mt-4 flex items-center justify-between text-sm text-slate-400">
+
+                  <span>
+                    {item.publishedAt
+                      ? new Date(
+                          item.publishedAt
+                        ).toLocaleDateString("ja-JP")
+                      : ""}
+                  </span>
+
+                  <span>
+                    👁 {item.views ?? 0}
+                  </span>
+
+                </div>
 
               </div>
 
             </Link>
           ))}
+
         </div>
 
       </section>
 
-          </main>
+    </main>
   );
 }

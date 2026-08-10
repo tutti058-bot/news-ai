@@ -3,19 +3,19 @@
 import { Flame } from "lucide-react";
 import Link from "next/link";
 
-const topics = [
-  "国内",
-  "経済",
-  "スポーツ",
-  "テクノロジー",
-  "国際",
-  "AI",
-];
+type TrendingNews = {
+  id: number;
+  title: string;
+  views: number;
+};
 
-export default function TrendingBar() {
+export default function TrendingBar({
+  news,
+}: {
+  news: TrendingNews[];
+}) {
   return (
-    <section className="border-b bg-white">
-
+    <section className="border-b border-slate-100 bg-white">
       <div className="mx-auto flex max-w-7xl items-center gap-3 overflow-x-auto px-4 py-4 scrollbar-hide">
 
         <div className="flex shrink-0 items-center gap-2 rounded-full bg-red-50 px-4 py-2 font-bold text-red-600">
@@ -23,18 +23,27 @@ export default function TrendingBar() {
           急上昇
         </div>
 
-        {topics.map((topic) => (
+        {news.map((item, index) => (
           <Link
-            key={topic}
-            href={`/search?q=${encodeURIComponent(topic)}`}
-            className="shrink-0 rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-blue-600 hover:bg-blue-600 hover:text-white"
+            key={item.id}
+            href={`/news/${item.id}`}
+            className="group flex min-w-[220px] shrink-0 items-center gap-3 rounded-full border border-slate-200 bg-slate-50 px-4 py-2 transition hover:border-red-500 hover:bg-red-50"
           >
-            #{topic}
+            <span className="font-black text-red-500">
+              {index + 1}
+            </span>
+
+            <span className="max-w-[180px] truncate text-sm font-semibold text-slate-700 group-hover:text-red-600">
+              {item.title}
+            </span>
+
+            <span className="shrink-0 text-xs text-slate-400">
+              👁 {item.views}
+            </span>
           </Link>
         ))}
 
       </div>
-
     </section>
   );
 }

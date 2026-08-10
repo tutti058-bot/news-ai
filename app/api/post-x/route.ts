@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { generateTweet } from "@/lib/ai";
 
 export async function POST() {
   const news = await prisma.news.findFirst({
@@ -17,17 +18,15 @@ export async function POST() {
 
   const url = `https://tutti-news-ai-bay.vercel.app/news/${news.id}`;
 
-  const tweet = `【${news.category ?? "ニュース"}】
+  const aiTweet = await generateTweet(
+    news.title,
+    news.summary ?? ""
+  );
 
-${news.title}
-
-AI要約👇
-${news.summary ?? ""}
+  const tweet = `${aiTweet}
 
 続きを読む👇
-${url}
-
-#ニュース`;
+${url}`;
 
   return NextResponse.json({
     tweet,
