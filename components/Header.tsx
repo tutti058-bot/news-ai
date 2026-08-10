@@ -45,6 +45,14 @@ export default function Header() {
               {item}
             </Link>
           ))}
+
+          <Link
+  href="/admin"
+  className="rounded-full bg-slate-900 px-4 py-2 text-sm font-bold text-white transition hover:bg-blue-600"
+>
+  管理画面
+</Link>
+
         </nav>
 
         {/* PC検索 */}
@@ -116,6 +124,15 @@ export default function Header() {
                 {item}
               </Link>
             ))}
+
+            <Link
+  href="/admin"
+  onClick={() => setOpen(false)}
+  className="mt-2 rounded-xl bg-slate-900 px-4 py-3 text-base font-bold text-white"
+>
+  管理画面
+</Link>
+
           </nav>
         </div>
       )}
