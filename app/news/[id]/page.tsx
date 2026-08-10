@@ -160,6 +160,7 @@ if (postScore === 5) {
 }
 const yansuComment = await generateYansuComment(
   news.title,
+  news.summary ?? "",
   news.score ?? 60,
   news.category ?? "国内"
 );
