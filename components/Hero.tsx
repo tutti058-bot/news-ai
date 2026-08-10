@@ -3,10 +3,10 @@ import Link from "next/link";
 
 export default async function Hero() {
   const top = await prisma.news.findFirst({
-    orderBy: {
-      score: "desc",
-    },
-  });
+  orderBy: {
+    publishedAt: "desc",
+  },
+});
 
   if (!top) return null;
 

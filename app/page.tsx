@@ -2,6 +2,8 @@ import Header from "@/components/Header";
 import TrendingBar from "@/components/TrendingBar";
 import HomeLayout from "@/components/HomeLayout";
 
+export const dynamic = "force-dynamic";
+
 export default async function Home({
   searchParams,
 }: {
