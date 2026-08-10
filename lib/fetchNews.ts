@@ -29,12 +29,15 @@ export async function fetchNews() {
   for (const feed of feeds) {
     try {
       const res = await fetch(feed.url, {
-        next: {
-          revalidate: 1800,
-        },
+        cache: "no-store",
       });
 
-      if (!res.ok) continue;
+      if (!res.ok) {
+        console.error(
+          `${feed.source}: RSS取得失敗 ${res.status}`
+        );
+        continue;
+      }
 
       const xml = await res.text();
       const json = parser.parse(xml);
@@ -47,15 +50,26 @@ export async function fetchNews() {
       const array = Array.isArray(items) ? items : [items];
 
       for (const item of array) {
+        if (!item) continue;
+
         news.push({
           ...item,
           source: feed.source,
         });
       }
-    } catch (e) {
-      console.error(feed.source, e);
+
+      console.log(
+        `${feed.source}: ${array.length}件取得`
+      );
+    } catch (error) {
+      console.error(
+        `${feed.source}: RSS取得エラー`,
+        error
+      );
     }
   }
+
+  console.log(`RSS合計: ${news.length}件`);
 
   return news;
 }
