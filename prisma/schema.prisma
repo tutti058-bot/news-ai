@@ -20,6 +20,19 @@ model News {
   publishedAt DateTime?
   createdAt   DateTime  @default(now())
   views       Int       @default(0)
+
+  viewRecords NewsView[]
+}
+
+model NewsView {
+  id        Int      @id @default(autoincrement())
+  newsId    Int
+  createdAt DateTime @default(now())
+
+  news News @relation(fields: [newsId], references: [id], onDelete: Cascade)
+
+  @@index([newsId])
+  @@index([createdAt])
 }
 
 model DailySummary {

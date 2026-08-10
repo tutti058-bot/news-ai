@@ -82,17 +82,23 @@ export default async function NewsDetail({
     );
   }
 
-  // 閲覧数を1回だけ増やす
-  await prisma.news.update({
-    where: {
-      id: news.id,
+// 閲覧数を1回増やして、24時間ランキング用の履歴を保存
+await prisma.news.update({
+  where: {
+    id: news.id,
+  },
+  data: {
+    views: {
+      increment: 1,
     },
-    data: {
-      views: {
-        increment: 1,
-      },
-    },
-  });
+  },
+});
+
+await prisma.newsView.create({
+  data: {
+    newsId: news.id,
+  },
+});
 
   const related = await prisma.news.findMany({
     where: {

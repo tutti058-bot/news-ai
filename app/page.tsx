@@ -15,33 +15,64 @@ export default async function Home({
 }) {
   const { q = "", page = "1" } = await searchParams;
 
-  const trendingNews = await prisma.news.findMany({
+  // 直近24時間
+  const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
+  // 直近24時間の閲覧数を集計
+  const trendingViews = await prisma.newsView.groupBy({
+    by: ["newsId"],
     where: {
-      publishedAt: {
-        not: null,
+      createdAt: {
+        gte: since,
       },
     },
-    orderBy: [
-      {
-        views: "desc",
+    _count: {
+      newsId: true,
+    },
+    orderBy: {
+      _count: {
+        newsId: "desc",
       },
-      {
-        publishedAt: "desc",
-      },
-    ],
+    },
     take: 6,
-    select: {
-      id: true,
-      title: true,
-      views: true,
-    },
   });
+
+  // 集計結果からニュース情報を取得
+  const trendingNews = await Promise.all(
+    trendingViews.map(async (item) => {
+      const news = await prisma.news.findUnique({
+        where: {
+          id: item.newsId,
+        },
+        select: {
+          id: true,
+          title: true,
+          views: true,
+        },
+      });
+
+      if (!news) {
+        return null;
+      }
+
+      return {
+        id: news.id,
+        title: news.title,
+        views: news.views,
+        trendingViews: item._count.newsId,
+      };
+    })
+  );
+
+  const filteredTrendingNews = trendingNews.filter(
+    (item): item is NonNullable<typeof item> => item !== null
+  );
 
   return (
     <>
       <Header />
 
-      <TrendingBar news={trendingNews} />
+      <TrendingBar news={filteredTrendingNews} />
 
       <HomeLayout
         keyword={q}
