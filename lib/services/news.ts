@@ -5,12 +5,12 @@ import { getImage } from "@/lib/getImage";
 import { getArticle } from "@/lib/getArticle";
 
 export async function syncNews() {
-  const items = (await fetchNews()).slice(0, 20);
-
+  const items = await fetchNews();
   let added = 0;
   let skipped = 0;
 
   for (const item of items) {
+  if (added >= 20) break;
     const title = item.title ?? "";
     const sourceUrl = item.link ?? "";
 
