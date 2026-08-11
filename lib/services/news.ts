@@ -4,6 +4,25 @@ import { analyzeArticle } from "@/lib/ai";
 import { getImage } from "@/lib/getImage";
 import { getArticle } from "@/lib/getArticle";
 
+function normalizeUrl(value: unknown): string {
+  if (typeof value !== "string") {
+    return "";
+  }
+
+  const start = value.indexOf("](");
+  const end = value.lastIndexOf(")");
+
+  if (start !== -1 && end > start + 2) {
+    const url = value.slice(start + 2, end);
+
+    if (url.startsWith("http://") || url.startsWith("https://")) {
+      return url;
+    }
+  }
+
+  return value;
+}
+
 export async function syncNews() {
   const items = await fetchNews();
 
@@ -15,7 +34,7 @@ export async function syncNews() {
     if (added + updated >= 20) break;
 
     const title = item.title ?? "";
-    const sourceUrl = item.link ?? "";
+    const sourceUrl = normalizeUrl(item.link);
 
     if (!title || !sourceUrl) continue;
 
@@ -23,26 +42,33 @@ export async function syncNews() {
       ? new Date(item.pubDate)
       : null;
 
-    const exists = await prisma.news.findUnique({
-      where: {
-        sourceUrl,
+    const allNews = await prisma.news.findMany({
+      select: {
+        id: true,
+        title: true,
+        sourceUrl: true,
+        publishedAt: true,
       },
     });
 
-    // 既存記事
+    const exists = allNews.find(
+      (news) => normalizeUrl(news.sourceUrl) === sourceUrl
+    );
+
     if (exists) {
-      // RSS側の公開日時が新しくなっている場合だけ更新
-      if (
+      const shouldUpdate =
         publishedAt &&
         (!exists.publishedAt ||
-          publishedAt.getTime() > exists.publishedAt.getTime())
-      ) {
+          publishedAt.getTime() > exists.publishedAt.getTime());
+
+      if (shouldUpdate) {
         await prisma.news.update({
           where: {
             id: exists.id,
           },
           data: {
             title,
+            sourceUrl,
             publishedAt,
           },
         });
@@ -57,7 +83,6 @@ export async function syncNews() {
       continue;
     }
 
-    // 新規記事だけ重い処理を実行
     const image = await getImage(sourceUrl);
     const article = await getArticle(sourceUrl);
 
