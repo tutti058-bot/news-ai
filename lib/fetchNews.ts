@@ -17,6 +17,10 @@ const feeds = [
     source: "GIGAZINE",
     url: "https://gigazine.net/news/rss_2.0/",
   },
+  {
+    source: "マイナビ芸能",
+    url: "https://news.mynavi.jp/rss/entertainment/entertainment/geinou",
+  },
 ];
 
 const parser = new XMLParser({
@@ -28,24 +32,19 @@ function normalizeUrl(value: unknown): string {
     return "";
   }
 
-  // Markdown形式: [表示文字](https://example.com)
-  const start = value.indexOf("](");
-  const end = value.lastIndexOf(")");
+  const markdownMatch = value.match(
+    /\]\((https?:\/\/[^)]+)\)$/
+  );
 
-  if (start !== -1 && end > start + 2) {
-    const url = value.slice(start + 2, end);
-
-    if (url.startsWith("http://") || url.startsWith("https://")) {
-      return url;
-    }
+  if (markdownMatch?.[1]) {
+    return markdownMatch[1];
   }
 
-  // 通常のURL
-  if (value.startsWith("http://") || value.startsWith("https://")) {
-    return value;
-  }
+  const urlMatch = value.match(
+    /https?:\/\/[^\s\])]+/
+  );
 
-  return "";
+  return urlMatch?.[0] ?? value;
 }
 
 export async function fetchNews() {
@@ -68,11 +67,15 @@ export async function fetchNews() {
       const json = parser.parse(xml);
 
       const items =
-        json?.rss?.channel?.item ??
-        json?.rdf?.item ??
-        [];
+  json?.rss?.channel?.item ??
+  json?.rdf?.item ??
+  json?.["rdf:RDF"]?.item ??
+  json?.feed?.entry ??
+  [];
 
-      const array = Array.isArray(items) ? items : [items];
+      const array = Array.isArray(items)
+        ? items
+        : [items];
 
       for (const item of array) {
         if (!item) continue;

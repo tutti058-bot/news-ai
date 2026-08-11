@@ -4,25 +4,6 @@ import { analyzeArticle } from "@/lib/ai";
 import { getImage } from "@/lib/getImage";
 import { getArticle } from "@/lib/getArticle";
 
-function normalizeUrl(value: unknown): string {
-  if (typeof value !== "string") {
-    return "";
-  }
-
-  const start = value.indexOf("](");
-  const end = value.lastIndexOf(")");
-
-  if (start !== -1 && end > start + 2) {
-    const url = value.slice(start + 2, end);
-
-    if (url.startsWith("http://") || url.startsWith("https://")) {
-      return url;
-    }
-  }
-
-  return value;
-}
-
 export async function syncNews() {
   const items = await fetchNews();
 
@@ -30,87 +11,112 @@ export async function syncNews() {
   let updated = 0;
   let skipped = 0;
 
+  let normalAdded = 0;
+  let entertainmentAdded = 0;
+
   for (const item of items) {
-    if (added + updated >= 20) break;
-
-    const title = item.title ?? "";
-    const sourceUrl = normalizeUrl(item.link);
-
-    if (!title || !sourceUrl) continue;
-
-    const publishedAt = item.pubDate
-      ? new Date(item.pubDate)
-      : null;
-
-    const allNews = await prisma.news.findMany({
-      select: {
-        id: true,
-        title: true,
-        sourceUrl: true,
-        publishedAt: true,
-      },
-    });
-
-    const exists = allNews.find(
-      (news) => normalizeUrl(news.sourceUrl) === sourceUrl
-    );
-
-    if (exists) {
-      const shouldUpdate =
-        publishedAt &&
-        (!exists.publishedAt ||
-          publishedAt.getTime() > exists.publishedAt.getTime());
-
-      if (shouldUpdate) {
-        await prisma.news.update({
-          where: {
-            id: exists.id,
-          },
-          data: {
-            title,
-            sourceUrl,
-            publishedAt,
-          },
-        });
-
-        updated++;
-        console.log("更新:", title);
-      } else {
-        skipped++;
-        console.log("スキップ:", title);
-      }
-
+    // 国内ニュースは最大20件、芸能は最大5件
+    if (
+      item.source === "マイナビ芸能" &&
+      entertainmentAdded >= 5
+    ) {
       continue;
     }
 
-    const image = await getImage(sourceUrl);
-    const article = await getArticle(sourceUrl);
+    if (
+      item.source !== "マイナビ芸能" &&
+      normalAdded >= 20
+    ) {
+      continue;
+    }
 
-    const ai =
-      article.length > 300
-        ? await analyzeArticle(title, article)
-        : {
-            summary: title,
-            category: "国内",
-            score: 60,
-            tweet: "",
-          };
+    const title = item.title ?? "";
+    const sourceUrl = item.link ?? "";
 
-    await prisma.news.create({
-      data: {
-        title,
-        summary: ai.summary,
-        category: ai.category,
-        score: ai.score,
-        image,
-        source: item.source ?? "RSS",
+    if (!title || !sourceUrl) {
+      continue;
+    }
+
+    // すでに存在する記事は処理しない
+    const exists = await prisma.news.findUnique({
+      where: {
         sourceUrl,
-        publishedAt,
       },
     });
 
-    added++;
-    console.log("追加:", title);
+    if (exists) {
+      skipped++;
+      continue;
+    }
+
+    // 新規記事だけ重い処理を実行
+    const image = await getImage(sourceUrl);
+    const article = await getArticle(sourceUrl);
+
+    let ai;
+
+    if (item.source === "マイナビ芸能") {
+      ai =
+        article.length > 300
+          ? await analyzeArticle(title, article)
+          : {
+              summary: title,
+              category: "芸能",
+              score: 60,
+              tweet: "",
+            };
+
+      // マイナビ芸能は必ず「芸能」
+      ai.category = "芸能";
+    } else {
+      ai =
+        article.length > 300
+          ? await analyzeArticle(title, article)
+          : {
+              summary: title,
+              category: "国内",
+              score: 60,
+              tweet: "",
+            };
+    }
+
+    try {
+      await prisma.news.create({
+        data: {
+          title,
+          summary: ai.summary,
+          category: ai.category,
+          score: ai.score,
+          image,
+          source: item.source ?? "RSS",
+          sourceUrl,
+          publishedAt: item.pubDate
+            ? new Date(item.pubDate)
+            : item["dc:date"]
+              ? new Date(item["dc:date"])
+              : null,
+        },
+      });
+
+      added++;
+
+      if (item.source === "マイナビ芸能") {
+        entertainmentAdded++;
+        console.log("芸能追加:", title);
+      } else {
+        normalAdded++;
+        console.log("追加:", title);
+      }
+    } catch (error: any) {
+      // 同じ記事が別の同期処理で先に追加された場合
+      if (error?.code === "P2002") {
+        skipped++;
+        console.log("重複スキップ:", title);
+        continue;
+      }
+
+      throw error;
+    }
   }
 
   return {
