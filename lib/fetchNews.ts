@@ -23,6 +23,31 @@ const parser = new XMLParser({
   ignoreAttributes: false,
 });
 
+function normalizeUrl(value: unknown): string {
+  if (typeof value !== "string") {
+    return "";
+  }
+
+  // Markdown形式: [表示文字](https://example.com)
+  const start = value.indexOf("](");
+  const end = value.lastIndexOf(")");
+
+  if (start !== -1 && end > start + 2) {
+    const url = value.slice(start + 2, end);
+
+    if (url.startsWith("http://") || url.startsWith("https://")) {
+      return url;
+    }
+  }
+
+  // 通常のURL
+  if (value.startsWith("http://") || value.startsWith("https://")) {
+    return value;
+  }
+
+  return "";
+}
+
 export async function fetchNews() {
   const news: any[] = [];
 
@@ -52,8 +77,11 @@ export async function fetchNews() {
       for (const item of array) {
         if (!item) continue;
 
+        const link = normalizeUrl(item.link);
+
         news.push({
           ...item,
+          link,
           source: feed.source,
         });
       }
