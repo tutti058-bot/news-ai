@@ -72,7 +72,7 @@ export default async function Sidebar() {
   "国際",
   "経済",
   "スポーツ",
-  "エンタメ",
+  "芸能",
   "テクノロジー",
 ].map((category) => (
 

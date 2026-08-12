@@ -126,7 +126,7 @@ export function generateCategory(title: string) {
     return "国際";
 
   if (/(芸能|俳優|女優|映画|ドラマ|音楽|アイドル)/i.test(t))
-    return "エンタメ";
+    return "芸能";
 
   return "国内";
 }
@@ -184,7 +184,7 @@ export async function analyzeArticle(
 ・タイトルだけで判断しない
 ・推測は禁止
 ・重要人物・企業名・数字は省略しない
-・カテゴリは「国内・国際・経済・テクノロジー・スポーツ・エンタメ」のいずれか
+・カテゴリは「国内・国際・経済・テクノロジー・スポーツ・芸能」のいずれか
 ・scoreは0〜100で重要度を付ける
 ・tweetはX向けに300〜500文字程度で作成する
 ・タイトルをそのまま繰り返さない
