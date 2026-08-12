@@ -20,7 +20,7 @@ export default function Header() {
 
   return (
     <header className="border-b border-slate-200 bg-white">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
 
         {/* ロゴ */}
         <Link href="/" className="flex items-center gap-3">
@@ -39,7 +39,7 @@ export default function Header() {
           {menu.map((item) => (
             <Link
               key={item}
-              href={`/search?q=${encodeURIComponent(item)}`}
+              href={`/category/${encodeURIComponent(item)}`}
               className="font-semibold text-slate-700 transition hover:text-blue-600"
             >
               {item}
@@ -47,12 +47,11 @@ export default function Header() {
           ))}
 
           <Link
-  href="/admin"
-  className="rounded-full bg-slate-900 px-4 py-2 text-sm font-bold text-white transition hover:bg-blue-600"
->
-  管理画面
-</Link>
-
+            href="/admin"
+            className="rounded-full bg-slate-900 px-4 py-2 text-sm font-bold text-white transition hover:bg-blue-600"
+          >
+            管理画面
+          </Link>
         </nav>
 
         {/* PC検索 */}
@@ -114,10 +113,11 @@ export default function Header() {
       {open && (
         <div className="border-t border-slate-200 bg-white lg:hidden">
           <nav className="mx-auto flex max-w-7xl flex-col px-4 py-4">
+
             {menu.map((item) => (
               <Link
                 key={item}
-                href={`/search?q=${encodeURIComponent(item)}`}
+                href={`/category/${encodeURIComponent(item)}`}
                 onClick={() => setOpen(false)}
                 className="rounded-xl px-4 py-3 text-base font-semibold text-slate-700 transition hover:bg-slate-100 hover:text-blue-600"
               >
@@ -126,12 +126,12 @@ export default function Header() {
             ))}
 
             <Link
-  href="/admin"
-  onClick={() => setOpen(false)}
-  className="mt-2 rounded-xl bg-slate-900 px-4 py-3 text-base font-bold text-white"
->
-  管理画面
-</Link>
+              href="/admin"
+              onClick={() => setOpen(false)}
+              className="mt-2 rounded-xl bg-slate-900 px-4 py-3 text-base font-bold text-white"
+            >
+              管理画面
+            </Link>
 
           </nav>
         </div>
