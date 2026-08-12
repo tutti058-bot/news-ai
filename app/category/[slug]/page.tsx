@@ -32,6 +32,7 @@ export default async function CategoryPage({ params }: Props) {
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-10">
+      {/* ページタイトル */}
       <div>
         <p className="text-sm font-bold text-blue-600">
           AI NEWS ジャパン
@@ -46,7 +47,8 @@ export default async function CategoryPage({ params }: Props) {
         </p>
       </div>
 
-      <nav className="mt-8 flex gap-2 overflow-x-auto pb-2">
+      {/* カテゴリーメニュー */}
+      <nav className="sticky top-0 z-30 mt-8 flex gap-2 overflow-x-auto bg-white py-3 pb-2">
         {categories.map((item) => {
           const active = item === category;
 
@@ -66,6 +68,7 @@ export default async function CategoryPage({ params }: Props) {
         })}
       </nav>
 
+      {/* ニュース一覧 */}
       {news.length === 0 ? (
         <div className="mt-8 rounded-3xl border border-slate-200 bg-white p-10 text-center">
           <p className="text-lg font-bold text-slate-700">
