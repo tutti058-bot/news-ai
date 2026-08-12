@@ -187,13 +187,13 @@ await prisma.newsView.create({
     news.category ?? "国内"
   );
 
-  const tweetText = `🚨 ${news.title}
+  const tweetText = `やんすAI
+「${yansuComment}」
+
+やんすAI評価：${news.score ?? 60}点／100点
 
 👇 詳細はこちら
-${url}
-
-🤖 やんすAI
-「${yansuComment}」`;
+${url}`;
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-8 sm:py-10">
