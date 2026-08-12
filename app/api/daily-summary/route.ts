@@ -30,48 +30,8 @@ export async function GET() {
       Date.UTC(year, month, date)
     );
 
-    // 今日すでに作成済みならDBから返す
-    const existing = await prisma.dailySummary.findUnique({
-      where: {
-        date: summaryDate,
-      },
-    });
-
-    if (existing) {
-      const newsIds = existing.newsIds
-        .split(",")
-        .filter(Boolean)
-        .map(Number);
-
-      const savedNews = await prisma.news.findMany({
-        where: {
-          id: {
-            in: newsIds,
-          },
-        },
-        orderBy: {
-          score: "desc",
-        },
-      });
-
-      return NextResponse.json({
-        date: `${year}-${String(month + 1).padStart(2, "0")}-${String(
-          date
-        ).padStart(2, "0")}`,
-        count: savedNews.length,
-        summary: existing.summary,
-        news: savedNews.map((item) => ({
-          id: item.id,
-          title: item.title,
-          category: item.category,
-          score: item.score,
-          url: `/news/${item.id}`,
-        })),
-        cached: true,
-      });
-    }
-
-    // まず今日のニュースを取得
+    // 今日の最新ニュースを取得
+    // 最大10件を重要度＋新着順で取得
     let news = await prisma.news.findMany({
       where: {
         publishedAt: {
@@ -125,34 +85,39 @@ ${index + 1}.
 カテゴリ: ${item.category ?? "国内"}
 タイトル: ${item.title}
 要約: ${item.summary ?? ""}
-重要度: ${item.score}点
+重要度: ${item.score ?? 0}点
 `
       )
       .join("\n");
 
+    // 今日のニュース全体をAIに渡してまとめる
     const response = await openai.chat.completions.create({
       model: "gpt-4.1-mini",
       messages: [
         {
           role: "system",
           content: `
-あなたはAI NEWS ジャパン専属AIニュースキャスター「やんすAI🤖」です。
+あなたはAI NEWS ジャパン専属AIニュースキャスター「やんすAI」です。
 
-与えられたニュースだけを使ってニュースまとめを作成してください。
+与えられた複数のニュースを使って、
+「今日1日のニュースまとめ」を作成してください。
 
-【ルール】
-・事実にない情報を追加しない
+【重要】
+・1件だけを取り上げるのではなく、与えられたニュース全体をまとめる
 ・重要度の高いニュースを優先する
-・5〜8件程度に厳選する
-・複数カテゴリーをできるだけ含める
-・同じカテゴリーばかりにならないようにする
+・できるだけ複数のカテゴリーを含める
+・同じカテゴリーばかりに偏らない
+・ニュースが複数ある場合は5〜8件程度に整理する
 ・各ニュースは短く分かりやすくする
 ・タイトルをそのまま長々と転載しない
-・Xで読みやすいように改行する
+・記事本文・要約にない情報を追加しない
+・推測は禁止
+・Xでも読みやすいように改行する
 ・300〜500文字程度
 ・ハッシュタグは2〜3個
 ・#ニュースは禁止
-・最後の一文は自然に「〜でやんす🤖」で締める
+・最後は自然な「でやんす」で締める
+・「🤖」は使用しない
 
 形式：
 
@@ -170,16 +135,18 @@ ${index + 1}.
 
 ⑥ 【芸能】ニュース内容
 
-今日の主なニュースをまとめたでやんす🤖
+今日の主なニュースをまとめたでやんす！
 
 #AIニュース #今日のニュース
 `,
         },
         {
           role: "user",
-          content: `ニュース一覧です。
+          content: `
+以下が今日取得されたニュース一覧です。
 
-${newsText}`,
+${newsText}
+`,
         },
       ],
       temperature: 0.4,
@@ -189,10 +156,26 @@ ${newsText}`,
     const summary =
       response.choices[0]?.message?.content?.trim() ?? "";
 
-    // 今日の記事がある場合だけ「今日のまとめ」として保存
+    if (!summary) {
+      return NextResponse.json(
+        {
+          error: "ニュースまとめの生成に失敗しました",
+        },
+        { status: 500 }
+      );
+    }
+
+    // 今日のまとめを新しい内容で保存・更新
     if (!fallback) {
-      const saved = await prisma.dailySummary.create({
-        data: {
+      const saved = await prisma.dailySummary.upsert({
+        where: {
+          date: summaryDate,
+        },
+        update: {
+          summary,
+          newsIds: news.map((item) => item.id).join(","),
+        },
+        create: {
           date: summaryDate,
           summary,
           newsIds: news.map((item) => item.id).join(","),
@@ -217,7 +200,6 @@ ${newsText}`,
       });
     }
 
-    // 今日のニュースがまだない場合
     return NextResponse.json({
       date: `${year}-${String(month + 1).padStart(2, "0")}-${String(
         date

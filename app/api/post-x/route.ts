@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { generateTweet } from "@/lib/ai";
+import { generateYansuComment, generateScore } from "@/lib/ai";
 
 export async function POST() {
   const news = await prisma.news.findFirst({
@@ -18,14 +18,21 @@ export async function POST() {
 
   const url = `https://tutti-news-ai-bay.vercel.app/news/${news.id}`;
 
-  const aiTweet = await generateTweet(
+  const score = generateScore(news.title);
+
+  const aiComment = await generateYansuComment(
     news.title,
-    news.summary ?? ""
+    news.summary ?? "",
+    score,
+    news.category ?? "国内"
   );
 
-  const tweet = `${aiTweet}
+  const tweet = `やんすAI
+「${aiComment}」
 
-続きを読む👇
+やんすAI評価：${score}点／100点
+
+👇 詳細はこちら
 ${url}`;
 
   return NextResponse.json({

@@ -74,25 +74,44 @@ export default function AdminPage() {
     }
   };
 
-  const postToX = () => {
+    const postToX = async () => {
     if (!summary) {
       setMessage("先に今日のニュースまとめを作成してください");
       return;
     }
 
-    const summaryUrl = `${SITE_URL}/daily-summary`;
+    try {
+      setMessage("やんすAIがX投稿を作成中...");
 
-    const text = `${summary}
+      const res = await fetch("/api/post-daily-x", {
+        method: "POST",
+      });
 
-🔗 今日のニュースまとめはこちら
-${summaryUrl}`;
+      const data = await res.json();
 
-    const url =
-      "https://twitter.com/intent/tweet?text=" +
-      encodeURIComponent(text);
+      if (!res.ok) {
+        throw new Error(
+          data.error ?? "X投稿の作成に失敗しました"
+        );
+      }
 
-    window.open(url, "_blank");
+      window.open(data.intentUrl, "_blank");
+
+      setMessage(
+        `X投稿を作成しました！ やんすAI評価：${data.score}点`
+      );
+    } catch (error) {
+      console.error(error);
+
+      const message =
+        error instanceof Error
+          ? error.message
+          : "不明なエラーが発生しました";
+
+      setMessage(`X投稿作成失敗：${message}`);
+    }
   };
+  
 
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-10">
