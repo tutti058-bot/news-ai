@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { generateYansuComment, generateScore } from "@/lib/ai";
+import { generateYansuComment } from "@/lib/ai";
 
 export async function POST() {
   const news = await prisma.news.findFirst({
@@ -18,7 +18,7 @@ export async function POST() {
 
   const url = `https://tutti-news-ai-bay.vercel.app/news/${news.id}`;
 
-  const score = generateScore(news.title);
+  const score = news.score ?? 60;
 
   const aiComment = await generateYansuComment(
     news.title,
@@ -37,6 +37,7 @@ ${url}`;
 
   return NextResponse.json({
     tweet,
+    score,
     intentUrl:
       "https://twitter.com/intent/tweet?text=" +
       encodeURIComponent(tweet),

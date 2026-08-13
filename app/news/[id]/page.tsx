@@ -425,22 +425,14 @@ ${url}
         <div className="flex flex-wrap gap-3">
 
           <a
-            href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
-              tweetText
-            )}`}
-            target="_blank"
-            rel="noopener noreferrer"
+            href={`/api/news/share?newsId=${news.id}&type=x`}
             className="rounded-full bg-black px-5 py-3 font-bold text-white"
           >
             Xでシェア
           </a>
 
           <a
-            href={`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(
-              url
-            )}`}
-            target="_blank"
-            rel="noopener noreferrer"
+            href={`/api/news/share?newsId=${news.id}&type=line`}
             className="rounded-full bg-green-500 px-5 py-3 font-bold text-white"
           >
             LINEで共有
