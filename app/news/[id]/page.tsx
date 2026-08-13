@@ -115,6 +115,71 @@ export default async function NewsDetail({
 
   const url = `https://tutti-news-ai-bay.vercel.app/news/${news.id}`;
 
+  const hashtags: string[] = [];
+
+  // カテゴリー別
+  switch (news.category) {
+    case "テクノロジー":
+      hashtags.push("#AI", "#テクノロジー");
+      break;
+
+    case "スポーツ":
+      hashtags.push("#スポーツ");
+      break;
+
+    case "芸能":
+      hashtags.push("#芸能");
+      break;
+
+    case "経済":
+      hashtags.push("#経済");
+      break;
+
+    default:
+      hashtags.push("#ニュース");
+  }
+
+  // タイトルから自動追加
+  if (news.title.includes("OpenAI")) hashtags.push("#OpenAI");
+  if (news.title.includes("ChatGPT")) hashtags.push("#ChatGPT");
+  if (news.title.includes("Google")) hashtags.push("#Google");
+  if (news.title.includes("Apple")) hashtags.push("#Apple");
+  if (news.title.includes("Microsoft")) hashtags.push("#Microsoft");
+  if (news.title.includes("Cloudflare")) hashtags.push("#Cloudflare");
+  if (news.title.includes("Tesla")) hashtags.push("#Tesla");
+  if (news.title.includes("Meta")) hashtags.push("#Meta");
+
+  let postScore = 3;
+
+  if ((news.score ?? 0) >= 90) {
+    postScore = 5;
+  } else if ((news.score ?? 0) >= 80) {
+    postScore = 4;
+  } else if ((news.score ?? 0) >= 70) {
+    postScore = 3;
+  } else if ((news.score ?? 0) >= 60) {
+    postScore = 2;
+  } else {
+    postScore = 1;
+  }
+
+  const stars =
+    "★".repeat(postScore) + "☆".repeat(5 - postScore);
+
+  let aiComment = "一般的なニュースです。";
+
+  if (postScore === 5) {
+    aiComment = "🔥 Xで話題になりやすいニュースです";
+  } else if (postScore === 4) {
+    aiComment = "📈 多くの人が興味を持ちそうです";
+  } else if (postScore === 3) {
+    aiComment = "👍 注目度は平均的です";
+  } else if (postScore === 2) {
+    aiComment = "ℹ️ 興味がある人向けのニュースです";
+  } else {
+    aiComment = "📌 ニッチな話題です";
+  }
+
   const yansuComment = await generateYansuComment(
     news.title,
     news.summary ?? "",
@@ -122,13 +187,13 @@ export default async function NewsDetail({
     news.category ?? "国内"
   );
 
-  const tweetText = `やんすAI
-「${yansuComment}」
-
-AI評価：${news.score ?? 60}点／100点
+  const tweetText = `🚨 ${news.title}
 
 👇 詳細はこちら
-${url}`;
+${url}
+
+やんすAI
+「${yansuComment}」`;
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-8 sm:py-10">
@@ -140,7 +205,6 @@ ${url}`;
         ← トップへ戻る
       </Link>
 
-      {/* 基本情報 */}
       <div className="mt-6 flex flex-wrap gap-3">
 
         <span className="rounded-full bg-red-600 px-4 py-2 text-sm font-bold text-white">
@@ -164,16 +228,26 @@ ${url}`;
 
       </div>
 
-      {/* AI評価詳細 */}
-      <div className="mt-6 w-full rounded-3xl border border-slate-200 bg-white p-6 shadow-lg">
+      <h1 className="mt-6 text-3xl font-black leading-tight sm:text-4xl lg:text-5xl">
+        {news.title}
+      </h1>
 
-        <div className="flex flex-wrap items-center justify-between gap-3">
+      <img
+        src={news.image ?? "/news.jpg"}
+        alt={news.title}
+        className="mt-8 h-64 w-full rounded-3xl object-cover sm:h-80 lg:h-[460px]"
+      />
+
+      {/* AI評価詳細 */}
+      <div className="mt-6 w-full overflow-hidden rounded-3xl border border-slate-200 bg-white p-4 shadow-lg sm:p-6">
+
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 
           <h2 className="text-xl font-black text-slate-900">
             AI評価
           </h2>
 
-          <span className="rounded-full bg-amber-400 px-4 py-2 text-lg font-black text-slate-900">
+          <span className="w-fit rounded-full bg-amber-400 px-4 py-2 text-base font-black text-slate-900 sm:text-lg">
             {news.score ?? 0}点 / 100点
           </span>
 
@@ -183,14 +257,14 @@ ${url}`;
 
           {/* ニュース重要度 */}
           <div>
-            <div className="mb-2 flex justify-between text-sm font-bold">
+            <div className="mb-2 flex items-center justify-between gap-3 text-sm font-bold">
               <span>📰 ニュース重要度</span>
-              <span>
+              <span className="shrink-0">
                 {news.importanceScore ?? 0} / 30
               </span>
             </div>
 
-            <div className="h-3 overflow-hidden rounded-full bg-slate-100">
+            <div className="h-3 w-full overflow-hidden rounded-full bg-slate-100">
               <div
                 className="h-full rounded-full bg-red-500"
                 style={{
@@ -205,14 +279,14 @@ ${url}`;
 
           {/* 話題性 */}
           <div>
-            <div className="mb-2 flex justify-between text-sm font-bold">
+            <div className="mb-2 flex items-center justify-between gap-3 text-sm font-bold">
               <span>🔥 話題性</span>
-              <span>
+              <span className="shrink-0">
                 {news.buzzScore ?? 0} / 20
               </span>
             </div>
 
-            <div className="h-3 overflow-hidden rounded-full bg-slate-100">
+            <div className="h-3 w-full overflow-hidden rounded-full bg-slate-100">
               <div
                 className="h-full rounded-full bg-orange-500"
                 style={{
@@ -227,14 +301,14 @@ ${url}`;
 
           {/* 影響範囲 */}
           <div>
-            <div className="mb-2 flex justify-between text-sm font-bold">
+            <div className="mb-2 flex items-center justify-between gap-3 text-sm font-bold">
               <span>🌏 影響範囲</span>
-              <span>
+              <span className="shrink-0">
                 {news.impactScore ?? 0} / 20
               </span>
             </div>
 
-            <div className="h-3 overflow-hidden rounded-full bg-slate-100">
+            <div className="h-3 w-full overflow-hidden rounded-full bg-slate-100">
               <div
                 className="h-full rounded-full bg-blue-500"
                 style={{
@@ -249,14 +323,14 @@ ${url}`;
 
           {/* 新規性 */}
           <div>
-            <div className="mb-2 flex justify-between text-sm font-bold">
+            <div className="mb-2 flex items-center justify-between gap-3 text-sm font-bold">
               <span>💡 新規性</span>
-              <span>
+              <span className="shrink-0">
                 {news.noveltyScore ?? 0} / 15
               </span>
             </div>
 
-            <div className="h-3 overflow-hidden rounded-full bg-slate-100">
+            <div className="h-3 w-full overflow-hidden rounded-full bg-slate-100">
               <div
                 className="h-full rounded-full bg-purple-500"
                 style={{
@@ -271,14 +345,14 @@ ${url}`;
 
           {/* 今後の注目度 */}
           <div>
-            <div className="mb-2 flex justify-between text-sm font-bold">
+            <div className="mb-2 flex items-center justify-between gap-3 text-sm font-bold">
               <span>📈 今後の注目度</span>
-              <span>
+              <span className="shrink-0">
                 {news.attentionScore ?? 0} / 15
               </span>
             </div>
 
-            <div className="h-3 overflow-hidden rounded-full bg-slate-100">
+            <div className="h-3 w-full overflow-hidden rounded-full bg-slate-100">
               <div
                 className="h-full rounded-full bg-green-500"
                 style={{
@@ -292,20 +366,7 @@ ${url}`;
           </div>
 
         </div>
-
       </div>
-
-      {/* タイトル */}
-      <h1 className="mt-6 text-3xl font-black leading-tight sm:text-4xl lg:text-5xl">
-        {news.title}
-      </h1>
-
-      {/* メイン画像 */}
-      <img
-        src={news.image ?? "/news.jpg"}
-        alt={news.title}
-        className="mt-8 h-64 w-full rounded-3xl object-cover sm:h-80 lg:h-[460px]"
-      />
 
       {/* AI要約 */}
       <div className="mt-8 rounded-3xl bg-white p-6 shadow-lg sm:p-8">
