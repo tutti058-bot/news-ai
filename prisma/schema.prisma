@@ -28,7 +28,8 @@ model News {
   createdAt   DateTime  @default(now())
   views       Int       @default(0)
 
-  viewRecords NewsView[]
+  viewRecords  NewsView[]
+  shareRecords NewsShare[]
 }
 
 model NewsView {
@@ -42,6 +43,19 @@ model NewsView {
   @@index([createdAt])
 }
 
+model NewsShare {
+  id        Int      @id @default(autoincrement())
+  newsId    Int
+  type      String
+  createdAt DateTime @default(now())
+
+  news News @relation(fields: [newsId], references: [id], onDelete: Cascade)
+
+  @@index([newsId])
+  @@index([type])
+  @@index([createdAt])
+}
+
 model DailySummary {
   id        Int      @id @default(autoincrement())
   date      DateTime @unique
@@ -49,4 +63,3 @@ model DailySummary {
   newsIds   String
   createdAt DateTime @default(now())
 }
-
