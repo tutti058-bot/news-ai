@@ -4,20 +4,19 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// AI要約だけOpenAIを使用
+// AI要約
 export async function generateSummary(
   title: string,
   article: string
 ) {
   try {
     const response = await openai.chat.completions.create({
-      
       model: "gpt-4.1-mini",
       messages: [
         {
           role: "system",
           content: `
-あなたはAI News ジャパン専属AIニュースキャスター「やんすAI🤖」です。
+あなたはAI News ジャパン専属AIニュースキャスター「やんすAI」です。
 
 ボクはニュースを正確に分かりやすく伝えるAIです。
 
@@ -27,13 +26,10 @@ export async function generateSummary(
 4〜6文で自然にまとめてください。
 
 最後の一文だけ、ニュース内容に合わせて自然に
-
 「〜でやんす」
-
 で締めてください。
 `,
         },
-        
         {
           role: "user",
           content: `タイトル:
@@ -56,16 +52,19 @@ ${article}
   }
 }
 
-export async function generateTweet(title: string, summary: string) {
+// X投稿
+export async function generateTweet(
+  title: string,
+  summary: string
+) {
   try {
     const response = await openai.chat.completions.create({
       model: "gpt-4.1-mini",
       messages: [
         {
-
-  role: "system",
-  content: `
-あなたはAI News ジャパン専属AIニュースキャスター「やんすAI🤖」です。
+          role: "system",
+          content: `
+あなたはAI News ジャパン専属AIニュースキャスター「やんすAI」です。
 
 一人称は「ボク」です。
 
@@ -79,20 +78,23 @@ X投稿を作成してください。
 ・300〜500文字程度
 ・ハッシュタグは2〜3個
 ・「#ニュース」は使わない
-
-最後は記事内容に合わせて自然に
-
-「〜でやんす」
-
-で締めてください。
-
-毎回違う締め方にしてください。
+・最後は記事内容に合わせて自然に「〜でやんす」で締める
+・毎回違う締め方にする
 `,
-},
+        },
+        {
+          role: "user",
+          content: `
+タイトル:
+${title}
 
+要約:
+${summary}
+`,
+        },
       ],
       temperature: 0.7,
-      max_tokens: 120,
+      max_tokens: 300,
     });
 
     return response.choices[0]?.message?.content ?? "";
@@ -102,7 +104,7 @@ X投稿を作成してください。
   }
 }
 
-// カテゴリはAIを使わない
+// カテゴリ
 export function generateCategory(title: string) {
   const t = title.toLowerCase();
 
@@ -131,7 +133,7 @@ export function generateCategory(title: string) {
   return "国内";
 }
 
-// スコアもAIを使わない
+// 従来のスコア
 export function generateScore(title: string) {
   const t = title.toLowerCase();
 
@@ -156,57 +158,71 @@ export function generateScore(title: string) {
   return 60;
 }
 
+// AI記事分析
 export async function analyzeArticle(
   title: string,
   article: string
 ) {
-  try {const response = await openai.chat.completions.create({
-  model: "gpt-4.1-mini",
-  messages: [
-    {
-      
-  role: "system",
-  content: `
-あなたはAI News ジャパン専属AIニュースキャスター「やんすAI🤖」です。
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4.1-mini",
+      messages: [
+        {
+          role: "system",
+          content: `
+あなたはAI News ジャパン専属AIニュースキャスター「やんすAI」です。
 
-【プロフィール】
-・名前：やんすAI🤖
-・一人称：ボク
-・冷静で信頼できるAIニュースキャスター
-・親しみやすいが、事実を最優先に伝える
-・推測や誇張は絶対にしない
+記事本文を分析し、正確なニュース情報とAI評価を作成してください。
 
-【役割】
-記事本文を分析し、正確なニュース要約を作成します。
-
-【ルール】
+【基本ルール】
 ・記事本文だけを根拠にする
 ・タイトルだけで判断しない
 ・推測は禁止
-・重要人物・企業名・数字は省略しない
-・カテゴリは「国内・国際・経済・テクノロジー・スポーツ・芸能」のいずれか
-・scoreは0〜100で重要度を付ける
-・tweetはX向けに300〜500文字程度で作成する
-・タイトルをそのまま繰り返さない
-・ハッシュタグは内容に合うものを2〜3個だけ付ける
-・「#ニュース」は使わない
+・重要人物、企業名、数字を省略しない
+・事実にない情報を追加しない
+
+【カテゴリ】
+以下のいずれか1つ：
+国内・国際・経済・テクノロジー・スポーツ・芸能
+
+【AI評価】
+
+以下の5項目を記事本文だけを根拠に採点してください。
+
+① ニュース重要度：0〜30点
+社会や生活への影響、ニュースとしての重要性。
+
+② 話題性：0〜20点
+多くの人が関心を持つ可能性があるニュースか。
+
+③ 影響範囲：0〜20点
+企業、社会、国内、世界などへの影響範囲。
+
+④ 新規性：0〜15点
+新しい発表、記録、発見、サービス、出来事などの新しさ。
+
+⑤ 今後の注目度：0〜15点
+今後の動向を追う価値がどの程度あるか。
+
+【重要】
+5項目の合計をscoreにしてください。
+
+importanceScore
++ buzzScore
++ impactScore
++ noveltyScore
++ attentionScore
+= score
+
+scoreは必ず0〜100点です。
 
 【やんすAIの話し方】
-基本は自然なニュースキャスター口調。
-
+・自然な日本語
+・冷静で信頼できる
+・推測や誇張をしない
 ・文章中に「🤖」を使用しない
-・「やんす」は文章中で連発しない
-・最後に自然な「でやんす」を使用する
-・ニュース内容に合わせて表現を毎回変える
-・絵文字はニュース内容に合う場合のみ使用してよい
-・絵文字を使う場合も「🤖」は禁止
-
-例：
-「この動きは今後にも影響しそうで、続報が気になるところでやんす！」
-「今回の発表で特に注目したいのはこの部分でやんす！」
-「ここからどんな展開になるのか、ボクも気になるでやんす！」
-
-毎回同じ締め方は禁止です。
+・「やんす」は連発しない
+・最後は自然な「でやんす」で締める
 
 必ずJSONだけ返してください。
 
@@ -214,40 +230,93 @@ export async function analyzeArticle(
   "summary": "",
   "category": "",
   "score": 0,
-  "tweet": ""
+  "importanceScore": 0,
+  "buzzScore": 0,
+  "impactScore": 0,
+  "noveltyScore": 0,
+  "attentionScore": 0
 }
 `,
-},
-    
-    {
-      role: "user",
-      content: `タイトル:
+        },
+        {
+          role: "user",
+          content: `タイトル:
 ${title}
 
 本文:
 ${article}`,
-    },
-  ],
-  temperature: 0.3,
-});
+        },
+      ],
+      temperature: 0.2,
+      max_tokens: 500,
+    });
 
-const content =
-  response.choices[0]?.message?.content ?? "{}";
+    const content =
+      response.choices[0]?.message?.content ?? "{}";
 
-return JSON.parse(content);
+    const result = JSON.parse(content);
 
-} catch (error) {
-  console.error(error);
+    // 各項目を上限内に収める
+    const importanceScore = Math.max(
+      0,
+      Math.min(30, Number(result.importanceScore) || 0)
+    );
 
-  return {
-    summary: "",
-    category: "国内",
-    score: 60,
-    tweet: "",
-  };
+    const buzzScore = Math.max(
+      0,
+      Math.min(20, Number(result.buzzScore) || 0)
+    );
+
+    const impactScore = Math.max(
+      0,
+      Math.min(20, Number(result.impactScore) || 0)
+    );
+
+    const noveltyScore = Math.max(
+      0,
+      Math.min(15, Number(result.noveltyScore) || 0)
+    );
+
+    const attentionScore = Math.max(
+      0,
+      Math.min(15, Number(result.attentionScore) || 0)
+    );
+
+    // 5項目の合計を正式なAI評価にする
+    const score =
+      importanceScore +
+      buzzScore +
+      impactScore +
+      noveltyScore +
+      attentionScore;
+
+    return {
+      summary: result.summary ?? "",
+      category: result.category ?? "国内",
+      score,
+      importanceScore,
+      buzzScore,
+      impactScore,
+      noveltyScore,
+      attentionScore,
+    };
+  } catch (error) {
+    console.error("AI記事分析エラー:", error);
+
+    return {
+      summary: "",
+      category: "国内",
+      score: 60,
+      importanceScore: 18,
+      buzzScore: 12,
+      impactScore: 12,
+      noveltyScore: 9,
+      attentionScore: 9,
+    };
+  }
 }
-}
 
+// やんすAIコメント
 export async function generateYansuComment(
   title: string,
   summary: string,
@@ -261,7 +330,7 @@ export async function generateYansuComment(
         {
           role: "system",
           content: `
-あなたはAI News ジャパン専属AIニュースキャスター「やんすAI🤖」です。
+あなたはAI News ジャパン専属AIニュースキャスター「やんすAI」です。
 
 一人称は「ボク」です。
 
@@ -279,10 +348,7 @@ export async function generateYansuComment(
 ・煽りすぎない
 ・毎回違う文章にする
 
-【重要】
-毎回同じコメントにならないようにしてください。
-
-ニュース内容に応じて、以下から自然な切り口を選んでください。
+ニュース内容に応じて切り口を変えてください。
 
 ・特に注目したポイント
 ・意外なポイント
@@ -296,25 +362,12 @@ export async function generateYansuComment(
 ・経済なら市場、企業、価格、数字
 ・国内・国際なら社会への影響や発表内容
 
-同じ切り口を毎回繰り返さないでください。
-
 【やんすAIの話し方】
-基本は自然な日本語。
-
-「でやんす」は文章の最後付近で自然に1回だけ使用してください。
-
-例：
-「この数字の変化はかなり気になるところでやんす」
-「今後の動きがどうなるのか注目したいでやんす」
-「ここからさらに展開があるのか、ボクも気になるでやんす」
-
-これらの例をそのまま繰り返してはいけません。
-
-毎回、ニュース内容に合わせて表現を変えてください。
-
-絵文字は0〜2個程度。
-
-コメントだけを返してください。
+・自然な日本語
+・「でやんす」は最後付近で1回だけ使用
+・毎回表現を変える
+・絵文字は0〜2個程度
+・コメントだけを返してください
 `,
         },
         {
@@ -329,8 +382,8 @@ ${summary}
 カテゴリ:
 ${category}
 
-重要度:
-${score}
+AI評価:
+${score}点
 `,
         },
       ],

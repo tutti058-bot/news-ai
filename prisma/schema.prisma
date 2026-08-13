@@ -15,6 +15,13 @@ model News {
   image       String?
   category    String?
   score       Int       @default(50)
+
+  importanceScore Int @default(0)
+  buzzScore       Int @default(0)
+  impactScore     Int @default(0)
+  noveltyScore    Int @default(0)
+  attentionScore  Int @default(0)
+
   source      String?
   sourceUrl   String    @unique
   publishedAt DateTime?
@@ -42,3 +49,4 @@ model DailySummary {
   newsIds   String
   createdAt DateTime @default(now())
 }
+

@@ -63,7 +63,11 @@ export async function syncNews() {
               summary: title,
               category: "芸能",
               score: 60,
-              tweet: "",
+              importanceScore: 18,
+              buzzScore: 12,
+              impactScore: 12,
+              noveltyScore: 9,
+              attentionScore: 9,
             };
 
       // マイナビ芸能は必ず「芸能」
@@ -76,20 +80,33 @@ export async function syncNews() {
               summary: title,
               category: "国内",
               score: 60,
-              tweet: "",
+              importanceScore: 18,
+              buzzScore: 12,
+              impactScore: 12,
+              noveltyScore: 9,
+              attentionScore: 9,
             };
     }
 
     try {
       await prisma.news.create({
         data: {
-          title,
+          title: title,
           summary: ai.summary,
           category: ai.category,
           score: ai.score,
-          image,
+
+          // AI評価の詳細
+          importanceScore: ai.importanceScore,
+          buzzScore: ai.buzzScore,
+          impactScore: ai.impactScore,
+          noveltyScore: ai.noveltyScore,
+          attentionScore: ai.attentionScore,
+
+          image: image,
           source: item.source ?? "RSS",
-          sourceUrl,
+          sourceUrl: sourceUrl,
+
           publishedAt: item.pubDate
             ? new Date(item.pubDate)
             : item["dc:date"]
