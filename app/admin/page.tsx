@@ -98,7 +98,7 @@ export default function AdminPage() {
       window.open(data.intentUrl, "_blank");
 
       setMessage(
-        `X投稿を作成しました！ やんすAI評価：${data.score}点`
+        `X投稿を作成しました！ AI評価：${data.score}点`
       );
     } catch (error) {
       console.error(error);

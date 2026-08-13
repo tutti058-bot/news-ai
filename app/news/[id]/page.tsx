@@ -190,7 +190,7 @@ await prisma.newsView.create({
   const tweetText = `やんすAI
 「${yansuComment}」
 
-やんすAI評価：${news.score ?? 60}点／100点
+AI評価：${news.score ?? 60}点／100点
 
 👇 詳細はこちら
 ${url}`;

@@ -125,7 +125,7 @@ ${dailySummary.summary}
     const tweet = `🤖 やんすAI
 「${comment}」
 
-やんすAI評価：${score}点／100点
+AI評価：${score}点／100点
 
 👇 詳細はこちら
 ${summaryUrl}`;
