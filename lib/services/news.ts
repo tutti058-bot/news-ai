@@ -4,6 +4,14 @@ import { analyzeArticle } from "@/lib/ai";
 import { getImage } from "@/lib/getImage";
 import { getArticle } from "@/lib/getArticle";
 
+function normalizeUrl(url: string): string {
+  return url
+    .replace(/&#45;/g, "-")
+    .replace(/&#x2D;/gi, "-")
+    .replace(/&amp;/g, "&")
+    .trim();
+}
+
 export async function syncNews() {
   const items = await fetchNews();
 
@@ -31,7 +39,7 @@ export async function syncNews() {
     }
 
     const title = item.title ?? "";
-    const sourceUrl = item.link ?? "";
+    const sourceUrl = normalizeUrl(item.link ?? "");
 
     if (!title || !sourceUrl) {
       continue;
@@ -49,49 +57,57 @@ export async function syncNews() {
       continue;
     }
 
-    // 新規記事だけ重い処理を実行
-    const image = await getImage(sourceUrl);
+    console.log("取得開始:", title);
+    console.log("URL:", sourceUrl);
+
+    // まず本文を取得
     const article = await getArticle(sourceUrl);
+
+    // 本文が短すぎる場合は保存しない
+    if (!article || article.length < 300) {
+      console.log(
+        "本文取得不十分のためスキップ:",
+        title
+      );
+
+      skipped++;
+      continue;
+    }
+
+    // 本文取得後に画像を取得
+    const image = await getImage(sourceUrl);
 
     let ai;
 
     if (item.source === "マイナビ芸能") {
-      ai =
-        article.length > 300
-          ? await analyzeArticle(title, article)
-          : {
-              summary: title,
-              category: "芸能",
-              score: 60,
-              importanceScore: 18,
-              buzzScore: 12,
-              impactScore: 12,
-              noveltyScore: 9,
-              attentionScore: 9,
-            };
+      ai = await analyzeArticle(
+        title,
+        article
+      );
 
       // マイナビ芸能は必ず「芸能」
       ai.category = "芸能";
     } else {
-      ai =
-        article.length > 300
-          ? await analyzeArticle(title, article)
-          : {
-              summary: title,
-              category: "国内",
-              score: 60,
-              importanceScore: 18,
-              buzzScore: 12,
-              impactScore: 12,
-              noveltyScore: 9,
-              attentionScore: 9,
-            };
+      ai = await analyzeArticle(
+        title,
+        article
+      );
+    }
+
+    if (!ai?.summary) {
+      console.log(
+        "AI分析結果がないためスキップ:",
+        title
+      );
+
+      skipped++;
+      continue;
     }
 
     try {
       await prisma.news.create({
         data: {
-          title: title,
+          title,
           summary: ai.summary,
           category: ai.category,
           score: ai.score,
@@ -103,9 +119,9 @@ export async function syncNews() {
           noveltyScore: ai.noveltyScore,
           attentionScore: ai.attentionScore,
 
-          image: image,
+          image,
           source: item.source ?? "RSS",
-          sourceUrl: sourceUrl,
+          sourceUrl,
 
           publishedAt: item.pubDate
             ? new Date(item.pubDate)

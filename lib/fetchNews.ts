@@ -27,12 +27,29 @@ const parser = new XMLParser({
   ignoreAttributes: false,
 });
 
+function decodeHtmlEntities(value: string): string {
+  return value
+    .replace(/&#(\d+);/g, (_, dec) =>
+      String.fromCharCode(Number(dec))
+    )
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) =>
+      String.fromCharCode(parseInt(hex, 16))
+    )
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">");
+}
+
 function normalizeUrl(value: unknown): string {
   if (typeof value !== "string") {
     return "";
   }
 
-  const markdownMatch = value.match(
+  const decoded = decodeHtmlEntities(value.trim());
+
+  const markdownMatch = decoded.match(
     /\]\((https?:\/\/[^)]+)\)$/
   );
 
@@ -40,11 +57,11 @@ function normalizeUrl(value: unknown): string {
     return markdownMatch[1];
   }
 
-  const urlMatch = value.match(
+  const urlMatch = decoded.match(
     /https?:\/\/[^\s\])]+/
   );
 
-  return urlMatch?.[0] ?? value;
+  return urlMatch?.[0] ?? decoded;
 }
 
 export async function fetchNews() {
@@ -67,11 +84,11 @@ export async function fetchNews() {
       const json = parser.parse(xml);
 
       const items =
-  json?.rss?.channel?.item ??
-  json?.rdf?.item ??
-  json?.["rdf:RDF"]?.item ??
-  json?.feed?.entry ??
-  [];
+        json?.rss?.channel?.item ??
+        json?.rdf?.item ??
+        json?.["rdf:RDF"]?.item ??
+        json?.feed?.entry ??
+        [];
 
       const array = Array.isArray(items)
         ? items
