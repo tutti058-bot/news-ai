@@ -24,7 +24,9 @@ export default function AdminPage() {
       const data = await res.json();
 
       if (!res.ok || !data.success) {
-        throw new Error(data.error ?? "ニュース取得に失敗しました");
+        throw new Error(
+          data.error ?? "ニュース取得に失敗しました"
+        );
       }
 
       setMessage(
@@ -74,9 +76,11 @@ export default function AdminPage() {
     }
   };
 
-    const postToX = async () => {
+  const postToX = async () => {
     if (!summary) {
-      setMessage("先に今日のニュースまとめを作成してください");
+      setMessage(
+        "先に今日のニュースまとめを作成してください"
+      );
       return;
     }
 
@@ -111,7 +115,6 @@ export default function AdminPage() {
       setMessage(`X投稿作成失敗：${message}`);
     }
   };
-  
 
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-10">
@@ -147,7 +150,9 @@ export default function AdminPage() {
               disabled={loading}
               className="mt-6 w-full rounded-2xl bg-blue-600 px-6 py-4 font-black text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {loading ? "取得中..." : "ニュースを取得する"}
+              {loading
+                ? "取得中..."
+                : "ニュースを取得する"}
             </button>
           </section>
 
@@ -207,6 +212,23 @@ export default function AdminPage() {
             </div>
           </section>
         )}
+
+        <section className="mt-6 rounded-3xl border border-slate-200 bg-white p-7 shadow-lg">
+          <h2 className="text-2xl font-black text-slate-900">
+            📊 シェア分析
+          </h2>
+
+          <p className="mt-2 text-slate-500">
+            X・LINEのシェア状況を確認できます。
+          </p>
+
+          <Link
+            href="/share-stats"
+            className="mt-6 block rounded-2xl bg-blue-600 px-6 py-4 text-center font-black text-white transition hover:bg-blue-700"
+          >
+            📊 シェア分析を見る →
+          </Link>
+        </section>
 
         <div className="mt-6 rounded-3xl border border-slate-200 bg-white p-7 shadow-lg">
           <Link
