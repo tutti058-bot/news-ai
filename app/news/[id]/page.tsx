@@ -401,11 +401,7 @@ ${url}
 
         <div className="rounded-2xl bg-slate-50 p-5">
 
-          <div className="mb-3 flex items-center gap-2">
-            <span className="text-lg font-black">
-              やんすAI
-            </span>
-          </div>
+        
 
           <p className="text-base font-semibold leading-7 text-slate-700">
             「{yansuComment}」
