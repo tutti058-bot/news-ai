@@ -1,8 +1,23 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { isAdminAuthenticated } from "@/lib/adminAuth";
 
 export async function GET() {
   try {
+    const authenticated = await isAdminAuthenticated();
+
+    if (!authenticated) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Unauthorized",
+        },
+        {
+          status: 401,
+        }
+      );
+    }
+
     const news = await prisma.news.findMany({
       orderBy: {
         publishedAt: "desc",

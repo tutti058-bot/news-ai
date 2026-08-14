@@ -3,11 +3,26 @@ import { prisma } from "@/lib/prisma";
 import { getArticle } from "@/lib/getArticle";
 import { analyzeArticle } from "@/lib/ai";
 import { getImage } from "@/lib/getImage";
+import { isAdminAuthenticated } from "@/lib/adminAuth";
 
 const REPAIR_IDS = [650, 654, 660, 661];
 
 export async function GET() {
   try {
+    const authenticated = await isAdminAuthenticated();
+
+    if (!authenticated) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Unauthorized",
+        },
+        {
+          status: 401,
+        }
+      );
+    }
+
     const newsList = await prisma.news.findMany({
       where: {
         id: {
