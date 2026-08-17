@@ -81,7 +81,6 @@ ${articleUrl}`;
       )}`;
 
     return NextResponse.redirect(lineUrl);
-
   } catch (error) {
     console.error("シェア記録エラー:", error);
 
