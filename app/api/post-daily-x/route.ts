@@ -8,35 +8,24 @@ const openai = new OpenAI({
 
 export async function POST() {
   try {
-    const now = new Date();
-
-    const jstOffset = 9 * 60 * 60 * 1000;
-    const jstNow = new Date(now.getTime() + jstOffset);
-
-    const year = jstNow.getUTCFullYear();
-    const month = jstNow.getUTCMonth();
-    const date = jstNow.getUTCDate();
-
-    const summaryDate = new Date(Date.UTC(year, month, date));
-
-    const dailySummary = await prisma.dailySummary.findUnique({
-      where: {
-        date: summaryDate,
+    const news = await prisma.news.findFirst({
+      orderBy: {
+        publishedAt: "desc",
       },
     });
 
-    if (!dailySummary) {
+    if (!news) {
       return NextResponse.json(
         {
-          error: "今日のニュースまとめがありません",
+          error: "記事がありません",
         },
         { status: 404 }
       );
     }
 
-    // ========================================
-    // やんすAIコメント生成
-    // ========================================
+    const url = `https://tutti-news-ai-bay.vercel.app/news/${news.id}`;
+
+    const score = news.score ?? 60;
 
     const response = await openai.chat.completions.create({
       model: "gpt-4.1-mini",
@@ -46,197 +35,174 @@ export async function POST() {
           content: `
 あなたはAI NEWS ジャパン専属AIニュースキャスター「やんすAI」です。
 
-今日のニュースまとめから、X投稿用の文章を作成してください。
+ニュース記事を読んで、X投稿用の短い文章を作成してください。
 
-必ずJSON形式だけで返してください。
+【最終的な投稿形式】
 
-{
-  "hook": "",
-  "description": ""
-}
+やんすAI
+「フック」
+短い説明
 
-【hook】
+AI評価：○○点／100点
 
-15〜50文字程度。
+👇 詳細はこちら
+URL
 
-読者が「これは気になる」と思う短いフックを作ってください。
+【フック】
 
-数字、具体的な事実、意外な組み合わせ、問いかけなど、
-ニュース内容に合った切り口を使ってください。
+最も重要な部分です。
 
-記事に存在しない数字や事実は禁止です。
+20〜50文字程度。
 
-タイトルの単純な言い換えは禁止です。
+タイトルをそのまま言い換えないでください。
 
-最後は「でやんす」で締めてください。
+読者が
+「え、どういうこと？」
+「それは気になる」
+と思って記事を開きたくなる切り口にしてください。
 
-【description】
+記事にある具体的な数字、量、金額、人数、記録、変化などが使える場合は積極的に使ってください。
 
-30〜50文字程度。
+数字がない場合は、
+・意外な事実
+・問いかけ
+・具体的なポイント
+・意外な組み合わせ
+などを使ってください。
 
-hookの続きを短く説明してください。
+記事に存在しない数字や事実は絶対に作らないでください。
 
-ニュースの具体的なポイントを1つだけ入れてください。
+「実は」「まさか」「え？」を毎回使わないでください。
 
-長い説明は禁止です。
+最後は必ず自然な
+「でやんす」
+で締めてください。
 
-記事の内容を全部説明しないでください。
+【短い説明】
 
-読者が「詳しく知りたい」と思う程度にしてください。
+20〜45文字程度。
 
-「詳しくは記事で」などは入れないでください。
+ここではニュースを詳しく説明しないでください。
 
-descriptionには「でやんす」を入れないでください。
+フックを見た人が
+「その仕組みとは？」
+「なぜこうなった？」
+「その理由とは？」
+「今後どうなる？」
+など、続きを知りたくなる文章にしてください。
 
-【重要】
+ニュースの具体的なポイントを少しだけ入れてください。
 
-・ニュースまとめに書かれている事実だけを使用
-・推測禁止
-・架空の数字禁止
-・架空の情報禁止
-・煽りすぎない
-・自然な日本語
-・親しみやすいニュースキャスター口調
-・「🤖」禁止
-・JSONだけ返す
-・Markdown禁止
-・禁止
+長い要約は禁止です。
 
-【今日のニュースまとめ】
+記事の内容を説明し切らないでください。
 
-${dailySummary.summary}
+「詳しくは記事で」
+「詳細はこちら」
+などのURL誘導文は禁止です。
+
+「でやんす」は付けないでください。
+
+【非常に重要】
+
+出力は必ず以下の3行だけです。
+
+1行目：フック
+2行目：短い説明
+3行目：空行ではなく終了
+
+JSON禁止。
+Markdown禁止。
+禁止。
+「やんすAI」という名前は禁止。
+「AI評価」という文字は禁止。
+URLは禁止。
+ハッシュタグ禁止。
+
+【例】
+
+1日400トンの鶏糞が電力に変わるって知ってたでやんす？
+約1万世帯分の電力を生み出す、その仕組みとは？
+
+別の例：
+
+136件の論文から見えてきた「肌の若返り」の実態でやんす？
+レーザーやマイクロニードルの効果を科学的に検証。
+
+【記事情報】
+
+タイトル：
+${news.title}
+
+要約：
+${news.summary ?? ""}
+
+カテゴリ：
+${news.category ?? "国内"}
+
+AI評価：
+${score}点
 `,
         },
         {
           role: "user",
           content: `
-今日のニュースまとめ：
+タイトル：
+${news.title}
 
-${dailySummary.summary}
+要約：
+${news.summary ?? ""}
 
-以下のJSONだけ返してください。
-
-{
-  "hook": "",
-  "description": ""
-}
+この記事を読んで、
+「フック」
+「短い説明」
+の2行だけを作成してください。
 `,
         },
       ],
-      temperature: 0.8,
-      max_tokens: 180,
+      temperature: 0.9,
+      max_tokens: 120,
     });
 
     let content =
-      response.choices[0]?.message?.content?.trim() ?? "{}";
+      response.choices[0]?.message?.content?.trim() ?? "";
 
-    // AIが ```json を付けた場合に除去
     content = content
-      .replace(/^```json\s*/i, "")
-      .replace(/^```\s*/i, "")
-      .replace(/\s*```$/i, "")
+      .replace(/```json/g, "")
+      .replace(/```/g, "")
       .trim();
 
-    let result: {
-      hook?: string;
-      description?: string;
-    };
+    let lines = content
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean);
 
-    try {
-      result = JSON.parse(content);
-    } catch (error) {
-      console.error("X投稿JSON解析エラー:", content);
+    // 余計な文章が入った場合でも最初の2行だけ使用
+    lines = lines.slice(0, 2);
 
-      return NextResponse.json(
-        {
-          error: "X投稿文の生成に失敗しました",
-        },
-        { status: 500 }
-      );
-    }
+    let hook =
+      lines[0] ??
+      "このニュース、知っておきたいポイントでやんす？";
 
-    let hook = String(result.hook ?? "").trim();
-    let description = String(result.description ?? "").trim();
+    let description =
+      lines[1] ??
+      "その背景と詳しい内容とは？";
 
-    // AIが「でやんす」を入れた場合は削除
+    // 不要な記号を除去
     hook = hook
+      .replace(/^「|」$/g, "")
       .replace(/でやんすね/g, "")
       .replace(/でやんす/g, "")
       .trim();
 
     description = description
+      .replace(/^「|」$/g, "")
       .replace(/でやんすね/g, "")
       .replace(/でやんす/g, "")
       .trim();
 
-    if (!hook) {
-      hook = "今日のニュースで気になる話題がありました";
-    }
-
-    if (!description) {
-      description = "その背景と詳しい内容とは？";
-    }
-
     // 「でやんす」はフックの最後に1回だけ
     hook = `${hook}でやんす`;
-
-    // ========================================
-    // AI評価
-    // ========================================
-
-    const scoreResponse = await openai.chat.completions.create({
-      model: "gpt-4.1-mini",
-      messages: [
-        {
-          role: "system",
-          content: `
-ニュースまとめ全体の重要度を0〜100点で評価してください。
-
-評価基準：
-・社会的影響
-・話題性
-・ニュースとしての重要度
-・国内外への影響
-・注目度
-
-必ず0〜100の整数だけを返してください。
-数字以外は返さないでください。
-`,
-        },
-        {
-          role: "user",
-          content: dailySummary.summary,
-        },
-      ],
-      temperature: 0.2,
-      max_tokens: 10,
-    });
-
-    const scoreText =
-      scoreResponse.choices[0]?.message?.content?.trim() ?? "60";
-
-    const parsedScore = Number(
-      scoreText.replace(/[^0-9]/g, "")
-    );
-
-    const score = Math.min(
-      100,
-      Math.max(
-        0,
-        Number.isFinite(parsedScore) ? parsedScore : 60
-      )
-    );
-
-    // ========================================
-    // 詳細ページURL
-    // ========================================
-
-    const summaryUrl =
-      "https://tutti-news-ai-bay.vercel.app/daily-summary";
-
-    // ========================================
-    // X投稿
-    // ========================================
 
     const tweet = `やんすAI
 「${hook}」
@@ -245,7 +211,7 @@ ${description}
 AI評価：${score}点／100点
 
 👇 詳細はこちら
-${summaryUrl}`;
+${url}`;
 
     return NextResponse.json({
       tweet,
@@ -257,7 +223,7 @@ ${summaryUrl}`;
         encodeURIComponent(tweet),
     });
   } catch (error) {
-    console.error("今日のニュースX投稿生成エラー:", error);
+    console.error("X投稿生成エラー:", error);
 
     return NextResponse.json(
       {
