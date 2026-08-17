@@ -36,7 +36,6 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // シェアを記録
     await prisma.newsShare.create({
       data: {
         newsId,
@@ -47,7 +46,6 @@ export async function GET(request: NextRequest) {
     const articleUrl =
       `https://tutti-news-ai-bay.vercel.app/news/${newsId}`;
 
-    // Xシェア
     if (type === "x") {
       const score = news.score ?? 60;
 
@@ -58,8 +56,22 @@ export async function GET(request: NextRequest) {
         news.category ?? "国内"
       );
 
+      // AIコメントの1行目だけをXのフックとして使用
+      const hook =
+        aiComment
+          .split("\n")
+          .map((line) => line.trim())
+          .filter(Boolean)[0] ??
+        "このニュース、ちょっと気になるポイントとは？";
+
+      const cleanHook = hook
+        .replace(/^「|」$/g, "")
+        .replace(/でやんすね/g, "")
+        .replace(/でやんす/g, "")
+        .trim();
+
       const tweet = `やんすAI
-「${aiComment}」
+「${cleanHook}」
 
 AI評価：${score}点／100点
 
@@ -74,7 +86,6 @@ ${articleUrl}`;
       return NextResponse.redirect(xUrl);
     }
 
-    // LINEシェア
     const lineUrl =
       `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(
         articleUrl
