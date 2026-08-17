@@ -7,193 +7,223 @@ const openai = new OpenAI({
 });
 
 export async function POST() {
-  const news = await prisma.news.findFirst({
-    orderBy: {
-      publishedAt: "desc",
-    },
-  });
-
-  if (!news) {
-    return NextResponse.json(
-      { error: "記事がありません" },
-      { status: 404 }
-    );
-  }
-
-  const url = `https://tutti-news-ai-bay.vercel.app/news/${news.id}`;
-
-  const score = news.score ?? 60;
-
-  let hook = "";
-  let description = "";
-
   try {
+    const news = await prisma.news.findFirst({
+      orderBy: {
+        publishedAt: "desc",
+      },
+    });
+
+    if (!news) {
+      return NextResponse.json(
+        {
+          error: "記事がありません",
+        },
+        { status: 404 }
+      );
+    }
+
+    const url = `https://tutti-news-ai-bay.vercel.app/news/${news.id}`;
+
+    const score = news.score ?? 60;
+
     const response = await openai.chat.completions.create({
       model: "gpt-4.1-mini",
       messages: [
         {
           role: "system",
           content: `
-あなたはAI News ジャパン専属AIニュースキャスター「やんすAI」です。
+あなたはAI NEWS ジャパン専属AIニュースキャスター「やんすAI」です。
 
-X投稿専用の短い文章を作成してください。
+ニュース記事を読んで、X投稿用の短い文章を作成してください。
 
-【目的】
-Xからニュースサイトへ読者を誘導することが目的です。
+【最終的な投稿形式】
 
-【投稿構成】
+やんすAI
+「フック」
+短い説明
 
-① フック
-② 短い説明
-③ 詳細はこちら
-④ URL
+AI評価：○○点／100点
+
+👇 詳細はこちら
+URL
 
 【フック】
 
 20〜50文字程度。
 
-読者が「これは気になる」と思って続きを読みたくなる文章にしてください。
+タイトルをそのまま言い換えないでください。
 
-以下から記事内容に合うものを選んでください。
+読者が
+「え、どういうこと？」
+「それは気になる」
+と思って記事を開きたくなる切り口にしてください。
 
-・数字
+記事にある具体的な数字、量、金額、人数、記録、変化などが使える場合は積極的に使ってください。
+
+数字がない場合は、
 ・意外な事実
 ・問いかけ
-・逆説
+・具体的なポイント
 ・意外な組み合わせ
+などを使ってください。
 
-記事本文・要約に存在しない数字や事実は禁止です。
+記事に存在しない数字や事実は絶対に作らないでください。
 
-タイトルの単純な言い換えは禁止です。
-
-「え、」「実は」「まさか」の乱用は禁止です。
-
-【説明】
-
-30〜60文字程度。
-
-記事の答えを全部説明しないでください。
-
-読者が「詳しく知りたい」と思う程度の情報だけを残してください。
-
-特に重要な数字や事実を1つだけ使ってください。
-
-説明文だけでニュースの内容が完結しないようにしてください。
+「実は」「まさか」「え？」を毎回使わないでください。
 
 【重要】
 
+フックには「でやんす」を付けないでください。
+
+【短い説明】
+
+20〜45文字程度。
+
+フックを見た人が続きを知りたくなる文章にしてください。
+
+例えば、
+
+「その仕組みとは？」
+「なぜこうなった？」
+「その理由とは？」
+「今後どうなる？」
+
+などです。
+
+ニュースの具体的なポイントを少しだけ入れてください。
+
+長い要約は禁止です。
+
+記事の内容を説明し切らないでください。
+
 「詳しくは記事で」
-「詳細はサイトで」
-などの誘導文は作らないでください。
+「詳細はこちら」
+などのURL誘導文は禁止です。
 
-誘導文はプログラム側で追加します。
+短い説明の最後には「でやんす」を自然に1回だけ付けてください。
 
-【やんすAI】
+【非常に重要】
 
-「でやんす」はフックまたは説明のどちらかに自然に1回だけ使用してください。
+出力は必ず2行だけです。
 
-「🤖」は禁止です。
+1行目：フック
+2行目：短い説明
 
-【禁止】
+JSON禁止。
+Markdown禁止。
+コードブロック禁止。
+「やんすAI」という名前は禁止。
+「AI評価」という文字は禁止。
+URL禁止。
+ハッシュタグ禁止。
 
-・推測
-・架空の数字
-・架空の事実
-・過度な煽り
-・長文
-・ハッシュタグ
-・タイトルの丸写し
+【例】
 
-必ずJSONだけ返してください。
+1日400トンの鶏糞が電力に変わるって知ってた？
+約1万世帯分の電力を生み出す、その仕組みとは？でやんす
 
-{
-  "hook": "",
-  "description": ""
-}
+別の例：
+
+136件の論文から見えてきた「肌の若返り」の実態？
+レーザーやマイクロニードルの効果を科学的に検証。でやんす
 
 【記事情報】
 
-タイトル:
+タイトル：
 ${news.title}
 
-要約:
+要約：
 ${news.summary ?? ""}
 
-カテゴリ:
+カテゴリ：
 ${news.category ?? "国内"}
 
-AI評価:
+AI評価：
 ${score}点
 `,
         },
         {
           role: "user",
           content: `
-タイトル:
+タイトル：
 ${news.title}
 
-要約:
+要約：
 ${news.summary ?? ""}
 
-カテゴリ:
-${news.category ?? "国内"}
-
-AI評価:
-${score}点
-
-JSONだけ返してください。
+「フック」
+「短い説明」
+の2行だけを作成してください。
 `,
         },
       ],
-      temperature: 0.8,
-      max_tokens: 180,
+      temperature: 0.9,
+      max_tokens: 120,
     });
 
-    const content =
-      response.choices[0]?.message?.content ?? "{}";
+    let content =
+      response.choices[0]?.message?.content?.trim() ?? "";
 
-    const result = JSON.parse(content);
+    content = content
+      .replace(/```json/g, "")
+      .replace(/```/g, "")
+      .trim();
 
-    hook = String(result.hook ?? "").trim();
-    description = String(result.description ?? "").trim();
+    const lines = content
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .slice(0, 2);
 
-    // AIが「でやんす」を複数入れた場合に整理
+    let hook =
+      lines[0] ??
+      "このニュース、知っておきたいポイントは？";
+
+    let description =
+      lines[1] ??
+      "その背景と詳しい内容とは？でやんす";
+
     hook = hook
+      .replace(/^「|」$/g, "")
       .replace(/でやんすね/g, "")
       .replace(/でやんす/g, "")
       .trim();
 
     description = description
+      .replace(/^「|」$/g, "")
       .replace(/でやんすね/g, "")
       .replace(/でやんす/g, "")
       .trim();
 
-    // 「でやんす」は1回だけ付ける
-    if (Math.random() < 0.5) {
-      hook = `${hook}でやんす`;
-    } else {
-      description = `${description}でやんす`;
-    }
-  } catch (error) {
-    console.error("X投稿生成エラー:", error);
+    description = `${description}でやんす`;
 
-    hook = "このニュース、ちょっと気になるポイントでやんす";
-    description = "記事の詳しい内容と背景を紹介しています。";
-  }
-
-  const tweet = `やんすAI
+    const tweet = `やんすAI
 「${hook}」
-
 ${description}
+
+AI評価：${score}点／100点
 
 👇 詳細はこちら
 ${url}`;
 
-  return NextResponse.json({
-    tweet,
-    score,
-    intentUrl:
-      "https://twitter.com/intent/tweet?text=" +
-      encodeURIComponent(tweet),
-  });
+    return NextResponse.json({
+      tweet,
+      score,
+      hook,
+      description,
+      intentUrl:
+        "https://twitter.com/intent/tweet?text=" +
+        encodeURIComponent(tweet),
+    });
+  } catch (error) {
+    console.error("X投稿生成エラー:", error);
+
+    return NextResponse.json(
+      {
+        error: "X投稿の生成に失敗しました",
+      },
+      { status: 500 }
+    );
+  }
 }
