@@ -117,7 +117,6 @@ export default async function NewsDetail({
 
   const hashtags: string[] = [];
 
-  // カテゴリー別
   switch (news.category) {
     case "テクノロジー":
       hashtags.push("#AI", "#テクノロジー");
@@ -139,7 +138,6 @@ export default async function NewsDetail({
       hashtags.push("#ニュース");
   }
 
-  // タイトルから自動追加
   if (news.title.includes("OpenAI")) hashtags.push("#OpenAI");
   if (news.title.includes("ChatGPT")) hashtags.push("#ChatGPT");
   if (news.title.includes("Google")) hashtags.push("#Google");
@@ -180,6 +178,7 @@ export default async function NewsDetail({
     aiComment = "📌 ニッチな話題です";
   }
 
+  // やんすAIコメント
   const yansuComment = await generateYansuComment(
     news.title,
     news.summary ?? "",
@@ -187,6 +186,7 @@ export default async function NewsDetail({
     news.category ?? "国内"
   );
 
+  // X投稿用
   const tweetText = `🚨 ${news.title}
 
 👇 詳細はこちら
@@ -400,8 +400,6 @@ ${url}
         </h2>
 
         <div className="rounded-2xl bg-slate-50 p-5">
-
-        
 
           <p className="text-base font-semibold leading-7 text-slate-700">
             「{yansuComment}」

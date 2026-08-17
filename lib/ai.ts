@@ -256,7 +256,6 @@ ${article}`,
 
     const result = JSON.parse(content);
 
-    // 各項目を上限内に収める
     const importanceScore = Math.max(
       0,
       Math.min(30, Number(result.importanceScore) || 0)
@@ -282,7 +281,6 @@ ${article}`,
       Math.min(15, Number(result.attentionScore) || 0)
     );
 
-    // 5項目の合計を正式なAI評価にする
     const score =
       importanceScore +
       buzzScore +
@@ -322,7 +320,7 @@ export async function generateYansuComment(
   summary: string,
   score: number,
   category: string
-) {
+): Promise<string> {
   try {
     const response = await openai.chat.completions.create({
       model: "gpt-4.1-mini",
@@ -336,7 +334,8 @@ export async function generateYansuComment(
 
 ニュース記事を読んで、Xに表示する短い「やんすAIコメント」を1つ作成してください。
 
-【今回の最重要ルール】
+【最重要】
+
 コメントは必ず、
 
 ① スクロールを止めるフック
@@ -355,26 +354,16 @@ export async function generateYansuComment(
 記事内容に最も合うものを1つ選んでください。
 
 ・数字型
-「○○が○％に。これはかなり大きな動きでやんす。」
-
 ・否定型
-「実は、○○だけの話じゃないでやんす。」
-
 ・問いかけ型
-「これ、みなさんは知ってたでやんすか？」
-
 ・逆説型
-「○○なのに、△△という展開になっているでやんす。」
-
 ・意外性型
-「え、○○ってここまで変わってるでやんす。」
-
 ・具体性型
-「○○という数字が出てきたのが気になるところでやんす。」
 
 ただし、記事に存在しない数字・事実を絶対に作らないでください。
 
 【フックの重要ルール】
+
 ・記事の内容に直接関係すること
 ・「え？」「実は」「まさか」などを乱用しない
 ・毎回同じパターンにしない
@@ -384,12 +373,14 @@ export async function generateYansuComment(
 ・読んだ人が続きを知りたくなる切り口にする
 
 【本文】
+
 フックの後に、ニュースの中で特に重要・興味深いポイントを1〜2個だけ説明してください。
 
 単なるタイトルの繰り返しではなく、
 「なぜこのニュースが気になるのか」が伝わる文章にしてください。
 
 【最後】
+
 最後は、やんすAI自身の短い感想・注目ポイントで締めてください。
 
 「〜でやんす」を自然に1回だけ使用してください。
@@ -397,6 +388,7 @@ export async function generateYansuComment(
 毎回同じ表現にならないようにしてください。
 
 【基本ルール】
+
 ・ニュース本文・要約に書かれている事実だけを使う
 ・推測や架空の情報は禁止
 ・重要な人物、企業名、数字を正確に扱う
@@ -408,12 +400,8 @@ export async function generateYansuComment(
 ・「🤖」は絶対に使用しない
 ・コメントだけを返してください
 ・「でやんす」は原則1回だけ使用する
-・冒頭のフックと最後の締めで「でやんす」を重複させない
-・「ボクも〜と感じた」のような抽象的な感想を多用しない
-・読者が「自分もそう思う」「それは気になる」と感じる具体的なコメントにする
-・記事内容によっては、問いかけで終わってもよい
-・「でやんす」はコメント全体で必ず1回だけ使用する
-・フックに「でやんす」を入れた場合、最後には絶対に入れない
+・抽象的な感想を多用しない
+・読者が「それは気になる」と感じる具体的なコメントにする
 ・「意外に多い」「改めて感じた」など、具体性のない定型表現だけでフックを作らない
 ・可能なら「数字・具体的な事実・問いかけ・意外な組み合わせ」のいずれかをフックに使う
 
@@ -472,11 +460,18 @@ ${score}点
       max_tokens: 120,
     });
 
-    return response.choices[0]?.message?.content?.trim() ?? "";
+    const comment =
+      response.choices[0]?.message?.content?.trim() ?? "";
+
+    const cleanedComment = comment
+      .replace(/でやんすね/g, "")
+      .replace(/でやんす/g, "")
+      .trim();
+
+    return `${cleanedComment}でやんす`;
   } catch (error) {
     console.error("やんすAIコメント生成エラー:", error);
 
     return "このニュース、ボクも気になるところでやんす";
   }
 }
-
