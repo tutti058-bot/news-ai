@@ -8,13 +8,13 @@ datasource db {
 }
 
 model News {
-  id          Int       @id @default(autoincrement())
-  title       String
-  summary     String?
-  content     String?
-  image       String?
-  category    String?
-  score       Int       @default(50)
+  id       Int     @id @default(autoincrement())
+  title    String
+  summary  String?
+  content  String?
+  image    String?
+  category String?
+  score    Int     @default(50)
 
   importanceScore Int @default(0)
   buzzScore       Int @default(0)
