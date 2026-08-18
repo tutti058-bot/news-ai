@@ -113,78 +113,6 @@ export default async function NewsDetail({
     take: 3,
   });
 
-  // おすすめアフィリエイト案件
-  const affiliatePrograms =
-    await prisma.affiliateProgram.findMany({
-      where: {
-        isActive: true,
-      },
-      orderBy: [
-        {
-          priority: "desc",
-        },
-        {
-          createdAt: "desc",
-        },
-      ],
-    });
-
-  // ニュースの記事タイトル・要約・カテゴリーを
-  // 案件とのキーワード判定に使用
-  const newsKeywords = [
-    news.title,
-    news.summary ?? "",
-    news.category ?? "",
-  ]
-    .join(",")
-    .toLowerCase();
-
-  // ニュースと案件の相性をスコアリング
-  const recommendedAffiliates = affiliatePrograms
-    .map((program) => {
-      let recommendationScore =
-        program.priority;
-
-      // カテゴリー一致
-      if (
-        news.category &&
-        program.category === news.category
-      ) {
-        recommendationScore += 30;
-      }
-
-      // 案件側のキーワード
-      const programKeywords = (
-        program.keywords ?? ""
-      )
-        .split(",")
-        .map((keyword) =>
-          keyword.trim().toLowerCase()
-        )
-        .filter(Boolean);
-
-      // キーワード一致
-      for (const keyword of programKeywords) {
-        if (
-          keyword &&
-          newsKeywords.includes(keyword)
-        ) {
-          recommendationScore += 10;
-        }
-      }
-
-      return {
-        ...program,
-        recommendationScore,
-      };
-    })
-    .sort(
-      (a, b) =>
-        b.recommendationScore -
-        a.recommendationScore
-    )
-    .slice(0, 3);
-
   const url = `https://tutti-news-ai-bay.vercel.app/news/${news.id}`;
 
   const hashtags: string[] = [];
@@ -210,37 +138,14 @@ export default async function NewsDetail({
       hashtags.push("#ニュース");
   }
 
-  if (news.title.includes("OpenAI")) {
-    hashtags.push("#OpenAI");
-  }
-
-  if (news.title.includes("ChatGPT")) {
-    hashtags.push("#ChatGPT");
-  }
-
-  if (news.title.includes("Google")) {
-    hashtags.push("#Google");
-  }
-
-  if (news.title.includes("Apple")) {
-    hashtags.push("#Apple");
-  }
-
-  if (news.title.includes("Microsoft")) {
-    hashtags.push("#Microsoft");
-  }
-
-  if (news.title.includes("Cloudflare")) {
-    hashtags.push("#Cloudflare");
-  }
-
-  if (news.title.includes("Tesla")) {
-    hashtags.push("#Tesla");
-  }
-
-  if (news.title.includes("Meta")) {
-    hashtags.push("#Meta");
-  }
+  if (news.title.includes("OpenAI")) hashtags.push("#OpenAI");
+  if (news.title.includes("ChatGPT")) hashtags.push("#ChatGPT");
+  if (news.title.includes("Google")) hashtags.push("#Google");
+  if (news.title.includes("Apple")) hashtags.push("#Apple");
+  if (news.title.includes("Microsoft")) hashtags.push("#Microsoft");
+  if (news.title.includes("Cloudflare")) hashtags.push("#Cloudflare");
+  if (news.title.includes("Tesla")) hashtags.push("#Tesla");
+  if (news.title.includes("Meta")) hashtags.push("#Meta");
 
   let postScore = 3;
 
@@ -257,36 +162,29 @@ export default async function NewsDetail({
   }
 
   const stars =
-    "★".repeat(postScore) +
-    "☆".repeat(5 - postScore);
+    "★".repeat(postScore) + "☆".repeat(5 - postScore);
 
   let aiComment = "一般的なニュースです。";
 
   if (postScore === 5) {
-    aiComment =
-      "🔥 Xで話題になりやすいニュースです";
+    aiComment = "🔥 Xで話題になりやすいニュースです";
   } else if (postScore === 4) {
-    aiComment =
-      "📈 多くの人が興味を持ちそうです";
+    aiComment = "📈 多くの人が興味を持ちそうです";
   } else if (postScore === 3) {
-    aiComment =
-      "👍 注目度は平均的です";
+    aiComment = "👍 注目度は平均的です";
   } else if (postScore === 2) {
-    aiComment =
-      "ℹ️ 興味がある人向けのニュースです";
+    aiComment = "ℹ️ 興味がある人向けのニュースです";
   } else {
-    aiComment =
-      "📌 ニッチな話題です";
+    aiComment = "📌 ニッチな話題です";
   }
 
   // やんすAIコメント
-  const yansuComment =
-    await generateYansuComment(
-      news.title,
-      news.summary ?? "",
-      news.score ?? 60,
-      news.category ?? "国内"
-    );
+  const yansuComment = await generateYansuComment(
+    news.title,
+    news.summary ?? "",
+    news.score ?? 60,
+    news.category ?? "国内"
+  );
 
   // X投稿用
   const tweetText = `🚨 ${news.title}
@@ -320,9 +218,7 @@ ${url}
         <span className="rounded-full bg-slate-100 px-4 py-2 text-sm text-slate-700">
           📅{" "}
           {news.publishedAt
-            ? new Date(
-                news.publishedAt
-              ).toLocaleDateString("ja-JP")
+            ? new Date(news.publishedAt).toLocaleDateString("ja-JP")
             : ""}
         </span>
 
@@ -363,7 +259,6 @@ ${url}
           <div>
             <div className="mb-2 flex items-center justify-between gap-3 text-sm font-bold">
               <span>📰 ニュース重要度</span>
-
               <span className="shrink-0">
                 {news.importanceScore ?? 0} / 30
               </span>
@@ -375,9 +270,7 @@ ${url}
                 style={{
                   width: `${Math.min(
                     100,
-                    ((news.importanceScore ?? 0) /
-                      30) *
-                      100
+                    ((news.importanceScore ?? 0) / 30) * 100
                   )}%`,
                 }}
               />
@@ -388,7 +281,6 @@ ${url}
           <div>
             <div className="mb-2 flex items-center justify-between gap-3 text-sm font-bold">
               <span>🔥 話題性</span>
-
               <span className="shrink-0">
                 {news.buzzScore ?? 0} / 20
               </span>
@@ -400,9 +292,7 @@ ${url}
                 style={{
                   width: `${Math.min(
                     100,
-                    ((news.buzzScore ?? 0) /
-                      20) *
-                      100
+                    ((news.buzzScore ?? 0) / 20) * 100
                   )}%`,
                 }}
               />
@@ -413,7 +303,6 @@ ${url}
           <div>
             <div className="mb-2 flex items-center justify-between gap-3 text-sm font-bold">
               <span>🌏 影響範囲</span>
-
               <span className="shrink-0">
                 {news.impactScore ?? 0} / 20
               </span>
@@ -425,9 +314,7 @@ ${url}
                 style={{
                   width: `${Math.min(
                     100,
-                    ((news.impactScore ?? 0) /
-                      20) *
-                      100
+                    ((news.impactScore ?? 0) / 20) * 100
                   )}%`,
                 }}
               />
@@ -438,7 +325,6 @@ ${url}
           <div>
             <div className="mb-2 flex items-center justify-between gap-3 text-sm font-bold">
               <span>💡 新規性</span>
-
               <span className="shrink-0">
                 {news.noveltyScore ?? 0} / 15
               </span>
@@ -450,9 +336,7 @@ ${url}
                 style={{
                   width: `${Math.min(
                     100,
-                    ((news.noveltyScore ?? 0) /
-                      15) *
-                      100
+                    ((news.noveltyScore ?? 0) / 15) * 100
                   )}%`,
                 }}
               />
@@ -463,7 +347,6 @@ ${url}
           <div>
             <div className="mb-2 flex items-center justify-between gap-3 text-sm font-bold">
               <span>📈 今後の注目度</span>
-
               <span className="shrink-0">
                 {news.attentionScore ?? 0} / 15
               </span>
@@ -475,9 +358,7 @@ ${url}
                 style={{
                   width: `${Math.min(
                     100,
-                    ((news.attentionScore ?? 0) /
-                      15) *
-                      100
+                    ((news.attentionScore ?? 0) / 15) * 100
                   )}%`,
                 }}
               />
@@ -510,152 +391,6 @@ ${url}
         )}
 
       </div>
-
-      {/* おすすめサービス */}
-      {recommendedAffiliates.length > 0 && (
-        <section className="mt-10 rounded-3xl border border-slate-200 bg-white shadow-xl">
-
-          {/* ヘッダー */}
-          <div className="border-b border-slate-100 px-6 py-5 sm:px-8">
-
-            <div className="flex items-center justify-between gap-3">
-
-              <div>
-                <p className="text-xs font-black tracking-widest text-blue-600">
-                  PICK UP
-                </p>
-
-                <h2 className="mt-1 text-xl font-black text-slate-900 sm:text-2xl">
-                  この記事に関連するサービス
-                </h2>
-              </div>
-
-              <span className="shrink-0 rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-500">
-                PR
-              </span>
-
-            </div>
-
-            <p className="mt-2 text-sm leading-6 text-slate-500">
-              このニュースに関連するサービスをご紹介します。
-            </p>
-
-          </div>
-
-          {/* 広告カード */}
-          <div
-            className={`grid gap-6 p-5 sm:p-8 ${
-              recommendedAffiliates.length === 1
-                ? "place-items-center"
-                : "md:grid-cols-2 lg:grid-cols-3"
-            }`}
-          >
-
-            {recommendedAffiliates.map((program) => (
-              <div
-                key={program.id}
-                className={`group w-full overflow-hidden rounded-2xl border border-slate-200 bg-white transition duration-200 hover:-translate-y-1 hover:shadow-lg ${
-                  recommendedAffiliates.length === 1
-                    ? "max-w-md"
-                    : ""
-                }`}
-              >
-
-                {/* バナー */}
-                {program.imageUrl ? (
-                  <a
-                    href={program.url}
-                    target="_blank"
-                    rel="nofollow sponsored noopener noreferrer"
-                    className="block overflow-hidden bg-slate-50"
-                  >
-                    <img
-                      src={program.imageUrl}
-                      alt={program.name}
-                      className="h-40 w-full object-contain p-3 transition duration-300 group-hover:scale-[1.02] sm:h-44"
-                    />
-                  </a>
-                ) : (
-                  <div className="flex h-40 items-center justify-center bg-slate-50 sm:h-44">
-                    <div className="text-center">
-                      <p className="text-xs font-black tracking-widest text-slate-400">
-                        PICK UP
-                      </p>
-                      <p className="mt-2 px-4 text-lg font-black text-slate-800">
-                        {program.name}
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {/* 案件情報 */}
-                <div className="p-5">
-
-                  <div className="mb-3 flex items-center gap-2">
-
-                    <span className="rounded-full bg-blue-600 px-3 py-1 text-xs font-black text-white">
-                      おすすめ
-                    </span>
-
-                    <span className="text-xs font-bold text-slate-400">
-                      PR
-                    </span>
-
-                  </div>
-
-                  <h3 className="text-lg font-black text-slate-900 group-hover:text-blue-600">
-                    {program.name}
-                  </h3>
-
-                  {program.description && (
-                    <p className="mt-3 line-clamp-3 text-sm leading-6 text-slate-600">
-                      {program.description}
-                    </p>
-                  )}
-
-                  {program.keywords && (
-                    <div className="mt-4 flex flex-wrap gap-1.5">
-                      {program.keywords
-                        .split(",")
-                        .map((keyword: string) => keyword.trim())
-                        .filter(Boolean)
-                        .slice(0, 4)
-                        .map((keyword: string) => (
-                          <span
-                            key={keyword}
-                            className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-bold text-slate-500"
-                          >
-                            {keyword}
-                          </span>
-                        ))}
-                    </div>
-                  )}
-
-                  <a
-                    href={program.url}
-                    target="_blank"
-                    rel="nofollow sponsored noopener noreferrer"
-                    className="mt-5 flex items-center justify-center rounded-xl bg-blue-600 px-4 py-3 text-sm font-black text-white transition hover:bg-blue-700"
-                  >
-                    詳細を見る →
-                  </a>
-
-                </div>
-
-              </div>
-            ))}
-
-          </div>
-
-          {/* 広告表記 */}
-          <div className="border-t border-slate-100 bg-slate-50 px-6 py-3 sm:px-8">
-            <p className="text-xs font-medium text-slate-400">
-              ※広告・アフィリエイトリンクを含みます
-            </p>
-          </div>
-
-        </section>
-      )}
 
       {/* やんすAIコメント */}
       <div className="mt-8 rounded-3xl bg-white p-6 shadow-lg">
@@ -751,9 +486,7 @@ ${url}
                     {item.publishedAt
                       ? new Date(
                           item.publishedAt
-                        ).toLocaleDateString(
-                          "ja-JP"
-                        )
+                        ).toLocaleDateString("ja-JP")
                       : ""}
                   </span>
 

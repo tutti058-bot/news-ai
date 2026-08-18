@@ -8,36 +8,32 @@ datasource db {
 }
 
 model News {
-  id       Int     @id @default(autoincrement())
-  title    String
-  summary  String?
-  content  String?
-  image    String?
-  category String?
-  score    Int     @default(50)
-
-  importanceScore Int @default(0)
-  buzzScore       Int @default(0)
-  impactScore     Int @default(0)
-  noveltyScore    Int @default(0)
-  attentionScore  Int @default(0)
-
-  source      String?
-  sourceUrl   String    @unique
-  publishedAt DateTime?
-  createdAt   DateTime  @default(now())
-  views       Int       @default(0)
-
-  viewRecords  NewsView[]
-  shareRecords NewsShare[]
+  id              Int         @id @default(autoincrement())
+  title           String
+  summary         String?
+  content         String?
+  image           String?
+  category        String?
+  score           Int         @default(50)
+  source          String?
+  sourceUrl       String      @unique
+  publishedAt     DateTime?
+  createdAt       DateTime    @default(now())
+  views           Int         @default(0)
+  attentionScore  Int         @default(0)
+  buzzScore       Int         @default(0)
+  impactScore     Int         @default(0)
+  importanceScore Int         @default(0)
+  noveltyScore    Int         @default(0)
+  shareRecords    NewsShare[]
+  viewRecords     NewsView[]
 }
 
 model NewsView {
   id        Int      @id @default(autoincrement())
   newsId    Int
   createdAt DateTime @default(now())
-
-  news News @relation(fields: [newsId], references: [id], onDelete: Cascade)
+  news      News     @relation(fields: [newsId], references: [id], onDelete: Cascade)
 
   @@index([newsId])
   @@index([createdAt])
@@ -48,8 +44,7 @@ model NewsShare {
   newsId    Int
   type      String
   createdAt DateTime @default(now())
-
-  news News @relation(fields: [newsId], references: [id], onDelete: Cascade)
+  news      News     @relation(fields: [newsId], references: [id], onDelete: Cascade)
 
   @@index([newsId])
   @@index([type])
@@ -62,4 +57,19 @@ model DailySummary {
   summary   String
   newsIds   String
   createdAt DateTime @default(now())
+}
+
+model AffiliateProgram {
+  id          Int      @id @default(autoincrement())
+  name        String
+  programId   String?
+  url         String
+  imageUrl    String?
+  category    String?
+  keywords    String?
+  description String?
+  priority    Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
