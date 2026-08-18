@@ -513,84 +513,117 @@ ${url}
 
       {/* おすすめサービス */}
       {recommendedAffiliates.length > 0 && (
-        <section className="mt-10 rounded-3xl border border-slate-200 bg-white shadow-sm">
+        <section className="mt-10 rounded-3xl border border-slate-200 bg-white shadow-xl">
 
+          {/* ヘッダー */}
           <div className="border-b border-slate-100 px-6 py-5 sm:px-8">
-            <div className="flex items-center justify-between">
+
+            <div className="flex items-center justify-between gap-3">
+
               <div>
-                <p className="text-[11px] font-bold tracking-[0.2em] text-blue-600">
+                <p className="text-xs font-black tracking-widest text-blue-600">
                   PICK UP
                 </p>
+
                 <h2 className="mt-1 text-xl font-black text-slate-900 sm:text-2xl">
                   この記事に関連するサービス
                 </h2>
               </div>
 
-              <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-bold text-slate-400">
+              <span className="shrink-0 rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-500">
                 PR
               </span>
+
             </div>
 
             <p className="mt-2 text-sm leading-6 text-slate-500">
-              この記事の内容に関連した、読者に役立つサービスをご紹介します。
+              このニュースに関連するサービスをご紹介します。
             </p>
+
           </div>
 
-          <div className="grid gap-5 p-5 sm:grid-cols-2 lg:grid-cols-3 sm:p-7">
+          {/* 広告カード */}
+          <div
+            className={`grid gap-6 p-5 sm:p-8 ${
+              recommendedAffiliates.length === 1
+                ? "place-items-center"
+                : "md:grid-cols-2 lg:grid-cols-3"
+            }`}
+          >
 
             {recommendedAffiliates.map((program) => (
               <div
                 key={program.id}
-                className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:border-blue-200 hover:shadow-md"
+                className={`group flex h-[560px] w-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white transition duration-200 hover:-translate-y-1 hover:shadow-lg ${
+                  recommendedAffiliates.length === 1
+                    ? "max-w-md"
+                    : ""
+                }`}
               >
 
-                {program.imageUrl && (
+                {/* バナー */}
+                {program.imageUrl ? (
                   <a
                     href={program.url}
                     target="_blank"
                     rel="nofollow sponsored noopener noreferrer"
-                    className="flex h-32 items-center justify-center overflow-hidden bg-slate-50 p-4 sm:h-36"
+                    className="block overflow-hidden bg-slate-50"
                   >
                     <img
                       src={program.imageUrl}
                       alt={program.name}
-                      className="h-full w-full object-contain transition duration-300 group-hover:scale-[1.02]"
+                      className="h-44 w-full object-contain p-4"
                     />
                   </a>
+                ) : (
+                  <div className="flex h-44 items-center justify-center bg-slate-50">
+                    <div className="text-center">
+                      <p className="text-xs font-black tracking-widest text-slate-400">
+                        PICK UP
+                      </p>
+                      <p className="mt-2 px-4 text-lg font-black text-slate-800">
+                        {program.name}
+                      </p>
+                    </div>
+                  </div>
                 )}
 
-                <div className="flex flex-1 flex-col p-4 sm:p-5">
+                {/* 案件情報 */}
+                <div className="flex flex-1 flex-col p-5">
 
                   <div className="mb-3 flex items-center gap-2">
-                    <span className="text-[11px] font-bold text-blue-600">
+
+                    <span className="rounded-full bg-blue-600 px-3 py-1 text-xs font-black text-white">
                       おすすめ
                     </span>
-                    <span className="text-[11px] text-slate-400">
+
+                    <span className="text-xs font-bold text-slate-400">
                       PR
                     </span>
+
                   </div>
 
-                  <h3 className="text-base font-black leading-6 text-slate-900">
+                  <h3 className="text-lg font-black text-slate-900 group-hover:text-blue-600">
                     {program.name}
                   </h3>
 
                   {program.description && (
-                    <p className="mt-2 text-sm leading-6 text-slate-600">
+                    <p className="mt-3 line-clamp-3 text-sm leading-6 text-slate-600">
                       {program.description}
                     </p>
                   )}
 
                   {program.keywords && (
-                    <div className="mt-3 flex flex-wrap gap-1.5">
+                    <div className="mt-4 flex flex-wrap gap-1.5">
                       {program.keywords
                         .split(",")
                         .map((keyword: string) => keyword.trim())
                         .filter(Boolean)
-                        .slice(0, 3)
+                        .slice(0, 4)
                         .map((keyword: string) => (
                           <span
                             key={keyword}
-                            className="rounded-full bg-slate-100 px-2 py-1 text-[10px] font-bold text-slate-500"
+                            className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-bold text-slate-500"
                           >
                             {keyword}
                           </span>
@@ -602,19 +635,21 @@ ${url}
                     href={program.url}
                     target="_blank"
                     rel="nofollow sponsored noopener noreferrer"
-                    className="mt-auto pt-5 text-sm font-bold text-blue-600 transition hover:text-blue-800"
+                    className="mt-auto flex items-center justify-center rounded-xl bg-blue-600 px-4 py-3 text-sm font-black text-white transition hover:bg-blue-700"
                   >
                     詳細を見る →
                   </a>
 
                 </div>
+
               </div>
             ))}
 
           </div>
 
-          <div className="border-t border-slate-100 px-6 py-3 sm:px-8">
-            <p className="text-[11px] text-slate-400">
+          {/* 広告表記 */}
+          <div className="border-t border-slate-100 bg-slate-50 px-6 py-3 sm:px-8">
+            <p className="text-xs font-medium text-slate-400">
               ※広告・アフィリエイトリンクを含みます
             </p>
           </div>
