@@ -620,7 +620,7 @@ ${url}
             {recommendedAffiliates.map((program) => (
               <div
                 key={program.id}
-                className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl"
+                className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-500 hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl motion-safe:animate-[affiliateFloat_4s_ease-in-out_infinite]"
               >
 
                 {/* 広告画像 */}
