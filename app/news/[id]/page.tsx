@@ -140,7 +140,8 @@ export default async function NewsDetail({
     .toLowerCase();
 
   // ニュースと案件の相性をスコアリング
-  const recommendedAffiliates = affiliatePrograms
+    // ニュースと案件の相性をスコアリング
+  const scoredAffiliates = affiliatePrograms
     .map((program) => {
       let recommendationScore =
         program.priority;
@@ -185,8 +186,46 @@ export default async function NewsDetail({
       (a, b) =>
         b.recommendationScore -
         a.recommendationScore
-    )
-    .slice(0, 3);
+    );
+
+  // 同じ広告URLの重複を削除
+  const uniqueAffiliates = Array.from(
+    new Map(
+      scoredAffiliates.map((program) => [
+        program.url,
+        program,
+      ])
+    ).values()
+  );
+
+  // 優先度・関連度が高い広告を2件
+  const priorityAffiliates =
+    uniqueAffiliates.slice(0, 2);
+
+  // 残りの広告からランダムに1件
+  const randomCandidates =
+    uniqueAffiliates.slice(2);
+
+  const randomAffiliate =
+    randomCandidates.length > 0
+      ? randomCandidates[
+          Math.floor(
+            Math.random() *
+              randomCandidates.length
+          )
+        ]
+      : null;
+
+  // 最終表示：
+  // 優先広告2件 + ランダム広告1件
+    // 最終表示：
+  // 優先広告2件 + ランダム広告1件
+  const recommendedAffiliates = [
+    ...priorityAffiliates,
+    ...(randomAffiliate
+      ? [randomAffiliate]
+      : []),
+  ];
 
   const url = `https://tutti-news-ai-bay.vercel.app/news/${news.id}`;
 
