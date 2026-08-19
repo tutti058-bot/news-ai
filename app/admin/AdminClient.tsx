@@ -31,7 +31,7 @@ export default function AdminClient() {
   const [affiliateProgramId, setAffiliateProgramId] =
     useState("");
   const [affiliateUrl, setAffiliateUrl] = useState("");
-  const [affiliateCategory, setAffiliateCategory] =
+  const [affiliateCategory, setAffiliateCategory] = useState<string[]>([]);
     useState("");
   const [affiliateKeywords, setAffiliateKeywords] =
     useState("");
@@ -174,7 +174,7 @@ export default function AdminClient() {
     setAffiliateName("");
     setAffiliateProgramId("");
     setAffiliateUrl("");
-    setAffiliateCategory("");
+    setAffiliateCategory([]);
     setAffiliateKeywords("");
     setAffiliatePriority(0);
     setEditingAffiliateId(null);
@@ -205,7 +205,7 @@ export default function AdminClient() {
           name: affiliateName,
           programId: affiliateProgramId,
           url: affiliateUrl,
-          category: affiliateCategory,
+          category: affiliateCategory.join(","),
           keywords: affiliateKeywords,
           priority: affiliatePriority,
           isActive: true,
@@ -259,7 +259,7 @@ export default function AdminClient() {
     );
     setAffiliateUrl(program.url);
     setAffiliateCategory(
-      program.category ?? ""
+      program.category ? program.category.split(",").map((item) => item.trim()).filter(Boolean) : []
     );
     setAffiliateKeywords(
       program.keywords ?? ""
@@ -306,7 +306,7 @@ export default function AdminClient() {
           name: affiliateName,
           programId: affiliateProgramId,
           url: affiliateUrl,
-          category: affiliateCategory,
+          category: affiliateCategory.join(","),
           keywords: affiliateKeywords,
           priority: affiliatePriority,
           isActive: true,
@@ -682,51 +682,49 @@ export default function AdminClient() {
                 ニュースカテゴリー
               </label>
 
-              <select
-                value={affiliateCategory}
-                onChange={(e) =>
-                  setAffiliateCategory(
-                    e.target.value
-                  )
-                }
-                className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-              >
-                <option value="">
-                  カテゴリーを選択
-                </option>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                {[
+                  "国内",
+                  "国際",
+                  "経済",
+                  "テクノロジー",
+                  "スポーツ",
+                  "芸能",
+                  "エンタメ",
+                  "その他",
+                ].map((category) => {
+                  const checked = affiliateCategory.includes(category);
 
-                <option value="国内">
-                  国内
-                </option>
+                  return (
+                    <label
+                      key={category}
+                      className={`flex cursor-pointer items-center gap-2 rounded-xl border px-4 py-3 text-sm font-bold transition ${
+                        checked
+                          ? "border-blue-500 bg-blue-50 text-blue-700"
+                          : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={() => {
+                          setAffiliateCategory((current) =>
+                            current.includes(category)
+                              ? current.filter((item) => item !== category)
+                              : [...current, category]
+                          );
+                        }}
+                        className="h-4 w-4"
+                      />
+                      {category}
+                    </label>
+                  );
+                })}
+              </div>
 
-                <option value="国際">
-                  国際
-                </option>
-
-                <option value="経済">
-                  経済
-                </option>
-
-                <option value="テクノロジー">
-                  テクノロジー
-                </option>
-
-                <option value="スポーツ">
-                  スポーツ
-                </option>
-
-                <option value="芸能">
-                  芸能
-                </option>
-
-                <option value="エンタメ">
-                  エンタメ
-                </option>
-
-                <option value="その他">
-                  その他
-                </option>
-              </select>
+              <p className="mt-2 text-xs text-slate-400">
+                関連するカテゴリーを複数選択できます。
+              </p>
             </div>
 
             {/* キーワード */}

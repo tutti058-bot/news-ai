@@ -148,7 +148,10 @@ export default async function NewsDetail({
       // カテゴリー一致
       if (
         news.category &&
-        program.category === news.category
+        (program.category ?? "")
+          .split(",")
+          .map((item) => item.trim())
+          .includes(news.category)
       ) {
         recommendationScore += 30;
       }
@@ -361,15 +364,19 @@ ${url}
 
           {/* ニュース重要度 */}
           <div>
+
             <div className="mb-2 flex items-center justify-between gap-3 text-sm font-bold">
+
               <span>📰 ニュース重要度</span>
 
               <span className="shrink-0">
                 {news.importanceScore ?? 0} / 30
               </span>
+
             </div>
 
             <div className="h-3 w-full overflow-hidden rounded-full bg-slate-100">
+
               <div
                 className="h-full rounded-full bg-red-500"
                 style={{
@@ -381,20 +388,26 @@ ${url}
                   )}%`,
                 }}
               />
+
             </div>
+
           </div>
 
           {/* 話題性 */}
           <div>
+
             <div className="mb-2 flex items-center justify-between gap-3 text-sm font-bold">
+
               <span>🔥 話題性</span>
 
               <span className="shrink-0">
                 {news.buzzScore ?? 0} / 20
               </span>
+
             </div>
 
             <div className="h-3 w-full overflow-hidden rounded-full bg-slate-100">
+
               <div
                 className="h-full rounded-full bg-orange-500"
                 style={{
@@ -406,20 +419,26 @@ ${url}
                   )}%`,
                 }}
               />
+
             </div>
+
           </div>
 
           {/* 影響範囲 */}
           <div>
+
             <div className="mb-2 flex items-center justify-between gap-3 text-sm font-bold">
+
               <span>🌏 影響範囲</span>
 
               <span className="shrink-0">
                 {news.impactScore ?? 0} / 20
               </span>
+
             </div>
 
             <div className="h-3 w-full overflow-hidden rounded-full bg-slate-100">
+
               <div
                 className="h-full rounded-full bg-blue-500"
                 style={{
@@ -431,20 +450,26 @@ ${url}
                   )}%`,
                 }}
               />
+
             </div>
+
           </div>
 
           {/* 新規性 */}
           <div>
+
             <div className="mb-2 flex items-center justify-between gap-3 text-sm font-bold">
+
               <span>💡 新規性</span>
 
               <span className="shrink-0">
                 {news.noveltyScore ?? 0} / 15
               </span>
+
             </div>
 
             <div className="h-3 w-full overflow-hidden rounded-full bg-slate-100">
+
               <div
                 className="h-full rounded-full bg-purple-500"
                 style={{
@@ -456,20 +481,26 @@ ${url}
                   )}%`,
                 }}
               />
+
             </div>
+
           </div>
 
           {/* 今後の注目度 */}
           <div>
+
             <div className="mb-2 flex items-center justify-between gap-3 text-sm font-bold">
+
               <span>📈 今後の注目度</span>
 
               <span className="shrink-0">
                 {news.attentionScore ?? 0} / 15
               </span>
+
             </div>
 
             <div className="h-3 w-full overflow-hidden rounded-full bg-slate-100">
+
               <div
                 className="h-full rounded-full bg-green-500"
                 style={{
@@ -481,7 +512,9 @@ ${url}
                   )}%`,
                 }}
               />
+
             </div>
+
           </div>
 
         </div>
@@ -516,24 +549,31 @@ ${url}
         <section className="mt-10 rounded-3xl border border-slate-200 bg-white shadow-sm">
 
           <div className="border-b border-slate-100 px-6 py-5 sm:px-8">
+
             <div className="flex items-center justify-between">
+
               <div>
+
                 <p className="text-[11px] font-bold tracking-[0.2em] text-blue-600">
                   PICK UP
                 </p>
+
                 <h2 className="mt-1 text-xl font-black text-slate-900 sm:text-2xl">
                   この記事に関連するサービス
                 </h2>
+
               </div>
 
               <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-bold text-slate-400">
                 PR
               </span>
+
             </div>
 
             <p className="mt-2 text-sm leading-6 text-slate-500">
               この記事の内容に関連した、読者に役立つサービスをご紹介します。
             </p>
+
           </div>
 
           <div className="grid gap-5 p-5 sm:grid-cols-2 lg:grid-cols-3 sm:p-7">
@@ -541,36 +581,41 @@ ${url}
             {recommendedAffiliates.map((program) => (
               <div
                 key={program.id}
-                className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:border-blue-200 hover:shadow-md"
+                className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl"
               >
 
-                {program.imageUrl && (
-                  <a
-                    href={program.url}
-                    target="_blank"
-                    rel="nofollow sponsored noopener noreferrer"
-                    className="flex h-32 items-center justify-center overflow-hidden bg-slate-50 p-4 sm:h-36"
-                  >
-                    <img
-                      src={program.imageUrl}
-                      alt={program.name}
-                      className="h-full w-full object-contain transition duration-300 group-hover:scale-[1.02]"
-                    />
-                  </a>
-                )}
+                {/* 広告画像 */}
+{program.imageUrl && (
+  <a
+    href={program.url}
+    target="_blank"
+    rel="nofollow sponsored noopener noreferrer"
+    className="flex h-72 w-full items-center justify-center overflow-hidden border-b border-slate-100 bg-white p-1 sm:h-80 lg:h-96"
+  >
+    <img
+      src={program.imageUrl}
+      alt={program.name}
+      className="block h-full w-full object-contain transition duration-300 group-hover:scale-[1.02]"
+    />
+  </a>
+)}
 
-                <div className="flex flex-1 flex-col p-4 sm:p-5">
+                {/* 広告情報 */}
+                <div className="flex flex-1 flex-col p-5 sm:p-6">
 
                   <div className="mb-3 flex items-center gap-2">
-                    <span className="text-[11px] font-bold text-blue-600">
+
+                    <span className="rounded-full bg-blue-600 px-3 py-1 text-[11px] font-black text-white">
                       おすすめ
                     </span>
+
                     <span className="text-[11px] text-slate-400">
                       PR
                     </span>
+
                   </div>
 
-                  <h3 className="text-base font-black leading-6 text-slate-900">
+                  <h3 className="text-lg font-black leading-7 text-slate-900 sm:text-xl">
                     {program.name}
                   </h3>
 
@@ -582,9 +627,12 @@ ${url}
 
                   {program.keywords && (
                     <div className="mt-3 flex flex-wrap gap-1.5">
+
                       {program.keywords
                         .split(",")
-                        .map((keyword: string) => keyword.trim())
+                        .map((keyword: string) =>
+                          keyword.trim()
+                        )
                         .filter(Boolean)
                         .slice(0, 3)
                         .map((keyword: string) => (
@@ -595,6 +643,7 @@ ${url}
                             {keyword}
                           </span>
                         ))}
+
                     </div>
                   )}
 
@@ -608,15 +657,18 @@ ${url}
                   </a>
 
                 </div>
+
               </div>
             ))}
 
           </div>
 
           <div className="border-t border-slate-100 px-6 py-3 sm:px-8">
+
             <p className="text-[11px] text-slate-400">
               ※広告・アフィリエイトリンクを含みます
             </p>
+
           </div>
 
         </section>
