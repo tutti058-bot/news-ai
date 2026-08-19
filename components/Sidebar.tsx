@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getRanking } from "@/lib/ranking";
+import { prisma } from "@/lib/prisma";
 
 const medalColor = [
   "bg-yellow-500",
@@ -11,6 +12,22 @@ const medalColor = [
 
 export default async function Sidebar() {
   const ranking = await getRanking();
+
+  const affiliatePrograms =
+    await prisma.affiliateProgram.findMany({
+      where: {
+        isActive: true,
+      },
+    });
+
+  const randomAffiliate =
+    affiliatePrograms.length > 0
+      ? affiliatePrograms[
+          Math.floor(
+            Math.random() * affiliatePrograms.length
+          )
+        ]
+      : null;
 
   return (
     <aside className="space-y-8">
@@ -90,23 +107,52 @@ export default async function Sidebar() {
 
       </div>
 
-      {/* 広告 */}
+            {/* ランダムアフィリエイト広告 */}
+      {randomAffiliate && (
+        <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl">
 
-      <div className="rounded-3xl bg-gradient-to-br from-blue-600 to-indigo-700 p-8 text-white shadow-xl">
+          <div className="flex items-center justify-between border-b border-slate-100 px-5 py-3">
+            <span className="text-[10px] font-black tracking-[0.2em] text-slate-400">
+              PICK UP
+            </span>
 
-        <p className="text-sm font-bold uppercase tracking-[0.2em]">
-          Advertisement
-        </p>
+            <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-400">
+              PR
+            </span>
+          </div>
 
-        <h2 className="mt-4 text-3xl font-black">
-          Google AdSense
-        </h2>
+          {randomAffiliate.imageUrl && (
+            <a
+              href={randomAffiliate.url}
+              target="_blank"
+              rel="nofollow sponsored noopener noreferrer"
+              className="block overflow-hidden bg-white p-2"
+            >
+              <img
+                src={randomAffiliate.imageUrl}
+                alt={randomAffiliate.name}
+                className="block h-auto w-full object-contain transition duration-300 hover:scale-[1.02]"
+              />
+            </a>
+          )}
 
-        <p className="mt-4 leading-7 text-blue-100">
-          このエリアにGoogle AdSense広告を表示します。
-        </p>
+          <div className="px-5 py-4">
+            <p className="text-sm font-black leading-6 text-slate-900">
+              {randomAffiliate.name}
+            </p>
 
-      </div>
+            <a
+              href={randomAffiliate.url}
+              target="_blank"
+              rel="nofollow sponsored noopener noreferrer"
+              className="mt-3 inline-flex w-full items-center justify-center rounded-xl bg-blue-600 px-4 py-3 text-sm font-black text-white transition hover:bg-blue-700"
+            >
+              詳細を見る →
+            </a>
+          </div>
+
+        </div>
+      )}
 
     </aside>
   );
