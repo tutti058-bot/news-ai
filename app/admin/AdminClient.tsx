@@ -58,6 +58,295 @@ export default function AdminClient() {
   const [affiliateEditLoading, setAffiliateEditLoading] =
     useState(false);
 
+      // =========================
+  // コラム管理
+  // =========================
+
+  type Column = {
+    id: number;
+    title: string;
+    slug: string;
+    excerpt: string | null;
+    content: string;
+    image: string | null;
+    publishedAt: string | null;
+    isPublished: boolean;
+    createdAt: string;
+  };
+
+  const [columns, setColumns] = useState<Column[]>([]);
+  const [columnTitle, setColumnTitle] = useState("");
+  const [columnSlug, setColumnSlug] = useState("");
+  const [columnExcerpt, setColumnExcerpt] = useState("");
+  const [columnContent, setColumnContent] = useState("");
+  const [columnImage, setColumnImage] = useState("");
+  const [columnIsPublished, setColumnIsPublished] =
+    useState(true);
+  const [columnLoading, setColumnLoading] = useState(false);
+  const [columnListLoading, setColumnListLoading] =
+    useState(false);
+  const [columnDeleteLoading, setColumnDeleteLoading] =
+    useState<number | null>(null);
+
+  // コラム編集
+  const [editingColumnId, setEditingColumnId] =
+    useState<number | null>(null);
+
+  const [columnEditLoading, setColumnEditLoading] =
+    useState(false);
+
+  // コラム本文への漫画画像挿入
+  const [columnImageUploading, setColumnImageUploading] =
+    useState(false);
+
+  const loadColumns = async () => {
+    setColumnListLoading(true);
+
+    try {
+      const res = await fetch("/api/column");
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(
+          data.error ?? "コラムの取得に失敗しました"
+        );
+      }
+
+      setColumns(data.columns ?? []);
+    } catch (error) {
+      console.error(error);
+
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "不明なエラーが発生しました";
+
+      setMessage(`コラム取得失敗：${errorMessage}`);
+    } finally {
+      setColumnListLoading(false);
+    }
+  };
+
+  const registerColumn = async () => {
+    if (!columnTitle.trim()) {
+      setMessage("コラムタイトルを入力してください");
+      return;
+    }
+
+    if (!columnSlug.trim()) {
+      setMessage("slugを入力してください");
+      return;
+    }
+
+    if (!columnContent.trim()) {
+      setMessage("本文を入力してください");
+      return;
+    }
+
+    setColumnLoading(true);
+    setMessage("");
+
+    try {
+      const res = await fetch("/api/column", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title: columnTitle,
+          slug: columnSlug,
+          excerpt: columnExcerpt,
+          content: columnContent,
+          image: columnImage,
+          isPublished: columnIsPublished,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(
+          data.error ?? "コラムの登録に失敗しました"
+        );
+      }
+
+      setMessage("コラムを登録しました");
+
+      setColumnTitle("");
+      setColumnSlug("");
+      setColumnExcerpt("");
+      setColumnContent("");
+      setColumnImage("");
+      setColumnIsPublished(true);
+
+      await loadColumns();
+    } catch (error) {
+      console.error(error);
+
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "不明なエラーが発生しました";
+
+      setMessage(`コラム登録失敗：${errorMessage}`);
+    } finally {
+      setColumnLoading(false);
+    }
+  };
+
+  const startEditColumn = (column: Column) => {
+    setEditingColumnId(column.id);
+
+    setColumnTitle(column.title);
+    setColumnSlug(column.slug);
+    setColumnExcerpt(column.excerpt ?? "");
+    setColumnContent(column.content);
+    setColumnImage(column.image ?? "");
+    setColumnIsPublished(column.isPublished);
+
+    setMessage(`「${column.title}」を編集しています`);
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
+  const updateColumn = async () => {
+    if (editingColumnId === null) {
+      return;
+    }
+
+    if (!columnTitle.trim()) {
+      setMessage("コラムタイトルを入力してください");
+      return;
+    }
+
+    if (!columnSlug.trim()) {
+      setMessage("slugを入力してください");
+      return;
+    }
+
+    if (!columnContent.trim()) {
+      setMessage("本文を入力してください");
+      return;
+    }
+
+    setColumnEditLoading(true);
+    setMessage("");
+
+    try {
+      const res = await fetch("/api/column", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: editingColumnId,
+          title: columnTitle,
+          slug: columnSlug,
+          excerpt: columnExcerpt,
+          content: columnContent,
+          image: columnImage,
+          isPublished: columnIsPublished,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(
+          data.error ?? "コラムの更新に失敗しました"
+        );
+      }
+
+      setMessage(`「${data.column.title}」を更新しました`);
+
+      setEditingColumnId(null);
+      setColumnTitle("");
+      setColumnSlug("");
+      setColumnExcerpt("");
+      setColumnContent("");
+      setColumnImage("");
+      setColumnIsPublished(true);
+
+      await loadColumns();
+    } catch (error) {
+      console.error(error);
+
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "不明なエラーが発生しました";
+
+      setMessage(`コラム更新失敗：${errorMessage}`);
+    } finally {
+      setColumnEditLoading(false);
+    }
+  };
+
+  const cancelEditColumn = () => {
+    setEditingColumnId(null);
+
+    setColumnTitle("");
+    setColumnSlug("");
+    setColumnExcerpt("");
+    setColumnContent("");
+    setColumnImage("");
+    setColumnIsPublished(true);
+
+    setMessage("コラム編集をキャンセルしました");
+  };
+
+  const deleteColumn = async (
+    id: number,
+    title: string
+  ) => {
+    if (
+      !window.confirm(
+        `「${title}」を削除しますか？`
+      )
+    ) {
+      return;
+    }
+
+    setColumnDeleteLoading(id);
+    setMessage("");
+
+    try {
+      const res = await fetch("/api/column", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(
+          data.error ?? "コラムの削除に失敗しました"
+        );
+      }
+
+      setMessage("コラムを削除しました");
+
+      await loadColumns();
+    } catch (error) {
+      console.error(error);
+
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "不明なエラーが発生しました";
+
+      setMessage(`コラム削除失敗：${errorMessage}`);
+    } finally {
+      setColumnDeleteLoading(null);
+    }
+  };
+  
   // =========================
   // ニュース取得
   // =========================
@@ -164,6 +453,7 @@ export default function AdminClient() {
 
   useEffect(() => {
     loadAffiliatePrograms();
+    loadColumns();
   }, []);
 
   // =========================
@@ -581,7 +871,26 @@ export default function AdminClient() {
         )}
 
         {/* アフィリエイト案件管理 */}
-        <section className="mt-6 rounded-3xl border border-slate-200 bg-white p-7 shadow-lg">
+        <details className="mt-6 rounded-3xl border border-slate-200 bg-white shadow-lg group">
+          <summary className="flex cursor-pointer list-none items-center justify-between p-7 font-black text-slate-900 [&::-webkit-details-marker]:hidden">
+            <div className="flex items-center gap-4">
+              <span className="text-3xl">💰</span>
+              <div>
+                <h2 className="text-2xl font-black">
+                  アフィリエイト案件管理
+                </h2>
+                <p className="mt-1 text-sm font-normal text-slate-500">
+                  広告案件・A8バナーを管理
+                </p>
+              </div>
+            </div>
+
+            <span className="text-2xl text-slate-400 transition-transform group-open:rotate-180">
+              ▼
+            </span>
+          </summary>
+
+          <div className="border-t border-slate-100 p-7">
 
           <div className="text-4xl">
             💰
@@ -970,7 +1279,410 @@ export default function AdminClient() {
 
           </div>
 
-        </section>
+          </div>
+        </details>
+
+        {/* コラム管理 */}
+        <details className="mt-6 rounded-3xl border border-slate-200 bg-white shadow-lg group">
+          <summary className="flex cursor-pointer list-none items-center justify-between p-7 font-black text-slate-900 [&::-webkit-details-marker]:hidden">
+            <div className="flex items-center gap-4">
+              <span className="text-3xl">📝</span>
+              <div>
+                <h2 className="text-2xl font-black">
+                  コラム管理
+                </h2>
+                <p className="mt-1 text-sm font-normal text-slate-500">
+                  コラムの作成・編集・公開を管理
+                </p>
+              </div>
+            </div>
+
+            <span className="text-2xl text-slate-400 transition-transform group-open:rotate-180">
+              ▼
+            </span>
+          </summary>
+
+          <div className="border-t border-slate-100 p-7">
+
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+
+            <div>
+              <h2 className="text-2xl font-black text-slate-900">
+                📝 コラム管理
+              </h2>
+
+              <p className="mt-2 text-slate-500">
+                AI News ジャパンの独自コラムを作成・公開できます。
+              </p>
+            </div>
+
+            <button
+              onClick={loadColumns}
+              disabled={columnListLoading}
+              className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-100 disabled:opacity-50"
+            >
+              {columnListLoading ? "更新中..." : "🔄 一覧を更新"}
+            </button>
+
+          </div>
+
+          {/* 新規コラム作成 */}
+          <div className="mt-6 rounded-2xl bg-slate-50 p-6">
+
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <h3 className="text-xl font-black text-slate-900">
+                {editingColumnId !== null
+                  ? "✏️ コラムを編集"
+                  : "新しいコラムを作成"}
+              </h3>
+
+              {editingColumnId !== null && (
+                <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-black text-amber-700">
+                  編集中
+                </span>
+              )}
+            </div>
+
+            <div className="mt-5 space-y-5">
+
+              <div>
+                <label className="mb-2 block text-sm font-bold text-slate-700">
+                  タイトル
+                </label>
+
+                <input
+                  type="text"
+                  value={columnTitle}
+                  onChange={(e) => setColumnTitle(e.target.value)}
+                  placeholder="例：AIニュースサイトを作ってみた"
+                  className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                />
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-bold text-slate-700">
+                  URL用slug
+                </label>
+
+                <input
+                  type="text"
+                  value={columnSlug}
+                  onChange={(e) => setColumnSlug(e.target.value)}
+                  placeholder="ai-news-site"
+                  className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 font-mono outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                />
+
+                <p className="mt-2 text-xs text-slate-400">
+                  URLは /column/slug になります。
+                </p>
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-bold text-slate-700">
+                  概要
+                </label>
+
+                <textarea
+                  value={columnExcerpt}
+                  onChange={(e) => setColumnExcerpt(e.target.value)}
+                  rows={3}
+                  placeholder="コラムの内容を短く説明してください。"
+                  className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                />
+              </div>
+
+              <div>
+                <div className="mb-2 flex items-end justify-between">
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700">
+                      本文
+                    </label>
+
+                    <p className="mt-1 text-xs text-slate-400">
+                      読み物として自然に読めるよう、段落ごとに改行して入力してください。
+                    </p>
+                  </div>
+
+                  <span className="text-xs font-bold text-slate-400">
+                    {columnContent.length.toLocaleString()}文字
+                  </span>
+                </div>
+
+                <div className="overflow-hidden rounded-2xl border border-slate-300 bg-white shadow-sm transition focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100">
+
+                  <div className="flex items-center gap-2 border-b border-slate-100 bg-slate-50 px-4 py-2">
+                    <span className="rounded-md bg-white px-2 py-1 text-xs font-black text-slate-500 shadow-sm">
+                      本文
+                    </span>
+
+                    <span className="text-xs text-slate-400">
+                      段落ごとに改行してください
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50 px-4 py-2">
+                    <label
+                      className={`cursor-pointer rounded-lg bg-white px-3 py-2 text-xs font-black text-slate-700 shadow-sm transition hover:bg-blue-50 hover:text-blue-600 ${
+                        columnImageUploading
+                          ? "pointer-events-none opacity-50"
+                          : ""
+                      }`}
+                    >
+                      {columnImageUploading
+                        ? "📤 アップロード中..."
+                        : "🖼️ 漫画画像を挿入"}
+
+                      <input
+                        type="file"
+                        accept="image/png,image/jpeg,image/webp"
+                        className="hidden"
+                        disabled={columnImageUploading}
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+
+                          if (!file) return;
+
+                          setColumnImageUploading(true);
+
+                          try {
+                            const formData = new FormData();
+                            formData.append("file", file);
+
+                            const res = await fetch(
+                              "/api/column/upload",
+                              {
+                                method: "POST",
+                                body: formData,
+                              }
+                            );
+
+                            const data = await res.json();
+
+                            if (!res.ok || !data.success) {
+                              throw new Error(
+                                data.error ??
+                                  "画像のアップロードに失敗しました"
+                              );
+                            }
+
+                            const imageTag =
+                              `\\n[IMAGE:${data.url}]\\n`;
+
+                            setColumnContent((current) => {
+                              return current + imageTag;
+                            });
+
+                          } catch (error) {
+                            console.error(error);
+
+                            alert(
+                              error instanceof Error
+                                ? error.message
+                                : "画像のアップロードに失敗しました"
+                            );
+                          } finally {
+                            setColumnImageUploading(false);
+                            e.target.value = "";
+                          }
+                        }}
+                      />
+                    </label>
+
+                    <span className="text-xs text-slate-400">
+                      PNG / JPG / WebP
+                    </span>
+                  </div>
+
+                  <textarea
+                    value={columnContent}
+                    onChange={(e) => setColumnContent(e.target.value)}
+                    rows={20}
+                    placeholder={`ここからコラムを書いてください。
+
+例えば、
+
+AIについて考えていたら、ふと昔のことを思い出した。
+
+あの頃は、まさか自分がAIを使ってニュースサイトを作るなんて思ってもいなかった。
+
+そんな出来事を、少しずつ書いていきます。`}
+                    className="min-h-[500px] w-full resize-y border-0 px-5 py-5 text-base leading-8 text-slate-700 outline-none placeholder:text-slate-300"
+                  />
+
+                </div>
+
+                <div className="mt-3 rounded-xl bg-blue-50 px-4 py-3 text-xs leading-6 text-slate-500">
+                  <span className="font-bold text-blue-600">
+                    💡 書き方のコツ
+                  </span>
+                  <br />
+                  文章のまとまりごとに1行空けると、公開ページでも読みやすい記事になります。
+                </div>
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-bold text-slate-700">
+                  アイキャッチ画像URL
+                </label>
+
+                <input
+                  type="text"
+                  value={columnImage}
+                  onChange={(e) => setColumnImage(e.target.value)}
+                  placeholder="https://..."
+                  className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                />
+              </div>
+
+              <label className="flex cursor-pointer items-center gap-3">
+                <input
+                  type="checkbox"
+                  checked={columnIsPublished}
+                  onChange={(e) => setColumnIsPublished(e.target.checked)}
+                  className="h-5 w-5"
+                />
+
+                <span className="font-bold text-slate-700">
+                  公開する
+                </span>
+              </label>
+
+              {editingColumnId !== null ? (
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <button
+                    onClick={updateColumn}
+                    disabled={columnEditLoading}
+                    className="rounded-2xl bg-blue-600 px-6 py-4 font-black text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {columnEditLoading
+                      ? "更新中..."
+                      : "💾 変更を保存する"}
+                  </button>
+
+                  <button
+                    onClick={cancelEditColumn}
+                    disabled={columnEditLoading}
+                    className="rounded-2xl border border-slate-300 bg-white px-6 py-4 font-black text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
+                  >
+                    編集をキャンセル
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={registerColumn}
+                  disabled={columnLoading}
+                  className="w-full rounded-2xl bg-blue-600 px-6 py-4 font-black text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {columnLoading
+                    ? "登録中..."
+                    : "📝 コラムを登録する"}
+                </button>
+              )}
+
+            </div>
+
+          </div>
+
+          {/* 登録済みコラム */}
+          <div className="mt-8 border-t border-slate-200 pt-8">
+
+            <h3 className="text-xl font-black text-slate-900">
+              📚 登録済みコラム
+            </h3>
+
+            {!columnListLoading && columns.length === 0 && (
+              <div className="mt-4 rounded-2xl bg-slate-50 p-6 text-center text-slate-500">
+                登録されているコラムはありません。
+              </div>
+            )}
+
+            <div className="mt-4 space-y-4">
+
+              {columns.map((column) => (
+                <div
+                  key={column.id}
+                  className="rounded-2xl border border-slate-200 bg-slate-50 p-5"
+                >
+
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+
+                    <div className="min-w-0 flex-1">
+
+                      <div className="flex flex-wrap items-center gap-2">
+
+                        <h4 className="text-lg font-black text-slate-900">
+                          {column.title}
+                        </h4>
+
+                        <span
+                          className={`rounded-full px-3 py-1 text-xs font-bold ${
+                            column.isPublished
+                              ? "bg-emerald-100 text-emerald-700"
+                              : "bg-slate-200 text-slate-500"
+                          }`}
+                        >
+                          {column.isPublished ? "公開" : "非公開"}
+                        </span>
+
+                      </div>
+
+                      <p className="mt-2 text-sm font-mono text-slate-400">
+                        /column/{column.slug}
+                      </p>
+
+                      {column.excerpt && (
+                        <p className="mt-2 text-sm leading-6 text-slate-600">
+                          {column.excerpt}
+                        </p>
+                      )}
+
+                    </div>
+
+                    <div className="flex shrink-0 flex-col gap-2 sm:flex-row lg:flex-col">
+
+                      {column.isPublished && (
+                        <a
+                          href={`/column/${column.slug}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="rounded-xl bg-blue-600 px-5 py-3 text-center text-sm font-black text-white hover:bg-blue-700"
+                        >
+                          🔗 コラムを見る
+                        </a>
+                      )}
+
+                      <button
+                        onClick={() => startEditColumn(column)}
+                        className="rounded-xl bg-amber-50 px-5 py-3 text-sm font-black text-amber-700 hover:bg-amber-100"
+                      >
+                        ✏️ 編集
+                      </button>
+
+                      <button
+                        onClick={() =>
+                          deleteColumn(column.id, column.title)
+                        }
+                        disabled={columnDeleteLoading === column.id}
+                        className="rounded-xl bg-red-50 px-5 py-3 text-sm font-black text-red-600 hover:bg-red-100 disabled:opacity-50"
+                      >
+                        {columnDeleteLoading === column.id
+                          ? "削除中..."
+                          : "🗑️ 削除"}
+                      </button>
+
+                    </div>
+
+                  </div>
+
+                </div>
+              ))}
+
+            </div>
+
+          </div>
+
+          </div>
+        </details>
 
         {/* シェア分析 */}
         <section className="mt-6 rounded-3xl border border-slate-200 bg-white p-7 shadow-lg">

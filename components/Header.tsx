@@ -46,6 +46,14 @@ export default function Header() {
             </Link>
           ))}
 
+          {/* コラム */}
+          <Link
+            href="/column"
+            className="font-semibold text-slate-700 transition hover:text-blue-600"
+          >
+            コラム
+          </Link>
+
           <Link
             href="/admin"
             className="rounded-full bg-slate-900 px-4 py-2 text-sm font-bold text-white transition hover:bg-blue-600"
@@ -124,6 +132,15 @@ export default function Header() {
                 {item}
               </Link>
             ))}
+
+            {/* コラム */}
+            <Link
+              href="/column"
+              onClick={() => setOpen(false)}
+              className="rounded-xl px-4 py-3 text-base font-semibold text-slate-700 transition hover:bg-slate-100 hover:text-blue-600"
+            >
+              コラム
+            </Link>
 
             <Link
               href="/admin"

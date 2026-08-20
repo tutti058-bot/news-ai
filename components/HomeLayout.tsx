@@ -3,6 +3,7 @@ import Hero from "./Hero";
 import NewsGrid from "./NewsGrid";
 import Sidebar from "./Sidebar";
 import Footer from "./Footer";
+import ColumnPreview from "./ColumnPreview";
 
 type Props = {
   keyword: string;
@@ -26,6 +27,9 @@ export default function HomeLayout({
           <SearchBar />
         </div>
 
+
+        {/* 注目コラム */}
+        <ColumnPreview />
 
         {/* Main */}
         <div className="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-[2fr_360px]">
