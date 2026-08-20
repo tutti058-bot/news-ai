@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { mkdir, writeFile } from "fs/promises";
-import path from "path";
+import { put } from "@vercel/blob";
 import { randomUUID } from "crypto";
 
 export const runtime = "nodejs";
@@ -20,15 +19,13 @@ export async function POST(request: Request) {
       );
     }
 
-    const allowedTypes: Record<string, string> = {
-      "image/jpeg": ".jpg",
-      "image/png": ".png",
-      "image/webp": ".webp",
-    };
+    const allowedTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/webp",
+    ];
 
-    const extension = allowedTypes[file.type];
-
-    if (!extension) {
+    if (!allowedTypes.includes(file.type)) {
       return NextResponse.json(
         {
           success: false,
@@ -49,31 +46,23 @@ export async function POST(request: Request) {
       );
     }
 
-    const fileName = `${randomUUID()}${extension}`;
+    const extension =
+      file.type === "image/jpeg"
+        ? ".jpg"
+        : file.type === "image/png"
+          ? ".png"
+          : ".webp";
 
-    const uploadDir = path.join(
-      process.cwd(),
-      "public",
-      "column-images"
-    );
+    const fileName = `column-images/${randomUUID()}${extension}`;
 
-    await mkdir(uploadDir, {
-      recursive: true,
+    const blob = await put(fileName, file, {
+      access: "public",
+      addRandomSuffix: false,
     });
-
-    const filePath = path.join(uploadDir, fileName);
-
-    const buffer = Buffer.from(
-      await file.arrayBuffer()
-    );
-
-    await writeFile(filePath, buffer);
-
-    const url = `/column-images/${fileName}`;
 
     return NextResponse.json({
       success: true,
-      url,
+      url: blob.url,
     });
   } catch (error) {
     console.error("コラム画像アップロードエラー:", error);

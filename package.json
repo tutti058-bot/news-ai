@@ -12,6 +12,7 @@
     "@extractus/article-extractor": "^9.0.0",
     "@prisma/adapter-pg": "^6.19.3",
     "@prisma/client": "^6.19.3",
+    "@vercel/blob": "^2.8.0",
     "@vercel/og": "^0.11.1",
     "cheerio": "^1.2.0",
     "fast-xml-parser": "^5.10.1",
