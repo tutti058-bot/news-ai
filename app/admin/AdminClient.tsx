@@ -1466,7 +1466,7 @@ export default function AdminClient() {
                             }
 
                             const imageTag =
-                              `\\n[IMAGE:${data.url}]\\n`;
+  `\n[IMAGE:${data.url}]\n`;
 
                             setColumnContent((current) => {
                               return current + imageTag;
@@ -1522,16 +1522,97 @@ AIについて考えていたら、ふと昔のことを思い出した。
 
               <div>
                 <label className="mb-2 block text-sm font-bold text-slate-700">
-                  アイキャッチ画像URL
+                  アイキャッチ画像
                 </label>
 
-                <input
-                  type="text"
-                  value={columnImage}
-                  onChange={(e) => setColumnImage(e.target.value)}
-                  placeholder="https://..."
-                  className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                />
+                <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
+
+                  {columnImage && (
+                    <div className="h-[390px] overflow-hidden bg-slate-100">
+                      <img
+                        src={columnImage}
+                        alt="アイキャッチ画像プレビュー"
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                  )}
+
+                  <div className="p-4">
+
+                    <label
+                      className={`inline-flex cursor-pointer items-center rounded-xl bg-blue-600 px-5 py-3 text-sm font-black text-white transition hover:bg-blue-700 ${
+                        columnImageUploading
+                          ? "pointer-events-none opacity-50"
+                          : ""
+                      }`}
+                    >
+                      {columnImageUploading
+                        ? "📤 アップロード中..."
+                        : "🖼️ アイキャッチ画像をアップロード"}
+
+                      <input
+                        type="file"
+                        accept="image/png,image/jpeg,image/webp"
+                        className="hidden"
+                        disabled={columnImageUploading}
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+
+                          if (!file) return;
+
+                          setColumnImageUploading(true);
+
+                          try {
+                            const formData = new FormData();
+                            formData.append("file", file);
+
+                            const res = await fetch(
+                              "/api/column/upload",
+                              {
+                                method: "POST",
+                                body: formData,
+                              }
+                            );
+
+                            const data = await res.json();
+
+                            if (!res.ok || !data.success) {
+                              throw new Error(
+                                data.error ??
+                                  "画像のアップロードに失敗しました"
+                              );
+                            }
+
+                            setColumnImage(data.url);
+
+                          } catch (error) {
+                            console.error(error);
+
+                            alert(
+                              error instanceof Error
+                                ? error.message
+                                : "画像のアップロードに失敗しました"
+                            );
+                          } finally {
+                            setColumnImageUploading(false);
+                            e.target.value = "";
+                          }
+                        }}
+                      />
+                    </label>
+
+                    <p className="mt-3 text-xs leading-5 text-slate-400">
+                      PNG / JPG / WebP・10MBまで
+                    </p>
+
+                    {columnImage && (
+                      <p className="mt-2 break-all text-xs text-slate-400">
+                        {columnImage}
+                      </p>
+                    )}
+
+                  </div>
+                </div>
               </div>
 
               <label className="flex cursor-pointer items-center gap-3">
