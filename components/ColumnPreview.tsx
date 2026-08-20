@@ -38,7 +38,7 @@ export default async function ColumnPreview() {
           </p>
 
           <h2 className="mt-2 text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">
-            読み物としてのAI NEWS
+            ニュースでは、語れない話。
           </h2>
 
           <p className="mt-2 text-sm leading-6 text-slate-500">
