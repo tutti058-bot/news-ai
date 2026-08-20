@@ -1,4 +1,3 @@
-import Header from "@/components/Header";
 import TrendingBar from "@/components/TrendingBar";
 import HomeLayout from "@/components/HomeLayout";
 import Link from "next/link";
@@ -90,8 +89,6 @@ export default async function Home({
 
   return (
     <>
-      <Header />
-
       <TrendingBar news={filteredTrendingNews} />
 
       <HomeLayout
