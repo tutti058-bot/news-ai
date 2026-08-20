@@ -36,6 +36,15 @@ export default function Header() {
 
         {/* PCメニュー */}
         <nav className="hidden lg:flex items-center gap-7">
+
+          {/* トップ */}
+          <Link
+            href="/"
+            className="font-semibold text-slate-700 transition hover:text-blue-600"
+          >
+            トップ
+          </Link>
+
           {menu.map((item) => (
             <Link
               key={item}
@@ -121,6 +130,15 @@ export default function Header() {
       {open && (
         <div className="border-t border-slate-200 bg-white lg:hidden">
           <nav className="mx-auto flex max-w-7xl flex-col px-4 py-4">
+
+            {/* トップ */}
+            <Link
+              href="/"
+              onClick={() => setOpen(false)}
+              className="rounded-xl px-4 py-3 text-base font-semibold text-slate-700 transition hover:bg-slate-100 hover:text-blue-600"
+            >
+              トップ
+            </Link>
 
             {menu.map((item) => (
               <Link
