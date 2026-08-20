@@ -81,7 +81,7 @@ function ColumnImage({
         src={column.image}
         alt={column.title}
         className={`w-full object-cover transition duration-500 group-hover:scale-105 ${
-          large ? "h-[320px] md:h-[400px]" : "h-56"
+          large ? "h-[300px] md:h-[390px]" : "h-56"
         }`}
       />
     );
@@ -128,14 +128,15 @@ export default async function ColumnPage() {
 
           <div className="mt-4 max-w-3xl">
             <h1 className="text-4xl font-black tracking-tight text-slate-950 md:text-6xl">
-              コラム
+              ニュースでは、語れない話。
             </h1>
 
             <p className="mt-5 text-base leading-8 text-slate-500 md:text-lg">
-              ニュースだけでは伝えきれない。
+              AI、仕事、人生、日々の出来事。
               <br className="hidden md:block" />
-              AI、仕事、社会、そして日々の出来事を、
-              AI NEWS ジャパン独自の視点で読み解きます。
+              ニュースだけでは伝わらない、
+              <br className="hidden md:block" />
+              そんな話を、自分の言葉で綴ります。
             </p>
           </div>
 
@@ -172,7 +173,7 @@ export default async function ColumnPage() {
                   href={`/column/${featured.slug}`}
                   className="group block overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-2xl"
                 >
-                  <div className="grid md:grid-cols-2">
+                  <div className="overflow-hidden">
 
                     <div className="overflow-hidden">
                       <ColumnImage
@@ -181,7 +182,7 @@ export default async function ColumnPage() {
                       />
                     </div>
 
-                    <div className="flex flex-col justify-center p-7 md:p-10">
+                    <div className="flex flex-col justify-center p-7 md:p-10 lg:p-12">
 
                       <div className="flex items-center gap-3">
                         <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-blue-600">
@@ -219,7 +220,7 @@ export default async function ColumnPage() {
             {/* SECONDARY */}
             {secondary.length > 0 && (
               <section className="mt-10">
-                <div className="grid gap-6 md:grid-cols-2">
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
 
                   {secondary.map((column) => (
                     <Link
