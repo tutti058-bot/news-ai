@@ -731,31 +731,52 @@ ${url}
       </div>
 
       {/* シェア */}
-      <div className="mt-8 rounded-3xl bg-white p-6 shadow-lg">
+<div className="mt-8 rounded-3xl bg-white p-6 shadow-lg">
 
-        <h2 className="mb-4 text-xl font-black">
-          この記事をシェア
-        </h2>
+  <h2 className="mb-4 text-xl font-black">
+    この記事をシェア
+  </h2>
 
-        <div className="flex flex-wrap gap-3">
+  <div className="flex flex-wrap gap-3">
 
-          <a
-            href={`/api/news/share?newsId=${news.id}&type=x`}
-            className="rounded-full bg-black px-5 py-3 font-bold text-white"
-          >
-            Xでシェア
-          </a>
+    <a
+      href={`/api/news/share?newsId=${news.id}&type=x`}
+      className="rounded-full bg-black px-5 py-3 font-bold text-white"
+    >
+      Xでシェア
+    </a>
 
-          <a
-            href={`/api/news/share?newsId=${news.id}&type=line`}
-            className="rounded-full bg-green-500 px-5 py-3 font-bold text-white"
-          >
-            LINEで共有
-          </a>
+    <a
+      href={`/api/news/share?newsId=${news.id}&type=line`}
+      className="rounded-full bg-green-500 px-5 py-3 font-bold text-white"
+    >
+      LINEで共有
+    </a>
 
-        </div>
+    <a
+      href={`/api/news/share?newsId=${news.id}&type=facebook`}
+      className="rounded-full bg-blue-600 px-5 py-3 font-bold text-white"
+    >
+      Facebook
+    </a>
 
-      </div>
+    <a
+      href={`/api/news/share?newsId=${news.id}&type=threads`}
+      className="rounded-full bg-gray-900 px-5 py-3 font-bold text-white"
+    >
+      Threads
+    </a>
+
+    <a
+      href={`/api/news/share?newsId=${news.id}&type=hatena`}
+      className="rounded-full bg-blue-500 px-5 py-3 font-bold text-white"
+    >
+      はてなブックマーク
+    </a>
+
+  </div>
+
+</div>
 
       {/* 関連記事 */}
       <section className="mt-14">
