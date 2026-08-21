@@ -47,6 +47,7 @@ export default async function SearchPage({
             summary={item.summary ?? ""}
             image={item.image ?? "/news.jpg"}
             category={item.category ?? "国内"}
+            score={item.score ?? 60}
             date={
               item.publishedAt
                 ? item.publishedAt.toLocaleDateString("ja-JP")

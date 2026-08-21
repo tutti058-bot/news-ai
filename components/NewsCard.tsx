@@ -7,6 +7,7 @@ type NewsCardProps = {
   image: string;
   category: string;
   date: string;
+  score: number;
 };
 
 const categoryColor: Record<string, string> = {
@@ -24,6 +25,7 @@ export default function NewsCard({
   image,
   category,
   date,
+  score,
 }: NewsCardProps) {
   return (
     <Link href={`/news/${id}`}>
@@ -67,9 +69,15 @@ export default function NewsCard({
 
                     <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-4">
 
-            <span className="text-sm text-slate-500">
-              📅 {date}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-slate-500">
+                📅 {date}
+              </span>
+
+              <span className="rounded-full bg-red-50 px-3 py-1 text-sm font-black text-red-500">
+                AI {score}点
+              </span>
+            </div>
 
             <span className="rounded-full bg-blue-600 px-4 py-2 text-sm font-bold text-white transition duration-300 group-hover:bg-slate-900">
               続きを読む →
