@@ -12,7 +12,7 @@ export async function getImage(url: string) {
       headers: {
         "User-Agent":
           "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/138.0 Safari/537.36",
-      },
+    },
       redirect: "follow",
       signal: controller.signal,
     });
@@ -23,6 +23,55 @@ export async function getImage(url: string) {
 
     const html = await res.text();
     const $ = cheerio.load(html);
+
+    /*
+     * =========================
+     * ゲキサカ
+     * =========================
+     *
+     * ゲキサカは og:image が
+     * dummy_300.gif になることがある。
+     *
+     * 実画像は data-original に
+     * 入っているため、こちらを優先する。
+     */
+
+    if (url.includes("gekisaka.jp")) {
+      const gekisakaImage =
+        $('img[data-original]')
+          .map((_, el) => $(el).attr("data-original"))
+          .get()
+          .find((src) => {
+            if (!src) return false;
+
+            return (
+              !src.includes("dummy") &&
+              !src.includes("spacer") &&
+              !src.includes("logo") &&
+              !src.includes("no_bookmark") &&
+              !src.includes("spike")
+            );
+          });
+
+      if (gekisakaImage) {
+        if (gekisakaImage.startsWith("//")) {
+          return "https:" + gekisakaImage;
+        }
+
+        if (gekisakaImage.startsWith("/")) {
+          const base = new URL(url);
+          return base.origin + gekisakaImage;
+        }
+
+        return gekisakaImage;
+      }
+    }
+
+    /*
+     * =========================
+     * 通常サイト
+     * =========================
+     */
 
     const image =
       $('meta[property="og:image"]').attr("content") ||
@@ -35,6 +84,18 @@ export async function getImage(url: string) {
       $("img").first().attr("src");
 
     if (!image) return null;
+
+    /*
+     * dummy画像は無効
+     */
+
+    if (
+      image.includes("dummy") ||
+      image.includes("spacer") ||
+      image.includes("spike")
+    ) {
+      return null;
+    }
 
     if (image.startsWith("//")) {
       return "https:" + image;
