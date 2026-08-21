@@ -26,10 +26,13 @@ export default function AdminClient() {
   const [message, setMessage] = useState("");
   const [summary, setSummary] = useState("");
 
- // サイト全体の閲覧数
-const [totalViews, setTotalViews] = useState(0);
-const [todayViews, setTodayViews] = useState(0);
-const [viewsLoading, setViewsLoading] = useState(true);
+  // サイト全体の閲覧数
+  const [totalViews, setTotalViews] = useState(0);
+  const [todayViews, setTodayViews] = useState(0);
+  const [yesterdayViews, setYesterdayViews] = useState(0);
+  const [last7DaysViews, setLast7DaysViews] = useState(0);
+  const [thisMonthViews, setThisMonthViews] = useState(0);
+  const [viewsLoading, setViewsLoading] = useState(true);
 
   // アフィリエイト案件
   const [affiliateName, setAffiliateName] = useState("");
@@ -473,7 +476,10 @@ const [viewsLoading, setViewsLoading] = useState(true);
         }
 
       setTotalViews(data.totalViews ?? 0);
-setTodayViews(data.todayViews ?? 0);
+      setTodayViews(data.todayViews ?? 0);
+      setYesterdayViews(data.yesterdayViews ?? 0);
+      setLast7DaysViews(data.last7DaysViews ?? 0);
+      setThisMonthViews(data.thisMonthViews ?? 0);
       } catch (error) {
         console.error("閲覧数取得エラー:", error);
       } finally {
@@ -822,33 +828,67 @@ setTodayViews(data.todayViews ?? 0);
                   読み込み中...
                 </p>
               ) : (
-                <div className="flex items-center gap-6">
-  <div className="text-right">
-    <p className="text-xs font-bold text-slate-400">
-      全体
-    </p>
-    <p className="text-3xl font-black text-blue-600">
-      {totalViews.toLocaleString()}
-      <span className="ml-1 text-base text-slate-500">
-        PV
-      </span>
-    </p>
-  </div>
+                <div className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-5">
+                  <div className="text-right">
+                    <p className="text-xs font-bold text-slate-400">
+                      全体
+                    </p>
+                    <p className="text-2xl font-black text-blue-600">
+                      {totalViews.toLocaleString()}
+                      <span className="ml-1 text-sm text-slate-500">
+                        PV
+                      </span>
+                    </p>
+                  </div>
 
-  <div className="h-12 w-px bg-slate-200" />
+                  <div className="text-right">
+                    <p className="text-xs font-bold text-slate-400">
+                      今日
+                    </p>
+                    <p className="text-2xl font-black text-emerald-600">
+                      {todayViews.toLocaleString()}
+                      <span className="ml-1 text-sm text-slate-500">
+                        PV
+                      </span>
+                    </p>
+                  </div>
 
-  <div className="text-right">
-    <p className="text-xs font-bold text-slate-400">
-      今日
-    </p>
-    <p className="text-3xl font-black text-emerald-600">
-      {todayViews.toLocaleString()}
-      <span className="ml-1 text-base text-slate-500">
-        PV
-      </span>
-    </p>
-  </div>
-</div>
+                  <div className="text-right">
+                    <p className="text-xs font-bold text-slate-400">
+                      昨日
+                    </p>
+                    <p className="text-2xl font-black text-slate-700">
+                      {yesterdayViews.toLocaleString()}
+                      <span className="ml-1 text-sm text-slate-500">
+                        PV
+                      </span>
+                    </p>
+                  </div>
+
+                  <div className="text-right">
+                    <p className="text-xs font-bold text-slate-400">
+                      過去7日
+                    </p>
+                    <p className="text-2xl font-black text-violet-600">
+                      {last7DaysViews.toLocaleString()}
+                      <span className="ml-1 text-sm text-slate-500">
+                        PV
+                      </span>
+                    </p>
+                  </div>
+
+                  <div className="text-right">
+                    <p className="text-xs font-bold text-slate-400">
+                      今月
+                    </p>
+                    <p className="text-2xl font-black text-orange-500">
+                      {thisMonthViews.toLocaleString()}
+                      <span className="ml-1 text-sm text-slate-500">
+                        PV
+                      </span>
+                    </p>
+                  </div>
+                </div>
               )}
             </div>
           </div>
