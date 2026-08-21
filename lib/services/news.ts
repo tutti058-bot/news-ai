@@ -23,58 +23,6 @@ function isEntertainmentSource(source: string): boolean {
 }
 
 /**
- * AI分析前の共通フィルター
- *
- * 明らかに優先度の低い告知系記事を
- * OpenAIに送る前に除外する。
- */
-function shouldAnalyzeArticle(
-  title: string,
-  source: string
-): boolean {
-  const t = title.toLowerCase();
-
-  const excludeWords = [
-    "プレゼント",
-    "キャンペーン",
-    "応募受付",
-    "応募開始",
-    "イベント開催",
-    "イベント情報",
-
-    // 番組告知
-    "番組出演",
-    "番組告知",
-    "放送決定",
-    "放送開始",
-    "出演決定",
-
-    // 舞台・映画関連の告知
-    "舞台挨拶",
-    "登壇決定",
-
-    // 音楽系の告知
-    "新曲発売",
-    "新曲リリース",
-    "リリース決定",
-    "配信決定",
-    "ライブ開催",
-    "ツアー開催",
-    "ライブ出演",
-  ];
-
-  if (
-    excludeWords.some((word) =>
-      t.includes(word)
-    )
-  ) {
-    return false;
-  }
-
-  return true;
-}
-
-/**
  * ゲキサカのAI分析前フィルター
  *
  * U-15/U-18などの育成年代の記事を除外し、
@@ -150,32 +98,7 @@ export async function syncNews() {
 
     const title = item.title ?? "";
 
-    /*
-     * =========================
-     * AI分析前の共通フィルター
-     * =========================
-     */
-
-    if (
-      !shouldAnalyzeArticle(
-        title,
-        source
-      )
-    ) {
-      console.log(
-        "AI分析前除外:",
-        title
-      );
-
-      continue;
-    }
-
-    /*
-     * =========================
-     * サッカー事前フィルター
-     * =========================
-     */
-
+    // ゲキサカはAI分析前に不要記事を除外
     if (
       soccer &&
       !shouldAnalyzeSoccer(title)
@@ -184,7 +107,6 @@ export async function syncNews() {
         "サッカー事前除外:",
         title
       );
-
       continue;
     }
 
@@ -197,7 +119,7 @@ export async function syncNews() {
      * → 最大20件
      *
      * サッカーニュース
-     * → ゲキサカ最大5件
+     * → ゲキサカ最大3件
      *
      * 芸能ニュース
      * → ORICON + マイナビ合計10件
@@ -212,7 +134,7 @@ export async function syncNews() {
 
     if (
       soccer &&
-      soccerAdded >= 5
+      soccerAdded >= 3
     ) {
       continue;
     }
@@ -340,11 +262,33 @@ export async function syncNews() {
       );
 
       /*
-       * 画像が取れなくても
-       * 記事自体は保存する
+       * 画像取得に失敗した場合は
+       * 記事自体を保存しない
        */
 
       image = null;
+    }
+
+    /*
+     * =========================
+     * 画像がない記事は除外
+     * =========================
+     *
+     * NO IMAGEの記事を
+     * サイトに表示させない。
+     *
+     * また、AI分析前に除外することで
+     * OpenAIの無駄な使用も防ぐ。
+     */
+
+    if (!image) {
+      console.log(
+        "画像取得できないためスキップ:",
+        title
+      );
+
+      skipped++;
+      continue;
     }
 
     /*
@@ -358,7 +302,7 @@ export async function syncNews() {
     try {
       ai = await analyzeArticle(
         title,
-        article.slice(0, 1800)
+        article.slice(0, 3000)
       );
     } catch (error) {
       console.error(
@@ -407,9 +351,7 @@ export async function syncNews() {
     }
 
     /*
-     * =========================
      * AI分析結果チェック
-     * =========================
      */
 
     if (!ai?.summary) {
@@ -504,7 +446,7 @@ export async function syncNews() {
         );
 
         console.log(
-          `サッカー件数: ${soccerAdded}/5`
+          `サッカー件数: ${soccerAdded}/3`
         );
       } else {
         normalAdded++;
@@ -574,6 +516,10 @@ export async function syncNews() {
   );
 
   console.log(
+    `サッカーニュース: ${soccerAdded}`
+  );
+
+  console.log(
     `スキップ: ${skipped}`
   );
 
@@ -600,5 +546,7 @@ export async function syncNews() {
     normalAdded,
 
     entertainmentAdded,
+
+    soccerAdded,
   };
 }
