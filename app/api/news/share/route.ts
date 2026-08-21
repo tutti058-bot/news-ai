@@ -16,7 +16,13 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    if (type !== "x" && type !== "line") {
+    if (
+      type !== "x" &&
+      type !== "line" &&
+      type !== "facebook" &&
+      type !== "threads" &&
+      type !== "hatena"
+    ) {
       return NextResponse.json(
         { error: "不正なシェアタイプです" },
         { status: 400 }
@@ -57,7 +63,6 @@ export async function GET(request: NextRequest) {
         news.category ?? "国内"
       );
 
-      // AIが作ったフックをそのまま使用
       const hook =
         aiComment
           .split("\n")
@@ -82,12 +87,52 @@ ${articleUrl}`;
     }
 
     // LINEシェア
-    const lineUrl =
-      `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(
-        articleUrl
-      )}`;
+    if (type === "line") {
+      const lineUrl =
+        `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(
+          articleUrl
+        )}`;
 
-    return NextResponse.redirect(lineUrl);
+      return NextResponse.redirect(lineUrl);
+    }
+
+    // Facebookシェア
+    if (type === "facebook") {
+      const facebookUrl =
+        `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
+          articleUrl
+        )}`;
+
+      return NextResponse.redirect(facebookUrl);
+    }
+
+    // Threadsシェア
+    if (type === "threads") {
+      const threadsText =
+        `${news.title}\n\n${articleUrl}`;
+
+      const threadsUrl =
+        `https://www.threads.net/intent/post?text=${encodeURIComponent(
+          threadsText
+        )}`;
+
+      return NextResponse.redirect(threadsUrl);
+    }
+
+    // はてなブックマーク
+    if (type === "hatena") {
+      const hatenaUrl =
+        `https://b.hatena.ne.jp/add?mode=confirm&url=${encodeURIComponent(
+          articleUrl
+        )}`;
+
+      return NextResponse.redirect(hatenaUrl);
+    }
+
+    return NextResponse.json(
+      { error: "不明なシェアタイプです" },
+      { status: 400 }
+    );
   } catch (error) {
     console.error("シェア記録エラー:", error);
 
