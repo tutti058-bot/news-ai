@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { isAdminAuthenticated } from "@/lib/adminAuth";
+export const dynamic = "force-dynamic";
+
+export const revalidate = 60;
 
 export async function GET() {
   try {

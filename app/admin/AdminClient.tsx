@@ -455,9 +455,31 @@ export default function AdminClient() {
     }
   };
 
-  useEffect(() => {
+    useEffect(() => {
     loadAffiliatePrograms();
     loadColumns();
+
+    const loadTotalViews = async () => {
+      try {
+        const res = await fetch("/api/admin/view-stats");
+
+        const data = await res.json();
+
+        if (!res.ok || !data.success) {
+          throw new Error(
+            data.error ?? "閲覧数の取得に失敗しました"
+          );
+        }
+
+        setTotalViews(data.totalViews ?? 0);
+      } catch (error) {
+        console.error("閲覧数取得エラー:", error);
+      } finally {
+        setViewsLoading(false);
+      }
+    };
+
+    loadTotalViews();
   }, []);
 
   // =========================
