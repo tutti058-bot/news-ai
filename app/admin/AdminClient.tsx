@@ -26,9 +26,10 @@ export default function AdminClient() {
   const [message, setMessage] = useState("");
   const [summary, setSummary] = useState("");
 
-  // サイト全体の閲覧数
-  const [totalViews, setTotalViews] = useState(0);
-  const [viewsLoading, setViewsLoading] = useState(true);
+ // サイト全体の閲覧数
+const [totalViews, setTotalViews] = useState(0);
+const [todayViews, setTodayViews] = useState(0);
+const [viewsLoading, setViewsLoading] = useState(true);
 
   // アフィリエイト案件
   const [affiliateName, setAffiliateName] = useState("");
@@ -471,7 +472,8 @@ export default function AdminClient() {
           );
         }
 
-        setTotalViews(data.totalViews ?? 0);
+      setTotalViews(data.totalViews ?? 0);
+setTodayViews(data.todayViews ?? 0);
       } catch (error) {
         console.error("閲覧数取得エラー:", error);
       } finally {
@@ -820,12 +822,33 @@ export default function AdminClient() {
                   読み込み中...
                 </p>
               ) : (
-                <p className="text-4xl font-black text-blue-600">
-                  {totalViews.toLocaleString()}
-                  <span className="ml-1 text-lg text-slate-500">
-                    PV
-                  </span>
-                </p>
+                <div className="flex items-center gap-6">
+  <div className="text-right">
+    <p className="text-xs font-bold text-slate-400">
+      全体
+    </p>
+    <p className="text-3xl font-black text-blue-600">
+      {totalViews.toLocaleString()}
+      <span className="ml-1 text-base text-slate-500">
+        PV
+      </span>
+    </p>
+  </div>
+
+  <div className="h-12 w-px bg-slate-200" />
+
+  <div className="text-right">
+    <p className="text-xs font-bold text-slate-400">
+      今日
+    </p>
+    <p className="text-3xl font-black text-emerald-600">
+      {todayViews.toLocaleString()}
+      <span className="ml-1 text-base text-slate-500">
+        PV
+      </span>
+    </p>
+  </div>
+</div>
               )}
             </div>
           </div>
