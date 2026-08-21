@@ -315,6 +315,81 @@ export default async function ColumnDetailPage({
 
         </div>
 
+                {/* シェア */}
+        <div className="mt-10 rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-100">
+
+          <h2 className="mb-4 text-xl font-black text-slate-950">
+            この記事をシェア
+          </h2>
+
+          <div className="flex flex-wrap gap-3">
+
+            {/* X */}
+            <a
+              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
+                column.title
+              )}&url=${encodeURIComponent(
+                `https://tutti-news-ai-bay.vercel.app/column/${column.slug}`
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-full bg-black px-5 py-3 text-sm font-bold text-white transition hover:opacity-80"
+            >
+              Xでシェア
+            </a>
+
+            {/* LINE */}
+            <a
+              href={`https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(
+                `https://tutti-news-ai-bay.vercel.app/column/${column.slug}`
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-full bg-green-500 px-5 py-3 text-sm font-bold text-white transition hover:opacity-80"
+            >
+              LINEで共有
+            </a>
+
+            {/* Facebook */}
+            <a
+              href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
+                `https://tutti-news-ai-bay.vercel.app/column/${column.slug}`
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-full bg-blue-600 px-5 py-3 text-sm font-bold text-white transition hover:opacity-80"
+            >
+              Facebook
+            </a>
+
+            {/* Threads */}
+            <a
+              href={`https://www.threads.net/intent/post?text=${encodeURIComponent(
+                `${column.title}\n\nhttps://tutti-news-ai-bay.vercel.app/column/${column.slug}`
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-full bg-slate-900 px-5 py-3 text-sm font-bold text-white transition hover:opacity-80"
+            >
+              Threads
+            </a>
+
+            {/* はてなブックマーク */}
+            <a
+              href={`https://b.hatena.ne.jp/add?mode=confirm&url=${encodeURIComponent(
+                `https://tutti-news-ai-bay.vercel.app/column/${column.slug}`
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-full bg-blue-500 px-5 py-3 text-sm font-bold text-white transition hover:opacity-80"
+            >
+              はてな
+            </a>
+
+          </div>
+
+        </div>
+
         {/* 著者プロフィール */}
         <section className="mt-10 border-t border-slate-200 pt-8">
           <div className="flex items-center gap-3">
