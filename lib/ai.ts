@@ -244,11 +244,11 @@ scoreは必ず0〜100点です。
 ${title}
 
 本文:
-${article}`,
+${article.slice(0, 1800)}`,
         },
       ],
       temperature: 0.2,
-      max_tokens: 500,
+      max_tokens: 300,
     });
 
     const content =

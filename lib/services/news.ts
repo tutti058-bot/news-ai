@@ -22,6 +22,97 @@ function isEntertainmentSource(source: string): boolean {
   );
 }
 
+/**
+ * AI分析前の共通フィルター
+ *
+ * 明らかに優先度の低い告知系記事を
+ * OpenAIに送る前に除外する。
+ */
+function shouldAnalyzeArticle(
+  title: string,
+  source: string
+): boolean {
+  const t = title.toLowerCase();
+
+  const excludeWords = [
+    "プレゼント",
+    "キャンペーン",
+    "応募受付",
+    "応募開始",
+    "イベント開催",
+    "イベント情報",
+
+    // 番組告知
+    "番組出演",
+    "番組告知",
+    "放送決定",
+    "放送開始",
+    "出演決定",
+
+    // 舞台・映画関連の告知
+    "舞台挨拶",
+    "登壇決定",
+
+    // 音楽系の告知
+    "新曲発売",
+    "新曲リリース",
+    "リリース決定",
+    "配信決定",
+    "ライブ開催",
+    "ツアー開催",
+    "ライブ出演",
+  ];
+
+  if (
+    excludeWords.some((word) =>
+      t.includes(word)
+    )
+  ) {
+    return false;
+  }
+
+  return true;
+}
+
+/**
+ * ゲキサカのAI分析前フィルター
+ *
+ * U-15/U-18などの育成年代の記事を除外し、
+ * 日本代表・海外日本人選手などを優先する。
+ */
+function shouldAnalyzeSoccer(title: string): boolean {
+  const t = title.toLowerCase();
+
+  // 育成年代・アマチュア系は除外
+  const excludeWords = [
+    "u-15",
+    "u15",
+    "u-18",
+    "u18",
+    "u-17",
+    "u17",
+    "u-16",
+    "u16",
+    "u-14",
+    "u14",
+    "ジュニアユース",
+    "クラセン",
+    "高校サッカー",
+    "大学サッカー",
+    "なでしこ",
+  ];
+
+  if (
+    excludeWords.some((word) =>
+      t.includes(word)
+    )
+  ) {
+    return false;
+  }
+
+  return true;
+}
+
 export async function syncNews() {
   console.log("=== SYNC START ===");
 
@@ -42,6 +133,9 @@ export async function syncNews() {
   // 通常ニュース
   let normalAdded = 0;
 
+  // サッカーニュース
+  let soccerAdded = 0;
+
   // 芸能ニュース
   let entertainmentAdded = 0;
 
@@ -51,6 +145,49 @@ export async function syncNews() {
     const entertainment =
       isEntertainmentSource(source);
 
+    const soccer =
+      source === "ゲキサカ";
+
+    const title = item.title ?? "";
+
+    /*
+     * =========================
+     * AI分析前の共通フィルター
+     * =========================
+     */
+
+    if (
+      !shouldAnalyzeArticle(
+        title,
+        source
+      )
+    ) {
+      console.log(
+        "AI分析前除外:",
+        title
+      );
+
+      continue;
+    }
+
+    /*
+     * =========================
+     * サッカー事前フィルター
+     * =========================
+     */
+
+    if (
+      soccer &&
+      !shouldAnalyzeSoccer(title)
+    ) {
+      console.log(
+        "サッカー事前除外:",
+        title
+      );
+
+      continue;
+    }
+
     /*
      * =========================
      * 取得件数制限
@@ -58,6 +195,9 @@ export async function syncNews() {
      *
      * 通常ニュース
      * → 最大20件
+     *
+     * サッカーニュース
+     * → ゲキサカ最大5件
      *
      * 芸能ニュース
      * → ORICON + マイナビ合計10件
@@ -71,13 +211,19 @@ export async function syncNews() {
     }
 
     if (
-      !entertainment &&
-      normalAdded >= 20
+      soccer &&
+      soccerAdded >= 5
     ) {
       continue;
     }
 
-    const title = item.title ?? "";
+    if (
+      !entertainment &&
+      !soccer &&
+      normalAdded >= 20
+    ) {
+      continue;
+    }
 
     const sourceUrl = normalizeUrl(
       item.link ?? ""
@@ -101,19 +247,19 @@ export async function syncNews() {
       });
 
     if (exists) {
-  console.log(
-    "重複スキップ:",
-    title
-  );
+      console.log(
+        "重複スキップ:",
+        title
+      );
 
-  console.log(
-    "重複URL:",
-    sourceUrl
-  );
+      console.log(
+        "重複URL:",
+        sourceUrl
+      );
 
-  skipped++;
-  continue;
-}
+      skipped++;
+      continue;
+    }
 
     console.log(
       "================================"
@@ -212,7 +358,7 @@ export async function syncNews() {
     try {
       ai = await analyzeArticle(
         title,
-        article
+        article.slice(0, 1800)
       );
     } catch (error) {
       console.error(
@@ -226,22 +372,22 @@ export async function syncNews() {
     }
 
     /*
- * =========================
- * 低優先度ニュース除外
- * =========================
- */
+     * =========================
+     * 低優先度ニュース除外
+     * =========================
+     */
 
-const MIN_SCORE = 70;
+    const MIN_SCORE = 70;
 
-if (ai.score < MIN_SCORE) {
-  console.log(
-    `低スコアのためスキップ: ${ai.score}点`,
-    title
-  );
+    if (ai.score < MIN_SCORE) {
+      console.log(
+        `低スコアのためスキップ: ${ai.score}点`,
+        title
+      );
 
-  skipped++;
-  continue;
-}
+      skipped++;
+      continue;
+    }
 
     /*
      * =========================
@@ -261,7 +407,9 @@ if (ai.score < MIN_SCORE) {
     }
 
     /*
+     * =========================
      * AI分析結果チェック
+     * =========================
      */
 
     if (!ai?.summary) {
@@ -346,6 +494,17 @@ if (ai.score < MIN_SCORE) {
 
         console.log(
           `芸能件数: ${entertainmentAdded}/10`
+        );
+      } else if (soccer) {
+        soccerAdded++;
+
+        console.log(
+          "サッカー追加:",
+          title
+        );
+
+        console.log(
+          `サッカー件数: ${soccerAdded}/5`
         );
       } else {
         normalAdded++;

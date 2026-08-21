@@ -321,14 +321,46 @@ export default async function NewsDetail({
       "📌 ニッチな話題です";
   }
 
-  // やんすAIコメント
-  const yansuComment =
-    await generateYansuComment(
-      news.title,
-      news.summary ?? "",
-      news.score ?? 60,
-      news.category ?? "国内"
-    );
+    // やんすAIコメント
+  // 記事ページではOpenAIを呼ばず、カテゴリごとにコメントを変更
+  let yansuComment =
+    "このニュース、詳しく見ていくでやんす🤖";
+
+  switch (news.category) {
+    case "テクノロジー":
+      yansuComment =
+        "AIやテクノロジーの動き、これからも目が離せないでやんす🤖";
+      break;
+
+    case "スポーツ":
+      yansuComment =
+        "今後の展開にも注目したいニュースでやんす🤖";
+      break;
+
+    case "芸能":
+      yansuComment =
+        "これからの動きも気になるニュースでやんす🤖";
+      break;
+
+    case "経済":
+      yansuComment =
+        "これからの市場への影響も見ておきたいでやんす🤖";
+      break;
+
+    case "国際":
+      yansuComment =
+        "今後の動きにも注目しておきたいニュースでやんす🤖";
+      break;
+
+    case "国内":
+      yansuComment =
+        "身近なところにも関わってくるニュースかもしれないでやんす🤖";
+      break;
+
+    default:
+      yansuComment =
+        "このニュース、詳しく見ていくでやんす🤖";
+  }
 
   // X投稿用
   const tweetText = `🚨 ${news.title}
