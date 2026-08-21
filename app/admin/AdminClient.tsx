@@ -774,10 +774,40 @@ export default function AdminClient() {
             管理画面
           </h1>
 
-          <p className="mt-3 text-slate-500">
+                    <p className="mt-3 text-slate-500">
             ニュース取得・まとめ作成・X投稿・アフィリエイト案件を管理します。
           </p>
         </div>
+
+        {/* サイト全体の閲覧数 */}
+        <section className="mb-8 rounded-3xl border border-slate-200 bg-white p-7 shadow-lg">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-black text-slate-400">
+                SITE VIEWS
+              </p>
+
+              <h2 className="mt-2 text-xl font-black text-slate-900">
+                👁 サイト全体の閲覧数
+              </h2>
+            </div>
+
+            <div className="text-right">
+              {viewsLoading ? (
+                <p className="text-sm font-bold text-slate-400">
+                  読み込み中...
+                </p>
+              ) : (
+                <p className="text-4xl font-black text-blue-600">
+                  {totalViews.toLocaleString()}
+                  <span className="ml-1 text-lg text-slate-500">
+                    PV
+                  </span>
+                </p>
+              )}
+            </div>
+          </div>
+        </section>
 
         {/* ニュース・まとめ */}
         <div className="grid gap-6 md:grid-cols-2">
