@@ -15,25 +15,21 @@ export async function GET() {
       );
     }
 
-    const now = new Date();
+    // サイト全体の閲覧数
+    const totalViews = await prisma.newsView.count();
 
-    const startOfDay = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate()
-    );
+    // 今日の0:00
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
 
-    const [totalViews, todayViews] = await Promise.all([
-      prisma.newsView.count(),
-
-      prisma.newsView.count({
-        where: {
-          createdAt: {
-            gte: startOfDay,
-          },
+    // 今日の閲覧数
+    const todayViews = await prisma.newsView.count({
+      where: {
+        createdAt: {
+          gte: startOfToday,
         },
-      }),
-    ]);
+      },
+    });
 
     return NextResponse.json({
       success: true,
