@@ -226,6 +226,24 @@ export async function syncNews() {
     }
 
     /*
+ * =========================
+ * 低優先度ニュース除外
+ * =========================
+ */
+
+const MIN_SCORE = 70;
+
+if (ai.score < MIN_SCORE) {
+  console.log(
+    `低スコアのためスキップ: ${ai.score}点`,
+    title
+  );
+
+  skipped++;
+  continue;
+}
+
+    /*
      * =========================
      * カテゴリ調整
      * =========================
