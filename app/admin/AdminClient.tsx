@@ -26,6 +26,10 @@ export default function AdminClient() {
   const [message, setMessage] = useState("");
   const [summary, setSummary] = useState("");
 
+  // サイト全体の閲覧数
+  const [totalViews, setTotalViews] = useState(0);
+  const [viewsLoading, setViewsLoading] = useState(true);
+
   // アフィリエイト案件
   const [affiliateName, setAffiliateName] = useState("");
   const [affiliateProgramId, setAffiliateProgramId] =
