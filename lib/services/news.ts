@@ -321,17 +321,29 @@ export async function syncNews() {
      * =========================
      */
 
-    const MIN_SCORE = 70;
+    /*
+ * =========================
+ * AIスコアによる掲載判定
+ * =========================
+ *
+ * サッカー
+ * → 70点以上
+ *
+ * それ以外
+ * → 60点以上
+ */
 
-    if (ai.score < MIN_SCORE) {
-      console.log(
-        `低スコアのためスキップ: ${ai.score}点`,
-        title
-      );
+const MIN_SCORE = soccer ? 70 : 60;
 
-      skipped++;
-      continue;
-    }
+if (ai.score < MIN_SCORE) {
+  console.log(
+    `低スコアのためスキップ: ${ai.score}点（基準: ${MIN_SCORE}点）`,
+    title
+  );
+
+  skipped++;
+  continue;
+}
 
     /*
      * =========================
