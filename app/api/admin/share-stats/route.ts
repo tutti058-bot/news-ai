@@ -38,27 +38,38 @@ export async function GET() {
     });
 
     const result = news.map((item) => {
-      const xShares =
+      const getShares = (type: string) =>
         shares.find(
           (share) =>
             share.newsId === item.id &&
-            share.type === "x"
+            share.type === type
         )?._count.id ?? 0;
 
-      const lineShares =
-        shares.find(
-          (share) =>
-            share.newsId === item.id &&
-            share.type === "line"
-        )?._count.id ?? 0;
+      const xShares = getShares("x");
+      const lineShares = getShares("line");
+      const facebookShares = getShares("facebook");
+      const threadsShares = getShares("threads");
+      const hatenaShares = getShares("hatena");
+
+      const totalShares =
+        xShares +
+        lineShares +
+        facebookShares +
+        threadsShares +
+        hatenaShares;
 
       return {
         id: item.id,
         title: item.title,
         publishedAt: item.publishedAt,
+
         xShares,
         lineShares,
-        totalShares: xShares + lineShares,
+        facebookShares,
+        threadsShares,
+        hatenaShares,
+
+        totalShares,
       };
     });
 

@@ -9,6 +9,9 @@ type ShareStat = {
   publishedAt: string | null;
   xShares: number;
   lineShares: number;
+  facebookShares: number;
+  threadsShares: number;
+  hatenaShares: number;
   totalShares: number;
 };
 
@@ -62,6 +65,21 @@ export default function ShareStatsPage() {
     0
   );
 
+  const totalFacebook = stats.reduce(
+    (sum, item) => sum + item.facebookShares,
+    0
+  );
+
+  const totalThreads = stats.reduce(
+    (sum, item) => sum + item.threadsShares,
+    0
+  );
+
+  const totalHatena = stats.reduce(
+    (sum, item) => sum + item.hatenaShares,
+    0
+  );
+
   const totalShares = stats.reduce(
     (sum, item) => sum + item.totalShares,
     0
@@ -73,7 +91,7 @@ export default function ShareStatsPage() {
 
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-10">
-      <div className="mx-auto max-w-6xl">
+      <div className="mx-auto max-w-7xl">
         <div className="mb-8">
           <Link
             href="/admin"
@@ -91,7 +109,7 @@ export default function ShareStatsPage() {
           </h1>
 
           <p className="mt-3 text-slate-500">
-            X・LINEでシェアされた記事を分析します。
+            X・LINE・Facebook・Threads・はてなのシェア状況を分析します。
           </p>
         </div>
 
@@ -101,7 +119,7 @@ export default function ShareStatsPage() {
           </div>
         )}
 
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-lg">
             <p className="text-sm font-bold text-slate-500">
               𝕏 Xシェア
@@ -124,6 +142,36 @@ export default function ShareStatsPage() {
 
           <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-lg">
             <p className="text-sm font-bold text-slate-500">
+              Facebookシェア
+            </p>
+
+            <p className="mt-2 text-4xl font-black text-slate-900">
+              {totalFacebook}
+            </p>
+          </section>
+
+          <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-lg">
+            <p className="text-sm font-bold text-slate-500">
+              Threadsシェア
+            </p>
+
+            <p className="mt-2 text-4xl font-black text-slate-900">
+              {totalThreads}
+            </p>
+          </section>
+
+          <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-lg">
+            <p className="text-sm font-bold text-slate-500">
+              はてなシェア
+            </p>
+
+            <p className="mt-2 text-4xl font-black text-slate-900">
+              {totalHatena}
+            </p>
+          </section>
+
+          <section className="rounded-3xl border border-blue-200 bg-white p-6 shadow-lg">
+            <p className="text-sm font-bold text-slate-500">
               総シェア
             </p>
 
@@ -141,7 +189,7 @@ export default function ShareStatsPage() {
               </h2>
 
               <p className="mt-2 text-sm text-slate-500">
-                シェア数の多い記事から表示しています。
+                全SNSの合計シェア数が多い記事から表示しています。
               </p>
             </div>
 
@@ -164,21 +212,37 @@ export default function ShareStatsPage() {
             </div>
           ) : (
             <div className="mt-6 overflow-x-auto">
-              <table className="w-full min-w-[800px]">
+              <table className="w-full min-w-[1100px]">
                 <thead>
                   <tr className="border-b border-slate-200 text-left text-sm text-slate-500">
                     <th className="px-4 py-4 text-center">
                       順位
                     </th>
+
                     <th className="px-4 py-4">
                       記事
                     </th>
+
                     <th className="px-4 py-4 text-center">
                       𝕏
                     </th>
+
                     <th className="px-4 py-4 text-center">
                       LINE
                     </th>
+
+                    <th className="px-4 py-4 text-center">
+                      Facebook
+                    </th>
+
+                    <th className="px-4 py-4 text-center">
+                      Threads
+                    </th>
+
+                    <th className="px-4 py-4 text-center">
+                      はてな
+                    </th>
+
                     <th className="px-4 py-4 text-center">
                       合計
                     </th>
@@ -205,6 +269,18 @@ export default function ShareStatsPage() {
 
                       <td className="px-4 py-5 text-center font-bold">
                         {item.lineShares}
+                      </td>
+
+                      <td className="px-4 py-5 text-center font-bold">
+                        {item.facebookShares}
+                      </td>
+
+                      <td className="px-4 py-5 text-center font-bold">
+                        {item.threadsShares}
+                      </td>
+
+                      <td className="px-4 py-5 text-center font-bold">
+                        {item.hatenaShares}
                       </td>
 
                       <td className="px-4 py-5 text-center text-xl font-black text-blue-600">
