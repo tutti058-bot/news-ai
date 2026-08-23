@@ -150,6 +150,12 @@ export async function syncNews(limit?: number) {
   // 芸能ニュース
   let entertainmentAdded = 0;
 
+  // テクノロジーニュース
+  let technologyAdded = 0;
+
+  // テクノロジーは最大8件まで
+  const TECHNOLOGY_LIMIT = 8;
+
   /*
    * 芸能トレンドを優先して処理
    *
@@ -197,7 +203,24 @@ export async function syncNews(limit?: number) {
 
   const candidateItems: typeof sortedItems = [];
 
-  for (const item of sortedItems) {
+  // テクノロジーを優先するため、
+  // 新規候補を「テクノロジー → その他」の順に並べる。
+  const technologyItems = sortedItems.filter(
+    (item) =>
+      (item.category ?? "") === "テクノロジー"
+  );
+
+  const otherItems = sortedItems.filter(
+    (item) =>
+      (item.category ?? "") !== "テクノロジー"
+  );
+
+  const prioritizedItems = [
+    ...technologyItems,
+    ...otherItems,
+  ];
+
+  for (const item of prioritizedItems) {
     if (candidateItems.length >= 80) {
       break;
     }
@@ -308,6 +331,16 @@ export async function syncNews(limit?: number) {
     if (
       !entertainment &&
       !soccer &&
+      (item.category ?? "") === "テクノロジー" &&
+      technologyAdded >= TECHNOLOGY_LIMIT
+    ) {
+      continue;
+    }
+
+    if (
+      !entertainment &&
+      !soccer &&
+      (item.category ?? "") !== "テクノロジー" &&
       normalAdded >= 20
     ) {
       continue;
@@ -527,7 +560,7 @@ export async function syncNews(limit?: number) {
  * → 60点以上
  */
 
-const MIN_SCORE = soccer ? 70 : 60;
+const MIN_SCORE = soccer ? 75 : 60;
 
 if (ai.score < MIN_SCORE) {
   console.log(
@@ -654,6 +687,19 @@ if (ai.score < MIN_SCORE) {
         console.log(
           `芸能件数: ${entertainmentAdded}/10`
         );
+      } else if (
+        (item.category ?? "") === "テクノロジー"
+      ) {
+        technologyAdded++;
+
+        console.log(
+          "テクノロジー追加:",
+          title
+        );
+
+        console.log(
+          `テクノロジー件数: ${technologyAdded}/${TECHNOLOGY_LIMIT}`
+        );
       } else if (soccer) {
         soccerAdded++;
 
@@ -730,6 +776,10 @@ if (ai.score < MIN_SCORE) {
 
   console.log(
     `芸能ニュース: ${entertainmentAdded}`
+  );
+
+  console.log(
+    `テクノロジーニュース: ${technologyAdded}`
   );
 
   console.log(
