@@ -119,7 +119,7 @@ function shouldAnalyzeSoccer(title: string): boolean {
   return true;
 }
 
-export async function syncNews() {
+export async function syncNews(limit?: number) {
   console.log("=== SYNC START ===");
 
   console.log("① fetchNews開始");
@@ -135,6 +135,11 @@ export async function syncNews() {
   let added = 0;
   let updated = 0;
   let skipped = 0;
+  let skippedDuplicate = 0;
+  let skippedShort = 0;
+  let skippedNoImage = 0;
+  let skippedLowScore = 0;
+  let skippedAI = 0;
 
   // 通常ニュース
   let normalAdded = 0;
@@ -172,7 +177,62 @@ export async function syncNews() {
     return 0;
   });
 
+    /*
+   * =========================
+   * 新規記事候補
+   * =========================
+   *
+   * 既存記事を除外したうえで、
+   * 最大80件まで候補を集める。
+   *
+   * limit指定時は
+   * 「AI評価する件数」ではなく
+   * 「採用したい記事数」として扱う。
+   */
+
+  const targetCount =
+    typeof limit === "number" && limit > 0
+      ? limit
+      : 33;
+
+  const candidateItems: typeof sortedItems = [];
+
   for (const item of sortedItems) {
+    if (candidateItems.length >= 80) {
+      break;
+    }
+
+    const candidateUrl = normalizeUrl(
+      item.link ?? ""
+    );
+
+    if (!candidateUrl) {
+      continue;
+    }
+
+    const candidateExists =
+      await prisma.news.findUnique({
+        where: {
+          sourceUrl: candidateUrl,
+        },
+      });
+
+    if (candidateExists) {
+      continue;
+    }
+
+    candidateItems.push(item);
+  }
+
+  console.log(
+    `新規記事候補: ${candidateItems.length}件`
+  );
+
+  console.log(
+    `採用目標: ${targetCount}件`
+  );
+
+  for (const item of candidateItems) {
     const source = item.source ?? "";
 
     const entertainment =
@@ -253,6 +313,15 @@ export async function syncNews() {
       continue;
     }
 
+    // 必要件数に達したカテゴリは以降の候補を処理しない
+    if (
+      entertainment && entertainmentAdded >= 10 ||
+      soccer && soccerAdded >= 3 ||
+      !entertainment && !soccer && normalAdded >= 20
+    ) {
+      continue;
+    }
+
     const sourceUrl = normalizeUrl(
       item.link ?? ""
     );
@@ -280,14 +349,15 @@ export async function syncNews() {
         title
       );
 
-      console.log(
-        "重複URL:",
-        sourceUrl
-      );
-
       skipped++;
+      skippedDuplicate++;
       continue;
     }
+
+    console.log(
+      "★ 新規記事候補:",
+      title
+    );
 
     console.log(
       "================================"
@@ -317,9 +387,11 @@ export async function syncNews() {
     let article: string | null = null;
 
     try {
+      console.log(">>> 本文取得開始");
       article = await getArticle(
         sourceUrl
       );
+      console.log("<<< 本文取得終了");
     } catch (error) {
       console.error(
         "本文取得エラー:",
@@ -345,6 +417,7 @@ export async function syncNews() {
       );
 
       skipped++;
+      skippedShort++;
       continue;
     }
 
@@ -357,9 +430,11 @@ export async function syncNews() {
     let image: string | null = null;
 
     try {
+      console.log(">>> 画像取得開始");
       image = await getImage(
         sourceUrl
       );
+      console.log("<<< 画像取得終了");
     } catch (error) {
       console.error(
         "画像取得エラー:",
@@ -394,6 +469,7 @@ export async function syncNews() {
       );
 
       skipped++;
+      skippedNoImage++;
       continue;
     }
 
@@ -406,10 +482,22 @@ export async function syncNews() {
     let ai;
 
     try {
+      console.log(">>> AI分析開始");
       ai = await analyzeArticle(
         title,
         article.slice(0, 3000)
       );
+      console.log("<<< AI分析終了");
+      console.log("AI評価結果:", {
+        title,
+        category: ai?.category,
+        score: ai?.score,
+        importanceScore: ai?.importanceScore,
+        buzzScore: ai?.buzzScore,
+        impactScore: ai?.impactScore,
+        noveltyScore: ai?.noveltyScore,
+        attentionScore: ai?.attentionScore,
+      });
     } catch (error) {
       console.error(
         "AI分析エラー:",
@@ -448,6 +536,7 @@ if (ai.score < MIN_SCORE) {
   );
 
   skipped++;
+  skippedLowScore++;
   continue;
 }
 
@@ -479,6 +568,7 @@ if (ai.score < MIN_SCORE) {
       );
 
       skipped++;
+      skippedAI++;
       continue;
     }
 
@@ -492,6 +582,9 @@ if (ai.score < MIN_SCORE) {
       await prisma.news.create({
         data: {
           title,
+
+          content:
+            article,
 
           summary:
             ai.summary,
@@ -537,6 +630,12 @@ if (ai.score < MIN_SCORE) {
       });
 
       added++;
+      if (
+  limit &&
+  added >= targetCount
+) {
+  break;
+}
 
       /*
        * =========================
@@ -640,6 +739,12 @@ if (ai.score < MIN_SCORE) {
   console.log(
     `スキップ: ${skipped}`
   );
+
+  console.log(`  重複: ${skippedDuplicate}`);
+  console.log(`  本文不足: ${skippedShort}`);
+  console.log(`  画像なし: ${skippedNoImage}`);
+  console.log(`  低スコア: ${skippedLowScore}`);
+  console.log(`  AI結果なし: ${skippedAI}`);
 
   console.log(
     `取得総数: ${items.length}`

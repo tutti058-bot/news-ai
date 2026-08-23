@@ -187,22 +187,75 @@ export async function analyzeArticle(
 
 【AI評価】
 
-以下の5項目を記事本文だけを根拠に採点してください。
+この記事を「AI NEWS ジャパンに掲載する価値」という観点で0〜100点で評価してください。
+
+重要なのは社会的影響だけではありません。
+ニュースのジャンルに応じて、以下を総合的に判断してください。
+
+・社会や生活への影響
+・企業やサービスの大きな動き
+・著名人の重大発表
+・人気作品、映画、ドラマ、アニメなどの重大発表
+・大型イベントや新作発表
+・記録達成や注目される出来事
+・多くの人が関心を持つ可能性
+・今後さらに話題が広がる可能性
+
+特に芸能・スポーツ・エンタメでは、
+「社会への影響が小さい」という理由だけで低得点にしないでください。
+
+【芸能】
+著名人の結婚・出産・休養・重大発表など
+→ 60〜85点を目安
+
+人気俳優・アーティスト・アイドルの大きなニュース
+→ 60〜80点を目安
+
+小規模なイベント参加、日常的なSNS投稿など
+→ 40〜60点を目安
+
+【エンタメ】
+人気作品の続編・新作映画・大型企画・放送決定など
+→ 60〜90点を目安
+
+作品に関する小さな話題や細かな変更
+→ 40〜60点を目安
+
+【スポーツ】
+重要大会、優勝、記録、移籍、代表関連など
+→ 70〜95点を目安
+
+一般的な試合結果や小規模な話題
+→ 50〜75点を目安
+
+【一般ニュース】
+社会的・経済的・生活上の影響が大きいもの
+→ 70〜100点
+
+影響が限定的なニュース
+→ 40〜70点
+
+【低評価】
+単なる商品紹介、広告色の強い記事、軽微な告知、
+内容が薄い記事、ニュース性の低い記事
+→ 20〜50点
 
 ① ニュース重要度：0〜30点
-社会や生活への影響、ニュースとしての重要性。
+そのジャンルにおいてニュースとしてどれだけ重要か。
 
-② 話題性：0〜20点
-多くの人が関心を持つ可能性があるニュースか。
+② 話題性：0〜25点
+著名人、人気作品、企業、SNSなどを含め、
+多くの人が関心を持つ可能性。
 
-③ 影響範囲：0〜20点
-企業、社会、国内、世界などへの影響範囲。
+③ 影響・注目範囲：0〜20点
+社会、企業、ファン、視聴者、スポーツ界など、
+そのニュースが影響・注目を集める範囲。
 
 ④ 新規性：0〜15点
-新しい発表、記録、発見、サービス、出来事などの新しさ。
+新しい発表、出来事、記録、作品、サービスなどの新しさ。
 
-⑤ 今後の注目度：0〜15点
-今後の動向を追う価値がどの程度あるか。
+⑤ 今後の注目度：0〜10点
+今後さらにニュースや話題が広がる可能性。
 
 【重要】
 5項目の合計をscoreにしてください。
@@ -215,6 +268,13 @@ importanceScore
 = score
 
 scoreは必ず0〜100点です。
+
+ジャンルによって評価軸を柔軟に変えてください。
+芸能記事だから一律に低くする、
+スポーツ記事だから一律に高くする、
+という評価は禁止です。
+
+記事本文に書かれている事実を根拠として評価してください。
 
 【やんすAIの話し方】
 ・自然な日本語
@@ -249,12 +309,34 @@ ${article.slice(0, 1800)}`,
       ],
       temperature: 0.2,
       max_tokens: 300,
+    }, {
+      timeout: 10000,
     });
 
-    const content =
-      response.choices[0]?.message?.content ?? "{}";
+    const rawContent =
+  response.choices[0]?.message?.content ?? "{}";
 
-    const result = JSON.parse(content);
+console.log("AI生レスポンス:", rawContent);
+console.log("AI生レスポンス型:", typeof rawContent);
+console.log("AI生レスポンス長:", rawContent.length);
+console.log("AI生レスポンスJSON化:", JSON.stringify(rawContent));
+
+let result: any;
+
+try {
+  result = JSON.parse(rawContent);
+
+  console.log("AI解析結果:", result);
+  console.log("AI解析結果JSON:", JSON.stringify(result));
+  console.log("AI解析結果keys:", Object.keys(result));
+
+} catch (error) {
+  console.error("AI JSON解析エラー:", error);
+  console.error("解析対象:", rawContent);
+  result = {};
+}
+
+console.log("AI解析JSON:", result);
 
     const importanceScore = Math.max(
       0,
@@ -323,8 +405,9 @@ export async function generateYansuComment(
 ): Promise<string> {
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-4.1-mini",
-      messages: [
+  model: "gpt-4.1-mini",
+  response_format: { type: "json_object" },
+  messages: [
         {
           role: "system",
           content: `

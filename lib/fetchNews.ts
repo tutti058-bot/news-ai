@@ -111,15 +111,18 @@ async function fetchOriconNews() {
   try {
     console.log("ORICON NEWS: 取得開始");
 
-    const res = await fetch("https://www.oricon.co.jp/news/", {
-      cache: "no-store",
-      headers: {
+    const res = await fetchWithTimeout(
+      "https://www.oricon.co.jp/news/",
+      {
+        cache: "no-store",
+        headers: {
         "User-Agent":
-          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/150.0.0.0 Safari/537.36",
-        Accept:
-          "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-      },
-    });
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/150.0.0.0 Safari/537.36",
+          Accept:
+            "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        },
+      }
+    );
 
     if (!res.ok) {
       console.error(
@@ -284,69 +287,113 @@ async function fetchOriconNews() {
   }
 }
 
+const FETCH_TIMEOUT_MS = 10000;
+
+async function fetchWithTimeout(
+  url: string,
+  options: RequestInit = {}
+) {
+  const controller = new AbortController();
+
+  const timeout = setTimeout(() => {
+    controller.abort();
+  }, FETCH_TIMEOUT_MS);
+
+  try {
+    return await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 export async function fetchNews() {
   const news: any[] = [];
 
   // =========================
-  // RSS取得
+  // RSSを並列取得
   // =========================
 
-  for (const feed of feeds) {
-    try {
-      const res = await fetch(feed.url, {
-        cache: "no-store",
-      });
-
-      if (!res.ok) {
-        console.error(
-          `${feed.source}: RSS取得失敗 ${res.status}`
+  const results = await Promise.allSettled(
+    feeds.map(async (feed) => {
+      try {
+        console.log(
+          `${feed.source}: RSS取得開始`
         );
 
-        continue;
-      }
-
-      const xml = await res.text();
-
-      const json = parser.parse(xml);
-
-      const items =
-        json?.rss?.channel?.item ??
-        json?.rdf?.item ??
-        json?.["rdf:RDF"]?.item ??
-        json?.feed?.entry ??
-        [];
-
-      const array = Array.isArray(items)
-        ? items
-        : [items];
-
-      for (const item of array) {
-        if (!item) continue;
-
-        const link = normalizeUrl(item.link);
-
-        if (!link) continue;
-
-        news.push({
-          ...item,
-
-          link,
-
-          source: feed.source,
-
-          feedCategory:
-            feed.category ?? null,
+        const res = await fetchWithTimeout(feed.url, {
+          cache: "no-store",
         });
-      }
 
-      console.log(
-        `${feed.source}: ${array.length}件取得`
-      );
-    } catch (error) {
-      console.error(
-        `${feed.source}: RSS取得エラー`,
-        error
-      );
+        if (!res.ok) {
+          console.error(
+            `${feed.source}: RSS取得失敗 ${res.status}`
+          );
+          return [];
+        }
+
+        const xml = await res.text();
+        const json = parser.parse(xml);
+
+        const items =
+          json?.rss?.channel?.item ??
+          json?.rdf?.item ??
+          json?.["rdf:RDF"]?.item ??
+          json?.feed?.entry ??
+          [];
+
+        const array = Array.isArray(items)
+          ? items
+          : [items];
+
+        const feedNews: any[] = [];
+
+        for (const item of array) {
+          if (!item) continue;
+
+          const link = normalizeUrl(item.link);
+
+          if (!link) continue;
+
+          feedNews.push({
+            ...item,
+            link,
+            source: feed.source,
+            feedCategory:
+              feed.category ?? null,
+          });
+        }
+
+        console.log(
+          `${feed.source}: ${feedNews.length}件取得`
+        );
+
+        return feedNews;
+      } catch (error) {
+        if (
+          error instanceof Error &&
+          error.name === "AbortError"
+        ) {
+          console.error(
+            `${feed.source}: RSS取得タイムアウト（${FETCH_TIMEOUT_MS / 1000}秒）`
+          );
+        } else {
+          console.error(
+            `${feed.source}: RSS取得エラー`,
+            error
+          );
+        }
+
+        return [];
+      }
+    })
+  );
+
+  for (const result of results) {
+    if (result.status === "fulfilled") {
+      news.push(...result.value);
     }
   }
 

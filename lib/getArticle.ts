@@ -10,7 +10,27 @@ export async function getArticle(url: string) {
      */
 
     try {
-      const article = await extract(url);
+      const controller = new AbortController();
+
+      const timeout = setTimeout(() => {
+        controller.abort();
+      }, 10000);
+
+      let article: Awaited<ReturnType<typeof extract>>;
+
+      try {
+        article = await Promise.race([
+          extract(url),
+          new Promise<Awaited<ReturnType<typeof extract>>>((_, reject) =>
+            setTimeout(
+              () => reject(new Error("article-extractor timeout")),
+              10000
+            )
+          ),
+        ]);
+      } finally {
+        clearTimeout(timeout);
+      }
 
       if (article?.content) {
         const text = article.content
