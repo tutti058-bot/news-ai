@@ -23,6 +23,47 @@ function isEntertainmentSource(source: string): boolean {
 }
 
 /**
+ * 芸能トレンドニュース
+ *
+ * 熱愛・結婚・破局など、
+ * 話題性の高い芸能ニュースを優先して処理する。
+ */
+function isEntertainmentTrend(title: string): boolean {
+  const t = title.toLowerCase();
+
+  const trendWords = [
+    "熱愛",
+    "交際",
+    "恋愛",
+    "結婚",
+    "婚約",
+    "入籍",
+    "結婚発表",
+    "結婚報告",
+    "婚約発表",
+    "婚約報告",
+    "破局",
+    "離婚",
+    "離婚発表",
+    "離婚報告",
+    "別居",
+    "復縁",
+    "再婚",
+    "妊娠",
+    "出産",
+    "第1子",
+    "第２子",
+    "第2子",
+    "第3子",
+    "第３子",
+  ];
+
+  return trendWords.some((word) =>
+    t.includes(word.toLowerCase())
+  );
+}
+
+/**
  * ゲキサカのAI分析前フィルター
  *
  * U-15/U-18などの育成年代の記事を除外し、
@@ -97,7 +138,34 @@ export async function syncNews() {
   // 芸能ニュース
   let entertainmentAdded = 0;
 
-  for (const item of items) {
+  /*
+   * 芸能トレンドを優先して処理
+   *
+   * 芸能ニュースの取得上限10件があるため、
+   * 熱愛・結婚・破局などを先にAI分析する。
+   */
+  const sortedItems = [...items].sort((a, b) => {
+    const aEntertainment =
+      isEntertainmentSource(a.source ?? "");
+
+    const bEntertainment =
+      isEntertainmentSource(b.source ?? "");
+
+    const aTrend =
+      aEntertainment &&
+      isEntertainmentTrend(a.title ?? "");
+
+    const bTrend =
+      bEntertainment &&
+      isEntertainmentTrend(b.title ?? "");
+
+    if (aTrend && !bTrend) return -1;
+    if (!aTrend && bTrend) return 1;
+
+    return 0;
+  });
+
+  for (const item of sortedItems) {
     const source = item.source ?? "";
 
     const entertainment =
