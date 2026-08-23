@@ -6,6 +6,51 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+
+function cleanXPostText(value: unknown): string {
+  if (typeof value !== "string") {
+    return String(value ?? "");
+  }
+
+  let text = value.trim();
+
+  // {"response":"..."} のJSONを通常の文章に変換
+  try {
+    const parsed = JSON.parse(text);
+
+    if (
+      parsed &&
+      typeof parsed === "object" &&
+      typeof parsed.response === "string"
+    ) {
+      text = parsed.response.trim();
+    }
+  } catch {
+    // JSONでなければそのまま
+  }
+
+  // Markdownコードブロック除去
+  text = text
+    .replace(/^```(?:json|text)?\s*/i, "")
+    .replace(/\s*```$/i, "")
+    .trim();
+
+  // JSON文字列が残っている場合の最終防御
+  const match = text.match(
+    /^\s*\{\s*"response"\s*:\s*"([\s\S]*)"\s*\}\s*$/
+  );
+
+  if (match) {
+    text = match[1]
+      .replace(/\\"/g, '"')
+      .replace(/\\n/g, "\n")
+      .replace(/\\\\/g, "\\")
+      .trim();
+  }
+
+  return text;
+}
+
 export async function POST() {
   try {
     const news = await prisma.news.findFirst({
@@ -165,7 +210,7 @@ ${news.summary ?? ""}
     });
 
     let content =
-      response.choices[0]?.message?.content?.trim() ?? "";
+      cleanXPostText(response.choices[0]?.message?.content?.trim() ?? "");
 
     content = content
       .replace(/```json/g, "")
