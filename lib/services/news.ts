@@ -176,6 +176,27 @@ export async function syncNews() {
 
     const title = item.title ?? "";
 
+    // =========================
+    // 芸能ニュース取得状況の調査ログ
+    // =========================
+    if (entertainment) {
+      console.log(
+        "================ 芸能候補 ================"
+      );
+      console.log("ソース:", source);
+      console.log("タイトル:", title);
+      console.log("URL:", item.link ?? "");
+      console.log(
+        "トレンド判定:",
+        isEntertainmentTrend(title)
+          ? "優先対象"
+          : "通常"
+      );
+      console.log(
+        "=========================================="
+      );
+    }
+
     // ゲキサカはAI分析前に不要記事を除外
     if (
       soccer &&
