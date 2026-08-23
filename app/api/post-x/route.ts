@@ -209,7 +209,9 @@ ${news.summary ?? ""}
     });
 
     let content =
-      response.choices[0]?.message?.content?.trim() ?? "";
+      cleanXPostText(
+        response.choices[0]?.message?.content?.trim() ?? ""
+      );
 
     content = content
       .replace(/```json/g, "")
