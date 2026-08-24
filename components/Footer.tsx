@@ -82,19 +82,33 @@ export default function Footer() {
                 ニュース検索
               </Link>
 
-              <a
-                href="#"
+              <Link
+                href="/about"
+                className="block text-slate-400 transition hover:text-white"
+              >
+                運営者情報
+              </Link>
+
+              <Link
+                href="/contact"
                 className="block text-slate-400 transition hover:text-white"
               >
                 お問い合わせ
-              </a>
+              </Link>
 
-              <a
-                href="#"
+              <Link
+                href="/privacy"
                 className="block text-slate-400 transition hover:text-white"
               >
                 プライバシーポリシー
-              </a>
+              </Link>
+
+              <Link
+                href="/terms"
+                className="block text-slate-400 transition hover:text-white"
+              >
+                利用規約
+              </Link>
 
             </div>
 
