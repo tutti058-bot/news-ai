@@ -22,6 +22,9 @@ export async function generateMetadata({
     title: `${category}ニュース`,
     description:
       `${category}に関する最新ニュースをAIがわかりやすくお届けします。`,
+    alternates: {
+      canonical: `/category/${encodeURIComponent(category)}`,
+    },
   };
 }
 
