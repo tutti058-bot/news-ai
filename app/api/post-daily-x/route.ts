@@ -109,114 +109,22 @@ export async function POST() {
           content: `
 あなたはAI NEWS ジャパン専属AIニュースキャスター「やんすAI」です。
 
-ニュース記事を読んで、X投稿用の短い文章を作成してください。
+ニュース記事を読み、X投稿用の「フック」と「短い説明」を作成してください。
 
-【最終的な投稿形式】
-
-やんすAI
-「フック」
-短い説明
-
-AI評価：○○点／100点
-
-👇 詳細はこちら
-URL
-
-【フック】
-
-最も重要な部分です。
-
+フック：
 20〜50文字程度。
+読者が「え、どういうこと？」と思って記事を開きたくなる内容。
+記事に存在しない数字・事実は禁止。
+最後は必ず「でやんす」。
 
-タイトルをそのまま言い換えないでください。
-
-読者が
-「え、どういうこと？」
-「それは気になる」
-と思って記事を開きたくなる切り口にしてください。
-
-記事にある具体的な数字、量、金額、人数、記録、変化などが使える場合は積極的に使ってください。
-
-数字がない場合は、
-・意外な事実
-・問いかけ
-・具体的なポイント
-・意外な組み合わせ
-などを使ってください。
-
-記事に存在しない数字や事実は絶対に作らないでください。
-
-「実は」「まさか」「え？」を毎回使わないでください。
-
-最後は必ず自然な
-「でやんす」
-で締めてください。
-
-【短い説明】
-
+短い説明：
 20〜45文字程度。
+ニュースの核心を少しだけ伝え、続きを読みたくなる内容。
+「でやんす」は付けない。
 
-ここではニュースを詳しく説明しないでください。
-
-フックを見た人が
-「その仕組みとは？」
-「なぜこうなった？」
-「その理由とは？」
-「今後どうなる？」
-など、続きを知りたくなる文章にしてください。
-
-ニュースの具体的なポイントを少しだけ入れてください。
-
-長い要約は禁止です。
-
-記事の内容を説明し切らないでください。
-
-「詳しくは記事で」
-「詳細はこちら」
-などのURL誘導文は禁止です。
-
-「でやんす」は付けないでください。
-
-【非常に重要】
-
-出力は必ず以下の3行だけです。
-
-1行目：フック
-2行目：短い説明
-3行目：空行ではなく終了
-
-JSON禁止。
-Markdown禁止。
-禁止。
-「やんすAI」という名前は禁止。
-「AI評価」という文字は禁止。
-URLは禁止。
-ハッシュタグ禁止。
-
-【例】
-
-1日400トンの鶏糞が電力に変わるって知ってたでやんす？
-約1万世帯分の電力を生み出す、その仕組みとは？
-
-別の例：
-
-136件の論文から見えてきた「肌の若返り」の実態でやんす？
-レーザーやマイクロニードルの効果を科学的に検証。
-
-【記事情報】
-
-タイトル：
-${news.title}
-
-要約：
-${news.summary ?? ""}
-
-カテゴリ：
-${news.category ?? "国内"}
-
-AI評価：
-${score}点
-`,
+重要：
+フックと短い説明以外は出力しない。
+`
         },
         {
           role: "user",
@@ -227,61 +135,63 @@ ${news.title}
 要約：
 ${news.summary ?? ""}
 
-この記事を読んで、
-「フック」
-「短い説明」
-の2行だけを作成してください。
-`,
-        },
+フックと短い説明を作成してください。
+`
+        }
       ],
-      temperature: 0.9,
+      temperature: 0.7,
       max_tokens: 120,
+      response_format: {
+        type: "json_schema",
+        json_schema: {
+          name: "x_post",
+          strict: true,
+          schema: {
+            type: "object",
+            properties: {
+              hook: {
+                type: "string"
+              },
+              description: {
+                type: "string"
+              }
+            },
+            required: ["hook", "description"],
+            additionalProperties: false
+          }
+        }
+      }
     });
 
-    let content =
+    const rawContent =
       response.choices[0]?.message?.content?.trim() ?? "";
 
-    content = cleanXPostText(content);
+    let parsed: {
+      hook: string;
+      description: string;
+    };
 
-    let lines = content
-      .split("\n")
-      .map((line) => line.trim())
-      .filter(Boolean);
+    try {
+      parsed = JSON.parse(rawContent);
+    } catch {
+      throw new Error("AIの構造化出力を解析できませんでした");
+    }
 
-    lines = lines.slice(0, 2);
+    let hook = parsed.hook.trim();
+    let description = parsed.description.trim();
 
-    let hook =
-      lines[0] ??
-      "このニュース、知っておきたいポイントでやんす？";
-
-    let description =
-      lines[1] ??
-      "その背景と詳しい内容とは？";
-
-    // 不要な記号を除去
     hook = hook
       .replace(/^「|」$/g, "")
-      .replace(/でやんすね/g, "")
-      .replace(/でやんす/g, "")
+      .replace(/でやんすね$/g, "")
+      .replace(/でやんす$/g, "")
       .trim();
 
     description = description
       .replace(/^「|」$/g, "")
-      .replace(/でやんすね/g, "")
-      .replace(/でやんす/g, "")
+      .replace(/でやんす$/g, "")
       .trim();
 
-    // 「でやんす」はフックの最後に1回だけ
     hook = `${hook}でやんす`;
-
-    // X投稿へ渡す直前に、hook / description を最終クリーンアップ
-    hook = hook
-      .replace(/^「|」$/g, "")
-      .trim();
-
-    description = description
-      .replace(/^「|」$/g, "")
-      .trim();
 
     let tweet = `やんすAI
 「${hook}」
