@@ -26,9 +26,16 @@ export async function generateMetadata({
     };
   }
 
+  const canonicalUrl =
+    `https://tutti-news-ai-bay.vercel.app/news/${news.id}`;
+
   return {
     title: news.title,
     description: news.summary ?? "",
+
+    alternates: {
+      canonical: canonicalUrl,
+    },
 
     openGraph: {
       title: news.title,
@@ -324,42 +331,42 @@ export default async function NewsDetail({
   // やんすAIコメント
   // 記事ページではOpenAIを呼ばず、カテゴリごとにコメントを変更
   let yansuComment =
-    "このニュース、詳しく見ていくでやんす🤖";
+    "このニュース、詳しく見ていくでやんす";
 
   switch (news.category) {
     case "テクノロジー":
       yansuComment =
-        "AIやテクノロジーの動き、これからも目が離せないでやんす🤖";
+        "AIやテクノロジーの動き、これからも目が離せないでやんす";
       break;
 
     case "スポーツ":
       yansuComment =
-        "今後の展開にも注目したいニュースでやんす🤖";
+        "今後の展開にも注目したいニュースでやんす";
       break;
 
     case "芸能":
       yansuComment =
-        "これからの動きも気になるニュースでやんす🤖";
+        "これからの動きも気になるニュースでやんす";
       break;
 
     case "経済":
       yansuComment =
-        "これからの市場への影響も見ておきたいでやんす🤖";
+        "これからの市場への影響も見ておきたいでやんす";
       break;
 
     case "国際":
       yansuComment =
-        "今後の動きにも注目しておきたいニュースでやんす🤖";
+        "今後の動きにも注目しておきたいニュースでやんす";
       break;
 
     case "国内":
       yansuComment =
-        "身近なところにも関わってくるニュースかもしれないでやんす🤖";
+        "身近なところにも関わってくるニュースかもしれないでやんす";
       break;
 
     default:
       yansuComment =
-        "このニュース、詳しく見ていくでやんす🤖";
+        "このニュース、詳しく見ていくでやんす";
   }
 
   // X投稿用
