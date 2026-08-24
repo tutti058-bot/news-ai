@@ -321,7 +321,7 @@ export default async function NewsDetail({
       "📌 ニッチな話題です";
   }
 
-    // やんすAIコメント
+  // やんすAIコメント
   // 記事ページではOpenAIを呼ばず、カテゴリごとにコメントを変更
   let yansuComment =
     "このニュース、詳しく見ていくでやんす🤖";
@@ -817,23 +817,6 @@ ${url}
 
         </section>
       )}
-
-      {/* やんすAIコメント */}
-      <div className="mt-8 rounded-3xl bg-white p-6 shadow-lg">
-
-        <h2 className="mb-4 text-xl font-black">
-          やんすAIのコメント
-        </h2>
-
-        <div className="rounded-2xl bg-slate-50 p-5">
-
-          <p className="text-base font-semibold leading-7 text-slate-700">
-            「{yansuComment}」
-          </p>
-
-        </div>
-
-      </div>
 
       {/* シェア */}
 <div className="mt-8 rounded-3xl bg-white p-6 shadow-lg">
