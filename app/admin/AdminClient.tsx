@@ -753,9 +753,10 @@ export default function AdminClient() {
       );
 
       const res = await fetch(
-        "/api/post-daily-x",
+        "/api/post-daily-x?_=" + Date.now(),
         {
           method: "POST",
+          cache: "no-store",
         }
       );
 
@@ -767,6 +768,12 @@ export default function AdminClient() {
             "X投稿の作成に失敗しました"
         );
       }
+
+      console.log("===== X POST DEBUG =====");
+      console.log("tweet:", data.tweet);
+      console.log("hook:", data.hook);
+      console.log("description:", data.description);
+      console.log("intentUrl:", data.intentUrl);
 
       window.open(
         data.intentUrl,
