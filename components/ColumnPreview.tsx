@@ -9,7 +9,7 @@ export default async function ColumnPreview() {
     orderBy: {
       publishedAt: "desc",
     },
-    take: 3,
+    take: 4,
     select: {
       id: true,
       title: true,
@@ -56,116 +56,86 @@ export default async function ColumnPreview() {
 
       </div>
 
-      {/* コラム */}
-      <div className="grid gap-5 lg:grid-cols-5">
+      {/* 最新コラム */}
+      <Link
+        href={`/column/${featured.slug}`}
+        className="group block overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl"
+      >
 
-        {/* 注目コラム */}
-        <Link
-          href={`/column/${featured.slug}`}
-          className="group relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl lg:col-span-3"
-        >
+        {featured.image ? (
+          <img
+            src={featured.image}
+            alt={featured.title}
+            className="h-64 w-full object-cover transition duration-500 group-hover:scale-105 sm:h-80"
+          />
+        ) : (
+          <div className="flex h-64 items-center justify-center bg-gradient-to-br from-blue-50 via-white to-slate-100 sm:h-80">
+            <span className="text-6xl font-black text-blue-600/70">
+              AI
+            </span>
+          </div>
+        )}
 
-          {featured.image ? (
-            <img
-              src={featured.image}
-              alt={featured.title}
-              className="h-64 w-full object-cover transition duration-500 group-hover:scale-105 sm:h-72"
-            />
-          ) : (
-            <div className="relative flex h-64 items-center justify-center overflow-hidden bg-gradient-to-br from-blue-50 via-white to-slate-100 sm:h-72">
+        <div className="p-6 sm:p-8">
 
-              <div className="absolute -left-16 -top-16 h-48 w-48 rounded-full bg-blue-100/60 blur-3xl" />
+          <div className="flex items-center gap-3">
+            <span className="rounded-full bg-blue-50 px-3 py-1 text-[11px] font-black tracking-widest text-blue-600">
+              FEATURED
+            </span>
 
-              <div className="absolute -bottom-16 -right-16 h-48 w-48 rounded-full bg-slate-200/70 blur-3xl" />
-
-              <div className="relative text-center">
-                <div className="text-6xl font-black tracking-tight text-blue-600/80">
-                  AI
-                </div>
-
-                <div className="mt-2 text-[10px] font-black tracking-[0.4em] text-slate-400">
-                  AI NEWS JAPAN
-                </div>
-              </div>
-
-            </div>
-          )}
-
-          <div className="p-6 sm:p-7">
-
-            <div className="flex items-center gap-3">
-              <span className="rounded-full bg-blue-50 px-3 py-1 text-[11px] font-black tracking-widest text-blue-600">
-                FEATURED
+            {featured.publishedAt && (
+              <span className="text-xs font-bold text-slate-400">
+                {new Date(featured.publishedAt).toLocaleDateString("ja-JP")}
               </span>
-
-              {featured.publishedAt && (
-                <span className="text-xs font-bold text-slate-400">
-                  {new Date(featured.publishedAt).toLocaleDateString("ja-JP")}
-                </span>
-              )}
-            </div>
-
-            <h3 className="mt-4 text-2xl font-black leading-tight tracking-tight text-slate-950 transition group-hover:text-blue-600 sm:text-3xl">
-              {featured.title}
-            </h3>
-
-            {featured.excerpt && (
-              <p className="mt-4 line-clamp-3 text-sm leading-7 text-slate-500">
-                {featured.excerpt}
-              </p>
             )}
-
-            <div className="mt-6 font-black text-blue-600">
-              続きを読む →
-            </div>
-
           </div>
 
-        </Link>
+          <h3 className="mt-4 text-2xl font-black leading-tight tracking-tight text-slate-950 transition group-hover:text-blue-600 sm:text-3xl">
+            {featured.title}
+          </h3>
 
-        {/* 2・3件目 */}
-        <div className="grid gap-5 lg:col-span-2">
+          {featured.excerpt && (
+            <p className="mt-4 line-clamp-3 text-sm leading-7 text-slate-500">
+              {featured.excerpt}
+            </p>
+          )}
+
+          <div className="mt-5 font-black text-blue-600">
+            続きを読む →
+          </div>
+
+        </div>
+
+      </Link>
+
+      {/* サブコラム */}
+      {others.length > 0 && (
+        <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
 
           {others.map((column) => (
             <Link
               key={column.id}
               href={`/column/${column.slug}`}
-              className="group flex overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg"
+              className="group flex min-h-32 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg"
             >
 
               {column.image ? (
                 <img
                   src={column.image}
                   alt={column.title}
-                  className="h-full min-h-40 w-32 shrink-0 object-cover transition duration-500 group-hover:scale-105"
+                  className="h-32 w-24 shrink-0 object-cover transition duration-500 group-hover:scale-105"
                 />
               ) : (
-                <div className="flex min-h-40 w-32 shrink-0 items-center justify-center bg-gradient-to-br from-blue-50 to-slate-100 text-3xl">
+                <div className="flex h-32 w-24 shrink-0 items-center justify-center bg-gradient-to-br from-blue-50 to-slate-100 text-2xl font-black text-blue-600">
                   AI
                 </div>
               )}
 
-              <div className="min-w-0 p-5">
+              <div className="flex min-w-0 flex-1 items-center p-4">
 
-                <p className="text-[10px] font-black tracking-[0.2em] text-blue-600">
-                  COLUMN
-                </p>
-
-                <h3 className="mt-2 line-clamp-2 text-lg font-black leading-relaxed text-slate-900 transition group-hover:text-blue-600">
+                <h3 className="line-clamp-3 text-base font-black leading-relaxed text-slate-900 transition group-hover:text-blue-600">
                   {column.title}
                 </h3>
-
-                {column.excerpt && (
-                  <p className="mt-2 line-clamp-2 text-xs leading-6 text-slate-500">
-                    {column.excerpt}
-                  </p>
-                )}
-
-                {column.publishedAt && (
-                  <p className="mt-3 text-[11px] font-bold text-slate-400">
-                    {new Date(column.publishedAt).toLocaleDateString("ja-JP")}
-                  </p>
-                )}
 
               </div>
 
@@ -173,8 +143,7 @@ export default async function ColumnPreview() {
           ))}
 
         </div>
-
-      </div>
+      )}
 
       {/* スマホ用一覧ボタン */}
       <div className="mt-5 sm:hidden">
@@ -188,4 +157,5 @@ export default async function ColumnPreview() {
 
     </section>
   );
+
 }
