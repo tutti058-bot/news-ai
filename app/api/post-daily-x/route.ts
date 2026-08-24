@@ -210,19 +210,74 @@ ${news.summary ?? ""}
     });
 
     let content =
-      cleanXPostText(response.choices[0]?.message?.content?.trim() ?? "");
+      response.choices[0]?.message?.content?.trim() ?? "";
 
-    content = content
-      .replace(/```json/g, "")
-      .replace(/```/g, "")
-      .trim();
+    // =========================
+    // X投稿用 最終クリーンアップ
+    // =========================
+
+    const cleanFinalXText = (value: string): string => {
+      let text = value.trim();
+
+      // コードブロック除去
+      text = text
+        .replace(/```json/gi, "")
+        .replace(/```/g, "")
+        .trim();
+
+      // JSONオブジェクトの場合
+      try {
+        const parsed = JSON.parse(text);
+
+        if (typeof parsed === "string") {
+          text = parsed;
+        } else if (parsed && typeof parsed === "object") {
+          const obj = parsed as Record<string, unknown>;
+
+          const candidates = [
+            obj.response,
+            obj.content,
+            obj.text,
+            obj.message,
+            obj.hook,
+            obj.description,
+          ];
+
+          const strings = candidates.filter(
+            (v): v is string => typeof v === "string" && v.trim().length > 0
+          );
+
+          if (strings.length > 0) {
+            text = strings.join("\n");
+          }
+        }
+      } catch {
+        // JSONでなければそのまま続行
+      }
+
+      // Markdown・JSON記号を除去
+      text = text
+        .replace(/^\s*["']+|["']+\s*$/g, "")
+        .replace(/^\s*\{+|\}+\s*$/g, "")
+        .replace(/^\s*\[+|\]+\s*$/g, "")
+        .replace(/^\s*[-*]\s+/gm, "")
+        .replace(/^\s*#+\s*/gm, "")
+        .replace(/\\n/g, " ")
+        .replace(/\\r/g, " ")
+        .replace(/\r?\n+/g, "\n")
+        .trim();
+
+      return text;
+    };
+
+    content = cleanFinalXText(content);
 
     let lines = content
       .split("\n")
+      .map((line) => cleanFinalXText(line))
       .map((line) => line.trim())
       .filter(Boolean);
 
-    // 余計な文章が入った場合でも最初の2行だけ使用
     lines = lines.slice(0, 2);
 
     let hook =
