@@ -2,6 +2,7 @@ import "./globals.css";
 import type { Metadata } from "next";
 import Script from "next/script";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
   title: {
@@ -73,25 +74,7 @@ export default function RootLayout({
 
         {children}
 
-        <footer className="mt-12 border-t border-gray-200">
-          <div className="mx-auto flex max-w-6xl justify-center gap-6 px-4 py-6 text-sm text-gray-500">
-            <a href="/privacy" className="hover:text-blue-600">
-              プライバシーポリシー
-            </a>
-
-            <a href="/contact" className="hover:text-blue-600">
-              お問い合わせ
-            </a>
-
-            <a href="/terms" className="hover:text-blue-600">
-              利用規約
-            </a>
-          </div>
-
-          <p className="pb-6 text-center text-xs text-gray-400">
-            © {new Date().getFullYear()} AI NEWS ジャパン
-          </p>
-        </footer>
+        <Footer />
       </body>
     </html>
   );
