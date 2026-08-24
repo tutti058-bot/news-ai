@@ -16,66 +16,63 @@ function cleanXPostText(value: unknown): string {
 
   // コードブロック除去
   text = text
-    .replace(/```json/gi, "")
-    .replace(/```text/gi, "")
-    .replace(/```/g, "")
+    .replace(/^```(?:json|text)?\s*/i, "")
+    .replace(/\s*```$/i, "")
     .trim();
 
-  // JSONとして解釈できる場合は本文だけ取り出す
-  for (let i = 0; i < 2; i++) {
+  // JSON文字列・JSONオブジェクトをキー名に関係なく再帰的に展開
+  for (let i = 0; i < 5; i++) {
+    let changed = false;
+
     try {
       const parsed = JSON.parse(text);
 
       if (typeof parsed === "string") {
         text = parsed.trim();
-        continue;
-      }
-
-      if (parsed && typeof parsed === "object") {
-        const obj = parsed as Record<string, unknown>;
-
-        const candidates = [
-          obj.result,
-          obj.response,
-          obj.content,
-          obj.text,
-          obj.message,
-          obj.hook,
-          obj.description,
-        ];
-
-        const found = candidates.find(
-          (v): v is string =>
-            typeof v === "string" && v.trim().length > 0
+        changed = true;
+      } else if (parsed && typeof parsed === "object") {
+        const values = Object.values(
+          parsed as Record<string, unknown>
         );
 
-        if (found) {
-          text = found.trim();
-          continue;
+        const stringValue = values.find(
+          (v): v is string =>
+            typeof v === "string" &&
+            v.trim().length > 0
+        );
+
+        if (stringValue) {
+          text = stringValue.trim();
+          changed = true;
         }
       }
     } catch {
-      // JSONではない通常の文章
+      // JSONではない通常テキスト
     }
 
-    break;
+    if (!changed) break;
   }
 
-  // JSON風の {"result":"..."} が文字列として残っている場合
+  // 文字列として残ったJSON風ラッパーを除去
   text = text
-    .replace(
-      /^\s*\{\s*["'](?:result|response|content|text|message|hook|description)["']\s*:\s*["']([\s\S]*?)["']\s*\}\s*$/i,
-      "$1"
-    )
     .replace(/^["']|["']$/g, "")
     .replace(/\\n/g, "\n")
     .replace(/\\r/g, "\r")
     .replace(/\\"/g, '"')
-    .replace(/^\s*[-*]\s+/gm, "")
-    .replace(/^\s*#+\s*/gm, "")
-    .replace(/\r?\n+/g, "\n")
-    .replace(/[^\S\r\n]+/g, " ")
     .trim();
+
+  // まだ {"任意のキー":"本文"} が残っている場合
+  const objectMatch = text.match(
+    /^\s*\{\s*["'][^"']+["']\s*:\s*["']([\s\S]*?)["']\s*\}\s*$/ 
+  );
+
+  if (objectMatch) {
+    text = objectMatch[1]
+      .replace(/\\"/g, '"')
+      .replace(/\\n/g, "\n")
+      .replace(/\\r/g, "\r")
+      .trim();
+  }
 
   return text;
 }
