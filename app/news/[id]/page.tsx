@@ -236,6 +236,35 @@ export default async function NewsDetail({
 
   const url = `https://tutti-news-ai-bay.vercel.app/news/${news.id}`;
 
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "NewsArticle",
+    headline: news.title,
+    description: news.summary ?? "",
+    image: [
+      news.image ??
+        "https://tutti-news-ai-bay.vercel.app/news.jpg",
+    ],
+    datePublished: news.publishedAt
+      ? news.publishedAt.toISOString()
+      : undefined,
+    dateModified: news.publishedAt
+      ? news.publishedAt.toISOString()
+      : undefined,
+    author: {
+      "@type": "Organization",
+      name: "AI NEWS ジャパン",
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "AI NEWS ジャパン",
+    },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": url,
+    },
+  };
+
   const hashtags: string[] = [];
 
   switch (news.category) {
@@ -379,7 +408,15 @@ ${url}
 「${yansuComment}」`;
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-8 sm:py-10">
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(structuredData),
+        }}
+      />
+
+      <main className="mx-auto max-w-6xl px-4 py-8 sm:py-10">
 
       <Link
         href="/"
@@ -945,5 +982,6 @@ ${url}
       </section>
 
     </main>
+    </>
   );
 }
