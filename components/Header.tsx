@@ -83,6 +83,7 @@ export default function Header() {
             name="q"
             placeholder="ニュース検索..."
             className="ml-2 w-44 bg-transparent outline-none"
+            suppressHydrationWarning
           />
 
           <button
