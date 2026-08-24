@@ -26,9 +26,16 @@ export async function generateMetadata({
     };
   }
 
+  const canonicalUrl =
+    `https://tutti-news-ai-bay.vercel.app/news/${news.id}`;
+
   return {
     title: news.title,
     description: news.summary ?? "",
+
+    alternates: {
+      canonical: canonicalUrl,
+    },
 
     openGraph: {
       title: news.title,
