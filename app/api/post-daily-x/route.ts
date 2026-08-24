@@ -210,7 +210,7 @@ ${url}`;
       hook,
       description,
       intentUrl:
-        "https://twitter.com/intent/tweet?text=" +
+        "https://x.com/intent/post?text=" +
         encodeURIComponent(tweet),
     });
   } catch (error) {
