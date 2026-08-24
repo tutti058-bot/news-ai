@@ -305,7 +305,7 @@ export async function syncNews(limit?: number) {
      * =========================
      *
      * 通常ニュース
-     * → 最大20件
+     * → 最大8件
      *
      * サッカーニュース
      * → ゲキサカ最大3件
@@ -316,7 +316,7 @@ export async function syncNews(limit?: number) {
 
     if (
       entertainment &&
-      entertainmentAdded >= 10
+      entertainmentAdded >= 8
     ) {
       continue;
     }
@@ -341,16 +341,16 @@ export async function syncNews(limit?: number) {
       !entertainment &&
       !soccer &&
       (item.category ?? "") !== "テクノロジー" &&
-      normalAdded >= 20
+      normalAdded >= 5
     ) {
       continue;
     }
 
     // 必要件数に達したカテゴリは以降の候補を処理しない
     if (
-      entertainment && entertainmentAdded >= 10 ||
+      entertainment && entertainmentAdded >= 8 ||
       soccer && soccerAdded >= 3 ||
-      !entertainment && !soccer && normalAdded >= 20
+      !entertainment && !soccer && normalAdded >= 5
     ) {
       continue;
     }
