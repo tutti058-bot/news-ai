@@ -182,13 +182,12 @@ ${news.summary ?? ""}
 
     hook = hook
       .replace(/^「|」$/g, "")
-      .replace(/でやんすね$/g, "")
-      .replace(/でやんす$/g, "")
+      .replace(/でやんす[！!]?$/g, "")
       .trim();
 
     description = description
       .replace(/^「|」$/g, "")
-      .replace(/でやんす$/g, "")
+      .replace(/でやんす[！!]?$/g, "")
       .trim();
 
     hook = `${hook}でやんす`;
