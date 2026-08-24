@@ -14,39 +14,68 @@ function cleanXPostText(value: unknown): string {
 
   let text = value.trim();
 
-  // {"response":"..."} のJSONを通常の文章に変換
-  try {
-    const parsed = JSON.parse(text);
-
-    if (
-      parsed &&
-      typeof parsed === "object" &&
-      typeof parsed.response === "string"
-    ) {
-      text = parsed.response.trim();
-    }
-  } catch {
-    // JSONでなければそのまま
-  }
-
-  // Markdownコードブロック除去
+  // コードブロック除去
   text = text
-    .replace(/^```(?:json|text)?\s*/i, "")
-    .replace(/\s*```$/i, "")
+    .replace(/```json/gi, "")
+    .replace(/```text/gi, "")
+    .replace(/```/g, "")
     .trim();
 
-  // JSON文字列が残っている場合の最終防御
-  const match = text.match(
-    /^\s*\{\s*"response"\s*:\s*"([\s\S]*)"\s*\}\s*$/
-  );
+  // JSONとして解釈できる場合は本文だけ取り出す
+  for (let i = 0; i < 2; i++) {
+    try {
+      const parsed = JSON.parse(text);
 
-  if (match) {
-    text = match[1]
-      .replace(/\\"/g, '"')
-      .replace(/\\n/g, "\n")
-      .replace(/\\\\/g, "\\")
-      .trim();
+      if (typeof parsed === "string") {
+        text = parsed.trim();
+        continue;
+      }
+
+      if (parsed && typeof parsed === "object") {
+        const obj = parsed as Record<string, unknown>;
+
+        const candidates = [
+          obj.result,
+          obj.response,
+          obj.content,
+          obj.text,
+          obj.message,
+          obj.hook,
+          obj.description,
+        ];
+
+        const found = candidates.find(
+          (v): v is string =>
+            typeof v === "string" && v.trim().length > 0
+        );
+
+        if (found) {
+          text = found.trim();
+          continue;
+        }
+      }
+    } catch {
+      // JSONではない通常の文章
+    }
+
+    break;
   }
+
+  // JSON風の {"result":"..."} が文字列として残っている場合
+  text = text
+    .replace(
+      /^\s*\{\s*["'](?:result|response|content|text|message|hook|description)["']\s*:\s*["']([\s\S]*?)["']\s*\}\s*$/i,
+      "$1"
+    )
+    .replace(/^["']|["']$/g, "")
+    .replace(/\\n/g, " ")
+    .replace(/\\r/g, " ")
+    .replace(/\\"/g, '"')
+    .replace(/^\s*[-*]\s+/gm, "")
+    .replace(/^\s*#+\s*/gm, "")
+    .replace(/\r?\n+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 
   return text;
 }
@@ -305,7 +334,16 @@ ${news.summary ?? ""}
     // 「でやんす」はフックの最後に1回だけ
     hook = `${hook}でやんす`;
 
-    const tweet = `やんすAI
+    // X投稿へ渡す直前に、hook / description を最終クリーンアップ
+    hook = cleanXPostText(hook)
+      .replace(/^「|」$/g, "")
+      .trim();
+
+    description = cleanXPostText(description)
+      .replace(/^「|」$/g, "")
+      .trim();
+
+    let tweet = `やんすAI
 「${hook}」
 ${description}
 
@@ -313,6 +351,12 @@ AI評価：${score}点／100点
 
 👇 詳細はこちら
 ${url}`;
+
+    // tweet全体にJSONが混入していた場合の最終防御
+    tweet = tweet
+      .replace(/```(?:json|text)?/gi, "")
+      .replace(/```/g, "")
+      .trim();
 
     return NextResponse.json({
       tweet,
