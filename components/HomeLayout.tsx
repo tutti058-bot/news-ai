@@ -2,7 +2,6 @@ import SearchBar from "./SearchBar";
 import Hero from "./Hero";
 import NewsGrid from "./NewsGrid";
 import Sidebar from "./Sidebar";
-import Footer from "./Footer";
 import ColumnPreview from "./ColumnPreview";
 
 type Props = {
@@ -49,7 +48,6 @@ export default function HomeLayout({
 
       </div>
 
-      <Footer />
 
     </main>
   );
