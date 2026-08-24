@@ -24,6 +24,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified: item.publishedAt ?? new Date(),
   }));
 
+  const categories = [
+    "国内",
+    "芸能",
+    "スポーツ",
+    "経済",
+    "テクノロジー",
+  ];
+
+  const categoryUrls: MetadataRoute.Sitemap = categories.map((category) => ({
+    url: `${baseUrl}/category/${encodeURIComponent(category)}`,
+    lastModified: new Date(),
+  }));
+
   const columns = await prisma.column.findMany({
     where: {
       isPublished: true,
@@ -70,6 +83,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(),
     },
     ...newsUrls,
+    ...categoryUrls,
     ...columnUrls,
   ];
 }
