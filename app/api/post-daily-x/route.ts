@@ -241,6 +241,7 @@ ${news.summary ?? ""}
             obj.message,
             obj.hook,
             obj.description,
+            obj.result,
           ];
 
           const strings = candidates.filter(
