@@ -2,55 +2,108 @@ import { NextResponse } from "next/server";
 import OpenAI from "openai";
 import { prisma } from "@/lib/prisma";
 
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
-function cleanXPostText(value: unknown): string {
+function cleanText(value: unknown): string {
   if (typeof value !== "string") {
     return String(value ?? "");
   }
 
   let text = value.trim();
 
-  // {"response":"..."} のJSONを通常の文章に変換
-  try {
-    const parsed = JSON.parse(text);
-
-    if (
-      parsed &&
-      typeof parsed === "object" &&
-      typeof parsed.response === "string"
-    ) {
-      text = parsed.response.trim();
-    }
-  } catch {
-    // JSONでなければそのまま
-  }
-
-  // Markdownのコードブロックを除去
+  // コードブロック除去
   text = text
     .replace(/^```(?:json|text)?\s*/i, "")
     .replace(/\s*```$/i, "")
     .trim();
 
-  // JSON文字列が残っている場合の最終防御
-  const match = text.match(
-    /^\s*\{\s*"response"\s*:\s*"([\s\S]*)"\s*\}\s*$/
-  );
+  // JSON文字列が残っている場合に可能な限り展開
+  for (let i = 0; i < 2; i++) {
+    try {
+      const parsed = JSON.parse(text);
 
-  if (match) {
-    text = match[1]
-      .replace(/\\"/g, '"')
-      .replace(/\\n/g, "\n")
-      .replace(/\\\\/g, "\\")
-      .trim();
+      if (typeof parsed === "string") {
+        text = parsed.trim();
+        continue;
+      }
+
+      if (parsed && typeof parsed === "object") {
+        const obj = parsed as Record<string, unknown>;
+
+        const candidates = [
+          obj.hook,
+          obj.description,
+          obj.result,
+          obj.response,
+          obj.content,
+          obj.text,
+          obj.message,
+        ];
+
+        const found = candidates.find(
+          (v): v is string =>
+            typeof v === "string" && v.trim().length > 0
+        );
+
+        if (found) {
+          text = found.trim();
+          continue;
+        }
+      }
+    } catch {
+      // 通常の文章
+    }
+
+    break;
   }
+
+  // JSON風文字列を除去
+  text = text
+    .replace(
+      /^\s*\{\s*["'](?:result|response|content|text|message|hook|description)["']\s*:\s*["']([\s\S]*?)["']\s*\}\s*$/i,
+      "$1"
+    )
+    .replace(/\\"/g, '"')
+    .replace(/\\n/g, "\n")
+    .replace(/\\r/g, "\r")
+    .replace(/^\s*[-*]\s+/gm, "")
+    .replace(/^\s*#+\s*/gm, "")
+    .trim();
 
   return text;
 }
 
+function cleanHook(value: unknown): string {
+  let text = cleanText(value)
+    .replace(/^「|」$/g, "")
+    .replace(/でやんす[！!]?$/g, "")
+    .trim();
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+  // JSON風の外側が残った場合
+  text = text
+    .replace(/^\s*\{\s*["'][^"']*["']\s*:\s*["']?/g, "")
+    .replace(/["']\s*\}\s*$/g, "")
+    .trim();
+
+  return `${text}でやんす`;
+}
+
+function cleanDescription(value: unknown): string {
+  let text = cleanText(value)
+    .replace(/^「|」$/g, "")
+    .replace(/でやんす[！!]?$/g, "")
+    .trim();
+
+  // JSON風の外側が残った場合
+  text = text
+    .replace(/^\s*\{\s*["'][^"']*["']\s*:\s*["']?/g, "")
+    .replace(/["']\s*\}\s*$/g, "")
+    .trim();
+
+  return text;
+}
 
 export async function POST() {
   try {
@@ -70,7 +123,6 @@ export async function POST() {
     }
 
     const url = `https://tutti-news-ai-bay.vercel.app/news/${news.id}`;
-
     const score = news.score ?? 60;
 
     const response = await openai.chat.completions.create({
@@ -81,101 +133,31 @@ export async function POST() {
           content: `
 あなたはAI NEWS ジャパン専属AIニュースキャスター「やんすAI」です。
 
-ニュース記事を読んで、X投稿用の短い文章を作成してください。
-
-【最終的な投稿形式】
-
-やんすAI
-「フック」
-短い説明
-
-AI評価：○○点／100点
-
-👇 詳細はこちら
-URL
+ニュース記事を読み、X投稿用の「フック」と「短い説明」を作成してください。
 
 【フック】
-
 20〜50文字程度。
-
-タイトルをそのまま言い換えないでください。
-
-読者が
-「え、どういうこと？」
-「それは気になる」
-と思って記事を開きたくなる切り口にしてください。
-
-記事にある具体的な数字、量、金額、人数、記録、変化などが使える場合は積極的に使ってください。
-
-数字がない場合は、
-・意外な事実
-・問いかけ
-・具体的なポイント
-・意外な組み合わせ
-などを使ってください。
-
-記事に存在しない数字や事実は絶対に作らないでください。
-
-「実は」「まさか」「え？」を毎回使わないでください。
-
-【重要】
+読者が「え、どういうこと？」と思って記事を開きたくなる内容。
+タイトルの単純な言い換えは禁止。
+記事に存在しない数字・事実は禁止。
 
 フックには「でやんす」を付けないでください。
 
 【短い説明】
-
 20〜45文字程度。
-
-フックを見た人が続きを知りたくなる文章にしてください。
-
-例えば、
-
-「その仕組みとは？」
-「なぜこうなった？」
-「その理由とは？」
-「今後どうなる？」
-
-などです。
-
-ニュースの具体的なポイントを少しだけ入れてください。
-
-長い要約は禁止です。
-
+ニュースの核心を少しだけ伝え、続きを読みたくなる内容。
 記事の内容を説明し切らないでください。
+「詳しくは記事で」「詳細はこちら」などは禁止。
+「でやんす」は付けないでください。
 
-「詳しくは記事で」
-「詳細はこちら」
-などのURL誘導文は禁止です。
-
-短い説明の最後には「でやんす」を自然に1回だけ付けてください。
-
-【非常に重要】
-
-出力は必ず2行だけです。
-
-1行目：フック
-2行目：短い説明
-
-JSON禁止。
-Markdown禁止。
-コードブロック禁止。
-「やんすAI」という名前は禁止。
-「AI評価」という文字は禁止。
-URL禁止。
-ハッシュタグ禁止。
-
-【例】
-
-1日400トンの鶏糞が電力に変わるって知ってた？
-約1万世帯分の電力を生み出す、その仕組みとは？でやんす
-
-別の例：
-
-136件の論文から見えてきた「肌の若返り」の実態？
-レーザーやマイクロニードルの効果を科学的に検証。でやんす
-
-【記事情報】
-
+【重要】
+構造化されたJSONとして返してください。
+hook と description の2項目だけを返してください。
+`,
+        },
+        {
+          role: "user",
+          content: `
 タイトル：
 ${news.title}
 
@@ -189,62 +171,49 @@ AI評価：
 ${score}点
 `,
         },
-        {
-          role: "user",
-          content: `
-タイトル：
-${news.title}
-
-要約：
-${news.summary ?? ""}
-
-「フック」
-「短い説明」
-の2行だけを作成してください。
-`,
-        },
       ],
-      temperature: 0.9,
+      temperature: 0.8,
       max_tokens: 120,
+      response_format: {
+        type: "json_schema",
+        json_schema: {
+          name: "x_post",
+          strict: true,
+          schema: {
+            type: "object",
+            properties: {
+              hook: {
+                type: "string",
+              },
+              description: {
+                type: "string",
+              },
+            },
+            required: ["hook", "description"],
+            additionalProperties: false,
+          },
+        },
+      },
     });
 
-    let content =
-      cleanXPostText(
-        response.choices[0]?.message?.content?.trim() ?? ""
+    const rawContent =
+      response.choices[0]?.message?.content?.trim() ?? "";
+
+    let parsed: {
+      hook: string;
+      description: string;
+    };
+
+    try {
+      parsed = JSON.parse(rawContent);
+    } catch {
+      throw new Error(
+        "AIの構造化出力を解析できませんでした"
       );
+    }
 
-    content = content
-      .replace(/```json/g, "")
-      .replace(/```/g, "")
-      .trim();
-
-    const lines = content
-      .split("\n")
-      .map((line) => line.trim())
-      .filter(Boolean)
-      .slice(0, 2);
-
-    let hook =
-      lines[0] ??
-      "このニュース、知っておきたいポイントは？";
-
-    let description =
-      lines[1] ??
-      "その背景と詳しい内容とは？でやんす";
-
-    hook = hook
-      .replace(/^「|」$/g, "")
-      .replace(/でやんすね/g, "")
-      .replace(/でやんす/g, "")
-      .trim();
-
-    description = description
-      .replace(/^「|」$/g, "")
-      .replace(/でやんすね/g, "")
-      .replace(/でやんす/g, "")
-      .trim();
-
-    description = `${description}でやんす`;
+    const hook = cleanHook(parsed.hook);
+    const description = cleanDescription(parsed.description);
 
     const tweet = `やんすAI
 「${hook}」
@@ -254,6 +223,20 @@ AI評価：${score}点／100点
 
 👇 詳細はこちら
 ${url}`;
+
+    // 最終チェック
+    if (
+      tweet.includes('{"') ||
+      tweet.includes('{"result"') ||
+      tweet.includes('{"response"') ||
+      tweet.includes('{"content"') ||
+      tweet.includes('{"hook"') ||
+      tweet.includes('{"description"')
+    ) {
+      throw new Error(
+        "X投稿にJSON文字列が混入したため投稿を中止しました"
+      );
+    }
 
     return NextResponse.json({
       tweet,
