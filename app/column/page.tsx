@@ -226,38 +226,20 @@ export default async function ColumnPage() {
                     <Link
                       key={column.id}
                       href={`/column/${column.slug}`}
-                      className="group overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl"
+                      className="group flex min-h-[390px] items-center rounded-3xl border border-slate-200 bg-white p-8 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl"
                     >
-                      <div className="overflow-hidden">
-                        <ColumnImage column={column} />
-                      </div>
+                      <div>
+                        <p className="text-xs font-black tracking-[0.2em] text-blue-600">
+                          COLUMN
+                        </p>
 
-                      <div className="p-6">
-
-                        <div className="flex items-center gap-3">
-                          <span className="text-xs font-black tracking-widest text-blue-600">
-                            COLUMN
-                          </span>
-
-                          <span className="text-xs text-slate-400">
-                            {formatDate(column.publishedAt)}
-                          </span>
-                        </div>
-
-                        <h2 className="mt-3 line-clamp-2 text-xl font-black leading-relaxed text-slate-900 group-hover:text-blue-600">
+                        <h2 className="mt-4 text-xl font-black leading-relaxed text-slate-900 group-hover:text-blue-600">
                           {column.title}
                         </h2>
 
-                        {column.excerpt && (
-                          <p className="mt-3 line-clamp-2 text-sm leading-7 text-slate-500">
-                            {column.excerpt}
-                          </p>
-                        )}
-
-                        <div className="mt-5 text-sm font-black text-blue-600">
-                          読む →
-                        </div>
-
+                        <p className="mt-4 text-xs font-bold text-slate-400">
+                          {formatDate(column.publishedAt)}
+                        </p>
                       </div>
                     </Link>
                   ))}

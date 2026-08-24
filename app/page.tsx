@@ -126,50 +126,57 @@ export default async function Home({
             公開中のコラムはありません。
           </div>
         ) : (
-          <div className="grid gap-5 md:grid-cols-3">
-            {columns.map((column) => (
+          <div className="grid gap-5 md:grid-cols-[2fr_1fr]">
+            {columns[0] && (
               <Link
-                key={column.id}
-                href={`/column/${column.slug}`}
+                href={`/column/${columns[0].slug}`}
                 className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
               >
-                {column.image ? (
+                {columns[0].image ? (
                   <img
-                    src={column.image}
-                    alt={column.title}
-                    className="h-48 w-full object-cover transition duration-300 group-hover:scale-105"
+                    src={columns[0].image}
+                    alt={columns[0].title}
+                    className="h-64 w-full object-cover transition duration-300 group-hover:scale-105"
                   />
                 ) : (
-                  <div className="flex h-48 w-full items-center justify-center bg-slate-100 text-4xl">
+                  <div className="flex h-64 w-full items-center justify-center bg-slate-100 text-4xl">
                     📝
                   </div>
                 )}
 
-                <div className="p-5">
+                <div className="p-6">
                   <p className="text-xs font-bold text-blue-600">
                     COLUMN
                   </p>
 
-                  <h3 className="mt-2 line-clamp-2 text-lg font-black leading-relaxed text-slate-900 group-hover:text-blue-600">
-                    {column.title}
+                  <h3 className="mt-2 text-2xl font-black leading-relaxed text-slate-900 group-hover:text-blue-600">
+                    {columns[0].title}
                   </h3>
 
-                  {column.excerpt && (
-                    <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-slate-500">
-                      {column.excerpt}
+                  {columns[0].excerpt && (
+                    <p className="mt-3 text-sm leading-relaxed text-slate-500">
+                      {columns[0].excerpt}
                     </p>
                   )}
-
-                  <p className="mt-4 text-xs text-slate-400">
-                    {column.publishedAt
-                      ? new Date(column.publishedAt).toLocaleDateString(
-                          "ja-JP"
-                        )
-                      : ""}
-                  </p>
                 </div>
               </Link>
-            ))}
+            )}
+
+            {columns.length > 1 && (
+              <div className="flex flex-col divide-y divide-slate-200 rounded-2xl border border-slate-200 bg-white">
+                {columns.slice(1).map((column) => (
+                  <Link
+                    key={column.id}
+                    href={`/column/${column.slug}`}
+                    className="group flex items-center p-6 transition hover:bg-slate-50"
+                  >
+                    <h3 className="text-lg font-black leading-relaxed text-slate-900 group-hover:text-blue-600">
+                      {column.title}
+                    </h3>
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </section>

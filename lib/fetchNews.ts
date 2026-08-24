@@ -19,6 +19,15 @@ const feeds: Feed[] = [
   },
 
   // =========================
+  // 大谷翔平
+  // =========================
+  {
+    source: "Google News 大谷翔平",
+    url: "https://news.google.com/rss/search?q=%E5%A4%A7%E8%B0%B7%E7%BF%94%E5%B9%B3&hl=ja&gl=JP&ceid=JP:ja",
+    category: "スポーツ",
+  },
+
+  // =========================
   // テクノロジー
   // =========================
   {
@@ -105,6 +114,46 @@ function normalizeUrl(value: unknown): string {
  * ORICONはRSSではなくHTMLを取得する。
  * ページはShift_JISなのでiconv-liteでデコードする。
  */
+function shouldExcludeNews(item: any): boolean {
+  const title = String(item.title ?? "");
+  const category = String(item.feedCategory ?? "");
+  const source = String(item.source ?? "");
+
+  // =========================
+  // サッカー：育成年代・小学生記事を除外
+  // =========================
+  if (category === "サッカー" || source === "ゲキサカ") {
+    const youthPattern =
+      /小学生|小学|U[- ]?(?:6|7|8|9|10|11|12|13|14|15|16|17|18)|ジュニア|少年|女子中学|中学生|高校生|高校サッカー|中学サッカー/i;
+
+    if (youthPattern.test(title)) {
+      return true;
+    }
+
+    // 試合結果・スコア速報だけの記事を除外
+    const resultPattern =
+      /試合結果|結果速報|スコア速報|[0-9０-９]+[-－][0-9０-９]+(?:で|の)?(?:勝利|敗戦|完勝|逆転勝ち)?/;
+
+    if (resultPattern.test(title)) {
+      return true;
+    }
+  }
+
+  // =========================
+  // 芸能：ドラマ・番宣系を除外
+  // =========================
+  if (category === "芸能" || source === "マイナビ芸能" || source === "ORICON NEWS") {
+    const promoPattern =
+      /番宣|番組宣伝|ドラマ.*(?:放送|出演|スタート|開始|告知)|(?:放送|出演).*ドラマ|ドラマ.*最終回|ドラマ.*第[0-9０-９]+話|ドラマ.*主題歌|ドラマ.*キャスト|ドラマ.*撮影/i;
+
+    if (promoPattern.test(title)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 async function fetchOriconNews() {
   const news: any[] = [];
 
@@ -407,12 +456,24 @@ export async function fetchNews() {
   news.push(...oriconNews);
 
   // =========================
+  // 不要記事を除外
+  // =========================
+
+  const filteredNews = news.filter(
+    (item) => !shouldExcludeNews(item)
+  );
+
+  console.log(
+    `フィルター後: ${filteredNews.length}件`
+  );
+
+  // =========================
   // 全体の重複除去
   // =========================
 
   const uniqueNews = Array.from(
     new Map(
-      news.map((item) => [
+      filteredNews.map((item) => [
         normalizeUrl(item.link),
         item,
       ])
