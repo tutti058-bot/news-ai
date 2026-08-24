@@ -615,6 +615,79 @@ ${url}
 
       </div>
 
+      {/* やんすAIの視点 */}
+      <section className="mt-8 overflow-hidden rounded-3xl border border-blue-100 bg-gradient-to-br from-blue-50 via-white to-slate-50 shadow-lg">
+
+        <div className="border-b border-blue-100 px-6 py-5 sm:px-8">
+
+          <p className="text-xs font-black tracking-[0.2em] text-blue-600">
+            YANSU AI VIEW
+          </p>
+
+          <h2 className="mt-1 text-xl font-black text-slate-900 sm:text-2xl">
+            やんすAIの視点
+          </h2>
+
+          <p className="mt-2 text-sm leading-6 text-slate-500">
+            AI NEWS ジャパン独自の視点から、このニュースをひとこと解説します。
+          </p>
+
+        </div>
+
+        <div className="p-6 sm:p-8">
+
+          <div className="rounded-2xl bg-white p-5 shadow-sm sm:p-6">
+
+            <div className="flex items-center gap-3">
+
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-600 text-lg font-black text-white">
+                や
+              </div>
+
+              <div>
+                <p className="font-black text-slate-900">
+                  やんすAI
+                </p>
+
+                <p className="text-xs text-slate-400">
+                  AI NEWS ジャパン
+                </p>
+              </div>
+
+            </div>
+
+            <p className="mt-5 text-base font-bold leading-8 text-slate-700 sm:text-lg">
+              「{yansuComment}」
+            </p>
+
+          </div>
+
+          <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-5">
+
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+
+              <div>
+                <h3 className="font-black text-slate-900">
+                  AI NEWS ジャパン独自評価
+                </h3>
+
+                <p className="mt-1 text-xs leading-5 text-slate-400">
+                  ニュースの重要度・話題性・影響範囲などを総合的に評価しています。
+                </p>
+              </div>
+
+              <span className="w-fit rounded-full bg-amber-400 px-4 py-2 text-lg font-black text-slate-900">
+                {news.score ?? 0}点
+              </span>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
       {/* おすすめサービス */}
       {recommendedAffiliates.length > 0 && (
         <section className="mt-10 rounded-3xl border border-slate-200 bg-white shadow-sm">
