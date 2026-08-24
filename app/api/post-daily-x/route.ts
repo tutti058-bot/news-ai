@@ -68,13 +68,13 @@ function cleanXPostText(value: unknown): string {
       "$1"
     )
     .replace(/^["']|["']$/g, "")
-    .replace(/\\n/g, " ")
-    .replace(/\\r/g, " ")
+    .replace(/\\n/g, "\n")
+    .replace(/\\r/g, "\r")
     .replace(/\\"/g, '"')
     .replace(/^\s*[-*]\s+/gm, "")
     .replace(/^\s*#+\s*/gm, "")
-    .replace(/\r?\n+/g, " ")
-    .replace(/\s+/g, " ")
+    .replace(/\r?\n+/g, "\n")
+    .replace(/[^\S\r\n]+/g, " ")
     .trim();
 
   return text;
