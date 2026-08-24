@@ -775,8 +775,18 @@ export default function AdminClient() {
       console.log("description:", data.description);
       console.log("intentUrl:", data.intentUrl);
 
+      // APIから返ってきた最新のtweet本文から
+      // X投稿URLを管理画面側で直接生成する
+      const freshIntentUrl =
+        "https://twitter.com/intent/tweet?text=" +
+        encodeURIComponent(data.tweet);
+
+      console.log("===== X投稿デバッグ =====");
+      console.log("API tweet:", data.tweet);
+      console.log("Fresh intentUrl:", freshIntentUrl);
+
       window.open(
-        data.intentUrl,
+        freshIntentUrl,
         "_blank"
       );
 
