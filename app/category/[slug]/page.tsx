@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import NewsCard from "@/components/NewsCard";
+import type { Metadata } from "next";
 
 type Props = {
   params: Promise<{
@@ -10,6 +11,19 @@ type Props = {
     page?: string;
   }>;
 };
+
+export async function generateMetadata({
+  params,
+}: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const category = decodeURIComponent(slug);
+
+  return {
+    title: `${category}ニュース`,
+    description:
+      `${category}に関する最新ニュースをAIがわかりやすくお届けします。`,
+  };
+}
 
 const categories = [
   "国内",

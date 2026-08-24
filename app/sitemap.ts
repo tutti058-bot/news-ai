@@ -4,6 +4,26 @@ import { prisma } from "@/lib/prisma";
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://tutti-news-ai-bay.vercel.app";
 
+  const news = await prisma.news.findMany({
+    where: {
+      publishedAt: {
+        not: null,
+      },
+    },
+    select: {
+      id: true,
+      publishedAt: true,
+    },
+    orderBy: {
+      publishedAt: "desc",
+    },
+  });
+
+  const newsUrls: MetadataRoute.Sitemap = news.map((item) => ({
+    url: `${baseUrl}/news/${item.id}`,
+    lastModified: item.publishedAt ?? new Date(),
+  }));
+
   const columns = await prisma.column.findMany({
     where: {
       isPublished: true,
@@ -49,6 +69,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${baseUrl}/terms`,
       lastModified: new Date(),
     },
+    ...newsUrls,
     ...columnUrls,
   ];
 }
