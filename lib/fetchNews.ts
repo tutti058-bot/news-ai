@@ -124,7 +124,7 @@ function shouldExcludeNews(item: any): boolean {
   // =========================
   if (category === "サッカー" || source === "ゲキサカ") {
     const youthPattern =
-      /小学生|小学|U[- ]?(?:6|7|8|9|10|11|12|13|14|15|16|17|18)|ジュニア|少年|女子中学|中学生|高校生|高校サッカー|中学サッカー/i;
+      /小学生|小学|U[- ]?(?:12|15|18|21|23)|ジュニア|少年|女子中学|中学生|高校生|高校サッカー|中学サッカー/i;
 
     if (youthPattern.test(title)) {
       return true;
