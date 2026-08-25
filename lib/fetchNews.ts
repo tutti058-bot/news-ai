@@ -19,15 +19,6 @@ const feeds: Feed[] = [
   },
 
   // =========================
-  // 大谷翔平
-  // =========================
-  {
-    source: "Google News 大谷翔平",
-    url: "https://news.google.com/rss/search?q=%E5%A4%A7%E8%B0%B7%E7%BF%94%E5%B9%B3&hl=ja&gl=JP&ceid=JP:ja",
-    category: "スポーツ",
-  },
-
-  // =========================
   // テクノロジー
   // =========================
   {
