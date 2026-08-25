@@ -258,6 +258,12 @@ export default async function NewsDetail({
     publisher: {
       "@type": "Organization",
       name: "AI NEWS ジャパン",
+      logo: {
+        "@type": "ImageObject",
+        url: "https://tutti-news-ai-bay.vercel.app/logo02.png",
+        width: 512,
+        height: 200,
+      },
     },
     mainEntityOfPage: {
       "@type": "WebPage",
