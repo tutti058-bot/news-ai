@@ -690,8 +690,12 @@ ${url}
 
             <div className="flex items-center gap-3">
 
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-600 text-lg font-black text-white">
-                や
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full">
+                <img
+                  src="/yans-ai.jpg"
+                  alt="やんすAI"
+                  className="h-full w-full object-cover"
+                />
               </div>
 
               <div>
