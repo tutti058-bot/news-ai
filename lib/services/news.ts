@@ -16,8 +16,7 @@ function normalizeUrl(url: string): string {
 function normalizeTitle(title: string): string {
   return title
     .toLowerCase()
-    .replace(/[「」『』【】［］（）()！？!?。、,.・:：;；]/g, "")
-    .replace(/\s+/g, "")
+    .replace(/[「」『』【】［］（）()！？!?。、,.・:：;；\s]/g, "")
     .trim();
 }
 
@@ -48,42 +47,20 @@ function isSimilarTitle(
   }
 
   /*
-   * タイトルの主要部分が共通している
-   * 類似ニュースを除外する。
+   * タイトルの共通部分を確認
    *
-   * 例：
-   * 「大谷翔平が30号本塁打」
-   * 「大谷翔平が31号本塁打」
-   *
-   * のように細部だけ違う記事を弾く。
+   * 大谷翔平など同一人物について、
+   * 細部だけ違う記事を重複掲載しない。
    */
 
-  const keywordsA = a
-    .split(/[「」『』【】\[\]（）()！？!?。、,.・:：;；\s]+/)
-    .filter((word) => word.length >= 2);
-
-  const keywordsB = b
-    .split(/[「」『』【】\[\]（）()！？!?。、,.・:：;；\s]+/)
-    .filter((word) => word.length >= 2);
-
-  if (keywordsA.length === 0 || keywordsB.length === 0) {
-    return false;
-  }
-
-  const commonCount = keywordsA.filter((word) =>
-    keywordsB.some(
-      (other) =>
-        other === word ||
-        other.includes(word) ||
-        word.includes(other)
-    )
+  const commonChars = [...a].filter((char) =>
+    b.includes(char)
   ).length;
 
   const similarity =
-    commonCount /
-    Math.min(keywordsA.length, keywordsB.length);
+    commonChars / Math.min(a.length, b.length);
 
-  return similarity >= 0.6;
+  return similarity >= 0.75;
 }
 
 /**
