@@ -47,10 +47,31 @@ function isSimilarTitle(
   }
 
   /*
-   * タイトルの共通部分を確認
+   * 数字が異なる場合は別ニュースとして扱う。
    *
-   * 大谷翔平など同一人物について、
-   * 細部だけ違う記事を重複掲載しない。
+   * 例：
+   * 「大谷翔平が30号本塁打」
+   * 「大谷翔平が31号本塁打」
+   *
+   * → 別ニュース
+   */
+
+  const numbersA = a.match(/\d+/g) ?? [];
+  const numbersB = b.match(/\d+/g) ?? [];
+
+  if (
+    numbersA.length > 0 &&
+    numbersB.length > 0 &&
+    numbersA.join(",") !== numbersB.join(",")
+  ) {
+    return false;
+  }
+
+  /*
+   * 共通する文字の割合を確認。
+   *
+   * 主要な文章がほぼ同じ場合だけ
+   * 類似記事として扱う。
    */
 
   const commonChars = [...a].filter((char) =>
