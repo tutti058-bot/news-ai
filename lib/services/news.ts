@@ -341,7 +341,33 @@ export async function syncNews(limit?: number) {
 
     if (hasSimilarTitle) {
       console.log(
-        "類似記事候補をスキップ:",
+        "既存記事との類似のためスキップ:",
+        candidateTitle
+      );
+      continue;
+    }
+
+    /*
+     * =========================
+     * 今回の取得候補同士の類似チェック
+     * =========================
+     *
+     * 同じ同期処理で取得した
+     * 大谷翔平などの類似ニュースを
+     * 複数掲載しない。
+     */
+    const hasCandidateSimilarTitle =
+      candidateItems.some(
+        (candidate) =>
+          isSimilarTitle(
+            candidateTitle,
+            candidate.title ?? ""
+          )
+      );
+
+    if (hasCandidateSimilarTitle) {
+      console.log(
+        "今回の候補内で類似のためスキップ:",
         candidateTitle
       );
       continue;
