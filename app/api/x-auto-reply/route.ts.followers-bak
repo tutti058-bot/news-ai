@@ -1,0 +1,153 @@
+import { NextResponse } from "next/server";
+import OpenAI from "openai";
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+export async function GET() {
+  try {
+    const query =
+      '("達成しました" OR "達成した" OR "達成！" OR "達成!" OR "人達成" OR "目標達成") -is:retweet lang:ja';
+
+    const searchUrl =
+      "https://api.x.com/2/tweets/search/recent?" +
+      new URLSearchParams({
+        query,
+        max_results: "20",
+        "tweet.fields": "author_id,created_at,text",
+      }).toString();
+
+    // 検索はBearer Token
+    const response = await fetch(searchUrl, {
+      headers: {
+        Authorization: `Bearer ${process.env.X_ACCESS_TOKEN}`,
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      return NextResponse.json(
+        {
+          error: "X API検索エラー",
+          detail: data,
+        },
+        { status: response.status }
+      );
+    }
+
+    const tweets = data.data ?? [];
+
+    // AIに「本当の達成報告か」を判定させる
+    const candidates = [];
+
+    for (const tweet of tweets) {
+      if (candidates.length >= 3) break;
+
+      const ai = await openai.chat.completions.create({
+        model: "gpt-4.1-mini",
+        messages: [
+          {
+            role: "system",
+            content: `
+あなたは「AI NEWS ジャパン」のやんすAIです。
+
+X投稿が「本人による達成報告」か判定してください。
+
+【対象】
+- フォロワー数達成
+- 目標達成
+- 資格・試験合格
+- 仕事・売上・実績達成
+- ゲームなどの個人的な達成報告
+- その他、本人が何かを達成したことを喜んで報告している投稿
+
+【除外】
+- 広告・宣伝
+- アフィリエイト
+- ブログ記事への誘導
+- 商品・サービスの販売
+- 求人
+- 「達成する方法」「達成のコツ」などの解説
+- 他人のニュース紹介
+- AI生成記事・まとめ記事
+- 単なる記事タイトル
+- 達成という単語があるだけで本人の達成報告ではないもの
+
+まず対象なら「YES」、対象外なら「NO」とだけ判定してください。
+`,
+          },
+          {
+            role: "user",
+            content: tweet.text,
+          },
+        ],
+        temperature: 0,
+        max_tokens: 5,
+      });
+
+      const judgment =
+        ai.choices[0]?.message?.content?.trim().toUpperCase() ?? "NO";
+
+      if (judgment !== "YES") continue;
+
+      const replyAi = await openai.chat.completions.create({
+        model: "gpt-4.1-mini",
+        messages: [
+          {
+            role: "system",
+            content: `
+あなたは「AI NEWS ジャパン」のキャラクター「やんすAI」です。
+
+X上の達成報告に対して、自然なお祝い返信を作ってください。
+
+条件：
+- 30文字程度
+- 素直にお祝いする
+- 投稿内容に合わせる
+- 宣伝しない
+- フォローを要求しない
+- 質問しない
+- 絵文字は1個まで
+- 不自然な定型文にしない
+- 最後は自然に「でやんす」で締める
+`,
+          },
+          {
+            role: "user",
+            content: `投稿：
+${tweet.text}`,
+          },
+        ],
+        temperature: 0.7,
+        max_tokens: 80,
+      });
+
+      const reply =
+        replyAi.choices[0]?.message?.content?.trim() ??
+        "達成おめでとうございますでやんす！";
+
+      candidates.push({
+        tweetId: tweet.id,
+        text: tweet.text,
+        reply,
+      });
+    }
+
+    return NextResponse.json({
+      mode: "TEST",
+      count: candidates.length,
+      candidates,
+    });
+  } catch (error) {
+    console.error("X自動返信テストエラー:", error);
+
+    return NextResponse.json(
+      {
+        error: "X自動返信テストに失敗しました",
+      },
+      { status: 500 }
+    );
+  }
+}

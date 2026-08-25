@@ -1,0 +1,147 @@
+import { NextResponse } from "next/server";
+import OAuth from "oauth-1.0a";
+import crypto from "crypto";
+
+const oauth = new OAuth({
+  consumer: {
+    key: process.env.X_CONSUMER_KEY!,
+    secret: process.env.X_CONSUMER_SECRET!,
+  },
+  signature_method: "HMAC-SHA1",
+  hash_function(baseString, key) {
+    return crypto
+      .createHmac("sha1", key)
+      .update(baseString)
+      .digest("base64");
+  },
+});
+
+const token = {
+  key: process.env.X_OAUTH1_ACCESS_TOKEN!,
+  secret: process.env.X_OAUTH1_ACCESS_TOKEN_SECRET!,
+};
+
+const MY_USER_ID = "2084661197438435328";
+
+async function xGet(url: string) {
+  const auth = oauth.authorize(
+    {
+      url,
+      method: "GET",
+    },
+    token
+  );
+
+  return fetch(url, {
+    headers: {
+      Authorization: oauth.toHeader(auth).Authorization,
+    },
+  });
+}
+
+export async function GET() {
+  try {
+    // 達成報告を検索
+    const query =
+      '("達成しました" OR "達成した" OR "達成！" OR "達成!" OR "人達成") -is:retweet lang:ja';
+
+    const searchUrl =
+      "https://api.x.com/2/tweets/search/recent?" +
+      new URLSearchParams({
+        query,
+        max_results: "20",
+        "tweet.fields": "author_id,created_at,text",
+      }).toString();
+
+    const searchResponse = await fetch(searchUrl, {
+  headers: {
+    Authorization: `Bearer ${process.env.X_ACCESS_TOKEN}`,
+  },
+});
+    const searchData = await searchResponse.json();
+
+    if (!searchResponse.ok) {
+      return NextResponse.json(
+        {
+          error: "達成報告の検索に失敗しました",
+          detail: searchData,
+        },
+        { status: searchResponse.status }
+      );
+    }
+
+    const tweets = searchData.data ?? [];
+
+    // 自分をフォローしているユーザーを全ページ取得
+    const followerIds = new Set<string>();
+    let nextToken: string | undefined = undefined;
+
+    do {
+      const params = new URLSearchParams({
+        max_results: "100",
+        "user.fields": "id,name,username",
+      });
+
+      if (nextToken) {
+        params.set("pagination_token", nextToken);
+      }
+
+      const followersUrl =
+        `https://api.x.com/2/users/${MY_USER_ID}/followers?${params.toString()}`;
+
+      const followersResponse = await xGet(followersUrl);
+      const followersData = await followersResponse.json();
+
+      if (!followersResponse.ok) {
+        return NextResponse.json(
+          {
+            error: "フォロワー取得に失敗しました",
+            detail: followersData,
+          },
+          { status: followersResponse.status }
+        );
+      }
+
+      for (const user of followersData.data ?? []) {
+        followerIds.add(user.id);
+      }
+
+      nextToken = followersData.meta?.next_token;
+    } while (nextToken);
+
+    // 検索結果をフォロワーだけに絞る
+    const followerTweets = tweets.filter((tweet: { author_id: string }) =>
+      followerIds.has(tweet.author_id)
+    );
+
+    return NextResponse.json({
+      mode: "FOLLOWER_TEST",
+      searched: tweets.length,
+      followerCount: followerIds.size,
+      matched: followerTweets.length,
+      candidates: followerTweets.slice(0, 3).map(
+        (tweet: {
+          id: string;
+          author_id: string;
+          text: string;
+          created_at?: string;
+        }) => ({
+          tweetId: tweet.id,
+          authorId: tweet.author_id,
+          text: tweet.text,
+          createdAt: tweet.created_at,
+          isFollower: true,
+        })
+      ),
+    });
+  } catch (error) {
+    console.error("フォロワー判定テストエラー:", error);
+
+    return NextResponse.json(
+      {
+        error: "フォロワー判定テストに失敗しました",
+      },
+      { status: 500 }
+    );
+  }
+}

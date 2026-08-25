@@ -1,0 +1,214 @@
+import { NextResponse } from "next/server";
+import OpenAI from "openai";
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+const MY_USER_ID = "2084661197438435328";
+
+async function aiJudgeAndReply(text: string) {
+  const ai = await openai.chat.completions.create({
+    model: "gpt-4.1-mini",
+    messages: [
+      {
+        role: "system",
+        content: `
+あなたはAI NEWS ジャパンの「やんすAI」です。
+
+X投稿を見て、本人が何かを達成したことを報告しているか判定してください。
+
+対象：
+- フォロワー数達成
+- 登録者数達成
+- 売上達成
+- スコア達成
+- 資格・試験などの達成
+- 個人的な目標達成
+- その他、本人が明確に成果を達成した報告
+
+対象外：
+- 達成を目指す、達成したい
+- 達成方法の説明
+- 商品・サービスの宣伝
+- アフィリエイト
+- LINE誘導
+- 集客・営業
+- 他人の達成報告
+- 「達成」という単語があるだけ
+
+JSONだけ返してください。
+
+{
+  "isAchievement": true,
+  "reply": "返信文"
+}
+
+isAchievementがfalseならreplyは空文字。
+
+返信条件：
+- 30文字程度
+- 自然なお祝い
+- 押し売り・宣伝なし
+- フォロー要求なし
+- 絵文字は1個まで
+- 最後は自然に「でやんす」
+- 投稿本文にある @ユーザー名は返信文に入れない
+`,
+      },
+      {
+        role: "user",
+        content: `投稿：\n${text}`,
+      },
+    ],
+    temperature: 0.3,
+    max_tokens: 80,
+  });
+
+  const content = ai.choices[0]?.message?.content?.trim() ?? "";
+
+  try {
+    return JSON.parse(content) as {
+      isAchievement: boolean;
+      reply: string;
+    };
+  } catch {
+    return {
+      isAchievement: false,
+      reply: "",
+    };
+  }
+}
+
+export async function GET() {
+  try {
+    // =========================================
+    // 1. フォロワーを取得
+    // =========================================
+
+    const followerIds = new Set<string>();
+    let paginationToken = "";
+
+    for (let page = 0; page < 10; page++) {
+      const url =
+        "https://api.x.com/2/users/" +
+        MY_USER_ID +
+        "/followers?" +
+        new URLSearchParams({
+          max_results: "1000",
+          ...(paginationToken
+            ? { pagination_token: paginationToken }
+            : {}),
+        }).toString();
+
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${process.env.X_ACCESS_TOKEN}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return NextResponse.json(
+          {
+            error: "フォロワー取得に失敗しました",
+            detail: data,
+          },
+          { status: response.status }
+        );
+      }
+
+      for (const user of data.data ?? []) {
+        followerIds.add(user.id);
+      }
+
+      paginationToken = data.meta?.next_token ?? "";
+
+      if (!paginationToken) break;
+    }
+
+    // =========================================
+    // 2. 達成系キーワードで先に検索
+    //    AIはまだ使わない
+    // =========================================
+
+    const query =
+      '("達成しました" OR "達成した" OR "達成！" OR "達成!" OR "人達成" OR "突破しました" OR "突破した" OR "目標達成") -is:retweet -is:reply lang:ja';
+
+    const searchUrl =
+      "https://api.x.com/2/tweets/search/recent?" +
+      new URLSearchParams({
+        query,
+        max_results: "100",
+        "tweet.fields": "author_id,created_at,text,referenced_tweets",
+      }).toString();
+
+    const response = await fetch(searchUrl, {
+      headers: {
+        Authorization: `Bearer ${process.env.X_ACCESS_TOKEN}`,
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      return NextResponse.json(
+        {
+          error: "達成報告の検索に失敗しました",
+          detail: data,
+        },
+        { status: response.status }
+      );
+    }
+
+    const tweets = (data.data ?? []).filter(
+      (tweet: { author_id: string }) =>
+        followerIds.has(tweet.author_id)
+    );
+
+    // =========================================
+    // 3. AI判定
+    //    キーワードで絞った後だけ使用
+    // =========================================
+
+    const candidates = [];
+
+    for (const tweet of tweets) {
+      const result = await aiJudgeAndReply(tweet.text);
+
+      if (!result.isAchievement || !result.reply) {
+        continue;
+      }
+
+      candidates.push({
+        tweetId: tweet.id,
+        authorId: tweet.author_id,
+        text: tweet.text,
+        reply: result.reply,
+        xReplyUrl:
+          "https://x.com/intent/tweet?in_reply_to=" +
+          encodeURIComponent(tweet.id) +
+          "&text=" +
+          encodeURIComponent(result.reply),
+      });
+    }
+
+    return NextResponse.json({
+      mode: "ONE_CLICK_REPLY",
+      followerCount: followerIds.size,
+      searched: tweets.length,
+      matched: candidates.length,
+      candidates,
+    });
+  } catch (error) {
+    console.error("X達成報告検索エラー:", error);
+
+    return NextResponse.json(
+      {
+        error: "達成報告の検索に失敗しました",
+      },
+      { status: 500 }
+    );
+  }
+}

@@ -1,0 +1,265 @@
+import { NextResponse } from "next/server";
+import OpenAI from "openai";
+import OAuth from "oauth-1.0a";
+import crypto from "crypto";
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+const oauth = new OAuth({
+  consumer: {
+    key: process.env.X_CONSUMER_KEY!,
+    secret: process.env.X_CONSUMER_SECRET!,
+  },
+  signature_method: "HMAC-SHA1",
+  hash_function(baseString, key) {
+    return crypto
+      .createHmac("sha1", key)
+      .update(baseString)
+      .digest("base64");
+  },
+});
+
+const token = {
+  key: process.env.X_OAUTH1_ACCESS_TOKEN!,
+  secret: process.env.X_OAUTH1_ACCESS_TOKEN_SECRET!,
+};
+
+const MY_USER_ID = "2084661197438435328";
+
+async function xOAuth1Get(url: string) {
+  const auth = oauth.authorize(
+    {
+      url,
+      method: "GET",
+    },
+    token
+  );
+
+  return fetch(url, {
+    headers: {
+      Authorization: oauth.toHeader(auth).Authorization,
+    },
+  });
+}
+
+async function aiJudgeAndReply(text: string) {
+  const ai = await openai.chat.completions.create({
+    model: "gpt-4.1-mini",
+    messages: [
+      {
+        role: "system",
+        content: `
+あなたはAI NEWS ジャパンの「やんすAI」です。
+
+X投稿を見て、「本人が何かを達成したことを報告している投稿」か判定してください。
+
+対象：
+- フォロワー数達成
+- 登録者数達成
+- 売上達成
+- スコア達成
+- 資格・試験などの達成
+- 個人的な目標達成
+- その他、本人が明確に成果を達成した報告
+
+対象外：
+- 「達成を目指す」「達成したい」など未来の目標
+- 達成方法を説明するノウハウ
+- 商品・サービスの宣伝
+- アフィリエイト
+- LINE誘導
+- 集客・営業目的の投稿
+- 他人の達成を紹介する投稿
+- 単なる「達成」という単語を含むだけの投稿
+
+JSONだけ返してください。
+
+{
+  "isAchievement": true,
+  "reply": "返信文"
+}
+
+isAchievementがfalseの場合、replyは空文字にしてください。
+
+返信条件：
+- 30文字程度
+- 自然なお祝い
+- 押し売り・宣伝は禁止
+- フォロー要求は禁止
+- 絵文字は1個まで
+- 最後は自然に「でやんす」で締める
+`,
+      },
+      {
+        role: "user",
+        content: `投稿：\n${text}`,
+      },
+    ],
+    temperature: 0.5,
+    max_tokens: 100,
+  });
+
+  const content = ai.choices[0]?.message?.content?.trim() ?? "";
+
+  try {
+    return JSON.parse(content) as {
+      isAchievement: boolean;
+      reply: string;
+    };
+  } catch {
+    return {
+      isAchievement: false,
+      reply: "",
+    };
+  }
+}
+
+export async function GET() {
+  try {
+    // =========================================
+    // 1. @news_ai_tutti へのメンションを検索
+    // =========================================
+
+    const query =
+      '@news_ai_tutti -is:retweet lang:ja';
+
+    const searchUrl =
+      "https://api.x.com/2/tweets/search/recent?" +
+      new URLSearchParams({
+        query,
+        max_results: "20",
+        "tweet.fields": "author_id,created_at,text,referenced_tweets",
+      }).toString();
+
+    const searchResponse = await fetch(searchUrl, {
+      headers: {
+        Authorization: `Bearer ${process.env.X_ACCESS_TOKEN}`,
+      },
+    });
+
+    const searchData = await searchResponse.json();
+
+    if (!searchResponse.ok) {
+      return NextResponse.json(
+        {
+          error: "メンション検索に失敗しました",
+          detail: searchData,
+        },
+        { status: searchResponse.status }
+      );
+    }
+
+    const uniqueTweets = searchData.data ?? [];
+
+    // =========================================
+    // 2. メンション投稿を候補にする
+    // =========================================
+
+    const followerIds = new Set<string>();
+
+    const followerTweets = uniqueTweets.filter(
+      (tweet: { text: string }) =>
+        tweet.text.toLowerCase().includes("@news_ai_tutti")
+    );
+
+    // =========================================
+    // 3. AI判定
+    // =========================================
+
+    const candidates = [];
+
+    for (const tweet of followerTweets.slice(0, 10)) {
+      const result = await aiJudgeAndReply(tweet.text);
+
+      if (!result.isAchievement || !result.reply) {
+        continue;
+      }
+
+      candidates.push({
+        tweetId: tweet.id,
+        authorId: tweet.author_id,
+        text: tweet.text,
+        reply: result.reply,
+        isFollower: true,
+      });
+
+      if (candidates.length >= 3) {
+        break;
+      }
+    }
+
+    // =========================================
+    // 5. 実返信テスト（1件だけ）
+    // =========================================
+
+    if (candidates.length === 0) {
+      return NextResponse.json({
+        mode: "MENTION_LIVE_TEST",
+        message: "返信対象がありませんでした",
+        searched: uniqueTweets.length,
+        followerCount: 0,
+        followerTweets: followerTweets.length,
+        matched: 0,
+        candidates: [],
+      });
+    }
+
+    const target = candidates[0];
+
+    const replyUrl = "https://api.x.com/2/tweets";
+
+    const auth = oauth.authorize(
+      {
+        url: replyUrl,
+        method: "POST",
+      },
+      token
+    );
+
+    const replyResponse = await fetch(replyUrl, {
+      method: "POST",
+      headers: {
+        Authorization: oauth.toHeader(auth).Authorization,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        text: target.reply,
+        reply: {
+          in_reply_to_tweet_id: target.tweetId,
+        },
+      }),
+    });
+
+    const replyData = await replyResponse.json();
+
+    if (!replyResponse.ok) {
+      return NextResponse.json(
+        {
+          mode: "MENTION_LIVE_TEST",
+          error: "X返信送信に失敗しました",
+          detail: replyData,
+          target,
+        },
+        { status: replyResponse.status }
+      );
+    }
+
+    return NextResponse.json({
+      mode: "MENTION_LIVE_TEST",
+      message: "1件だけ返信を送信しました",
+      target,
+      replyResult: replyData,
+    });
+  } catch (error) {
+    console.error("X自動返信テストエラー:", error);
+
+    return NextResponse.json(
+      {
+        error: "X自動返信テストに失敗しました",
+      },
+      { status: 500 }
+    );
+  }
+}

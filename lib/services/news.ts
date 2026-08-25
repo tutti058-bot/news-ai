@@ -95,6 +95,45 @@ function isEntertainmentSource(source: string): boolean {
 }
 
 /**
+ * ニュース化しないジャンル
+ *
+ * ゲーム・アニメ・アイドル系は、
+ * 話題性だけ高くなりやすいため原則除外。
+ */
+function isExcludedTopic(
+  title: string,
+  category: string,
+  source: string
+): boolean {
+  const t = `${title} ${category} ${source}`.toLowerCase();
+
+  const excludeWords = [
+    "ゲーム",
+    "game",
+    "アニメ",
+    "anime",
+    "アイドル",
+    "idol",
+    "ジュニアアイドル",
+    "u-15",
+    "u15",
+    "u-19",
+    "u19",
+    "u-20",
+    "u20",
+    "ジュニアユース",
+    "jrユース",
+    "jr.ユース",
+    "クラブユース",
+  ];
+
+  return excludeWords.some((word) =>
+    t.includes(word.toLowerCase())
+  );
+}
+
+
+/**
  * 芸能トレンドニュース
  *
  * 熱愛・結婚・破局など、
@@ -268,10 +307,66 @@ export async function syncNews(limit?: number) {
    * 「採用したい記事数」として扱う。
    */
 
+  // 1回の同期は最大5件。
+  // 4時間おきの実行を前提に、1日最大20件とする。
   const targetCount =
     typeof limit === "number" && limit > 0
-      ? limit
-      : 33;
+      ? Math.min(limit, 5)
+      : 5;
+
+  // 日本時間の今日を基準に、1日20件を上限にする
+  const now = new Date();
+  const jstNow = new Date(
+    now.toLocaleString("en-US", {
+      timeZone: "Asia/Tokyo",
+    })
+  );
+
+  const jstStart = new Date(jstNow);
+  jstStart.setHours(0, 0, 0, 0);
+
+  const jstEnd = new Date(jstStart);
+  jstEnd.setDate(jstEnd.getDate() + 1);
+
+  // DBのUTC日時として検索するためJST境界をUTCに変換
+  const todayStart = new Date(
+    jstStart.getTime() - 9 * 60 * 60 * 1000
+  );
+
+  const todayEnd = new Date(
+    jstEnd.getTime() - 9 * 60 * 60 * 1000
+  );
+
+  const todayAdded = await prisma.news.count({
+    where: {
+      createdAt: {
+        gte: todayStart,
+        lt: todayEnd,
+      },
+    },
+  });
+
+  const dailyRemaining = Math.max(
+    0,
+    20 - todayAdded
+  );
+
+  if (dailyRemaining === 0) {
+    console.log(
+      "本日の記事上限20件に到達。今回は保存しません。"
+    );
+
+    return {
+      added: 0,
+      skipped: 0,
+      message: "本日の記事上限20件に到達",
+    };
+  }
+
+  const actualTargetCount = Math.min(
+    targetCount,
+    dailyRemaining
+  );
 
   const candidateItems: typeof sortedItems = [];
 
@@ -293,7 +388,7 @@ export async function syncNews(limit?: number) {
   ];
 
   for (const item of prioritizedItems) {
-    if (candidateItems.length >= 80) {
+    if (candidateItems.length >= 20) {
       break;
     }
 
@@ -317,6 +412,23 @@ export async function syncNews(limit?: number) {
     }
 
     const candidateTitle = item.title ?? "";
+    const candidateCategory = item.category ?? "";
+    const candidateSource = item.source ?? "";
+
+    // ゲーム・アニメ・アイドル等はAIに送る前に除外
+    if (
+      isExcludedTopic(
+        candidateTitle,
+        candidateCategory,
+        candidateSource
+      )
+    ) {
+      console.log(
+        "対象外ジャンルのためスキップ:",
+        candidateTitle
+      );
+      continue;
+    }
 
     const recentNews = await prisma.news.findMany({
       select: {
@@ -681,13 +793,34 @@ export async function syncNews(limit?: number) {
  * =========================
  *
  * サッカー
- * → 70点以上
+ * → 80点以上
  *
- * それ以外
+ * 芸能
+ * → 75点以上
+ *
+ * テクノロジー
+ * → 80点以上
+ *
+ * その他
  * → 60点以上
  */
 
-const MIN_SCORE = soccer ? 75 : 60;
+const aiCategory = ai?.category ?? "";
+
+let MIN_SCORE = 60;
+
+if (soccer || aiCategory === "サッカー") {
+  MIN_SCORE = 80;
+} else if (
+  entertainment ||
+  aiCategory === "芸能"
+) {
+  MIN_SCORE = 75;
+} else if (
+  aiCategory === "テクノロジー"
+) {
+  MIN_SCORE = 80;
+}
 
 if (ai.score < MIN_SCORE) {
   console.log(
@@ -790,12 +923,9 @@ if (ai.score < MIN_SCORE) {
       });
 
       added++;
-      if (
-  limit &&
-  added >= targetCount
-) {
-  break;
-}
+      if (added >= actualTargetCount) {
+        break;
+      }
 
       /*
        * =========================
