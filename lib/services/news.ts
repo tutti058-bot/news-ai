@@ -12,6 +12,80 @@ function normalizeUrl(url: string): string {
     .trim();
 }
 
+
+function normalizeTitle(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/[「」『』【】［］（）()！？!?。、,.・:：;；]/g, "")
+    .replace(/\s+/g, "")
+    .trim();
+}
+
+function isSimilarTitle(
+  titleA: string,
+  titleB: string
+): boolean {
+  const a = normalizeTitle(titleA);
+  const b = normalizeTitle(titleB);
+
+  if (!a || !b) return false;
+
+  // 完全一致
+  if (a === b) return true;
+
+  // 片方がもう片方を含む場合
+  const shorter =
+    a.length <= b.length ? a : b;
+
+  const longer =
+    a.length <= b.length ? b : a;
+
+  if (
+    shorter.length >= 15 &&
+    longer.includes(shorter)
+  ) {
+    return true;
+  }
+
+  /*
+   * タイトルの主要部分が共通している
+   * 類似ニュースを除外する。
+   *
+   * 例：
+   * 「大谷翔平が30号本塁打」
+   * 「大谷翔平が31号本塁打」
+   *
+   * のように細部だけ違う記事を弾く。
+   */
+
+  const keywordsA = a
+    .split(/[「」『』【】\[\]（）()！？!?。、,.・:：;；\s]+/)
+    .filter((word) => word.length >= 2);
+
+  const keywordsB = b
+    .split(/[「」『』【】\[\]（）()！？!?。、,.・:：;；\s]+/)
+    .filter((word) => word.length >= 2);
+
+  if (keywordsA.length === 0 || keywordsB.length === 0) {
+    return false;
+  }
+
+  const commonCount = keywordsA.filter((word) =>
+    keywordsB.some(
+      (other) =>
+        other === word ||
+        other.includes(word) ||
+        word.includes(other)
+    )
+  ).length;
+
+  const similarity =
+    commonCount /
+    Math.min(keywordsA.length, keywordsB.length);
+
+  return similarity >= 0.6;
+}
+
 /**
  * 芸能ニュースとして扱う取得元
  */
@@ -241,6 +315,35 @@ export async function syncNews(limit?: number) {
       });
 
     if (candidateExists) {
+      continue;
+    }
+
+    const candidateTitle = item.title ?? "";
+
+    const recentNews = await prisma.news.findMany({
+      select: {
+        id: true,
+        title: true,
+      },
+      orderBy: {
+        publishedAt: "desc",
+      },
+      take: 100,
+    });
+
+    const hasSimilarTitle = recentNews.some(
+      (existing) =>
+        isSimilarTitle(
+          candidateTitle,
+          existing.title
+        )
+    );
+
+    if (hasSimilarTitle) {
+      console.log(
+        "類似記事候補をスキップ:",
+        candidateTitle
+      );
       continue;
     }
 
