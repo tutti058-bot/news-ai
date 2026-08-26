@@ -1,5 +1,4 @@
 import { prisma } from "@/lib/prisma";
-import { generateYansuComment } from "@/lib/ai";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
@@ -53,34 +52,12 @@ export async function GET(request: NextRequest) {
       `https://tutti-news-ai-bay.vercel.app/news/${newsId}`;
 
     // Xシェア
+    // 記事ページからのXシェアは読者向けの通常シェア。
+    // やんすAIの投稿文生成は管理画面側だけで行う。
     if (type === "x") {
-      const score = news.score ?? 60;
-
-      const aiComment = await generateYansuComment(
-        news.title,
-        news.summary ?? "",
-        score,
-        news.category ?? "国内"
-      );
-
-      const hook =
-        aiComment
-          .split("\n")
-          .map((line) => line.trim())
-          .filter(Boolean)[0] ??
-        "このニュース、何が起きたやんすか？";
-
-      const tweet = `やんすAI
-「${hook}」
-
-AI評価：${score}点／100点
-
-👇 詳細はこちら
-${articleUrl}`;
-
       const xUrl =
-        `https://twitter.com/intent/tweet?text=${encodeURIComponent(
-          tweet
+        `https://twitter.com/intent/tweet?url=${encodeURIComponent(
+          articleUrl
         )}`;
 
       return NextResponse.redirect(xUrl);
