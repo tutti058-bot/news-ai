@@ -17,6 +17,7 @@ model News {
   score           Int         @default(50)
   source          String?
   sourceUrl       String      @unique
+  xPostUrl        String?
   publishedAt     DateTime?
   createdAt       DateTime    @default(now())
   views           Int         @default(0)

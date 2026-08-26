@@ -26,6 +26,263 @@ export default function AdminClient() {
   const [message, setMessage] = useState("");
   const [summary, setSummary] = useState("");
 
+  // ニュース一覧・X投稿・関連記事
+  type NewsItem = {
+    id: number;
+    title: string;
+    summary: string | null;
+    category: string | null;
+    source: string | null;
+    sourceUrl: string;
+    image: string | null;
+    score: number | null;
+    publishedAt: string | null;
+  };
+
+  type RelatedNewsItem = {
+    id: number;
+    title: string;
+    sourceUrl: string;
+    category: string | null;
+    publishedAt: string | null;
+    score: number;
+  };
+
+  const [newsList, setNewsList] = useState<NewsItem[]>([]);
+  const [newsListLoading, setNewsListLoading] = useState(false);
+  const [xPostLoadingId, setXPostLoadingId] = useState<number | null>(null);
+  const [xPostConfirmLoadingId, setXPostConfirmLoadingId] = useState<number | null>(null);
+  const [relatedLoadingId, setRelatedLoadingId] = useState<number | null>(null);
+  const [relatedNews, setRelatedNews] = useState<Record<number, RelatedNewsItem[]>>({});
+  const [copiedRelatedId, setCopiedRelatedId] = useState<number | null>(null);
+  const [relatedReplyLoadingId, setRelatedReplyLoadingId] = useState<number | null>(null);
+
+  // =========================
+  // 関連記事へのXコメント作成
+  // =========================
+
+  const createRelatedXReply = async (
+    newsId: number,
+    relatedNewsId: number
+  ) => {
+    setRelatedReplyLoadingId(relatedNewsId);
+    setMessage("");
+
+    try {
+      const res = await fetch(
+        "/api/related-x-reply",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            newsId,
+            relatedNewsId,
+          }),
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok || !data.replyText) {
+        throw new Error(
+          data.error ??
+            "Xコメントの作成に失敗しました"
+        );
+      }
+
+      await navigator.clipboard.writeText(
+        data.replyText
+      );
+
+      setMessage(
+        "💬 コメントをコピーしました。Xで自分の投稿への返信欄に貼り付けてください。"
+      );
+    } catch (error) {
+      console.error(
+        "関連記事Xコメント作成エラー:",
+        error
+      );
+
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "不明なエラーが発生しました";
+
+      setMessage(
+        `Xコメント作成失敗：${errorMessage}`
+      );
+    } finally {
+      setRelatedReplyLoadingId(null);
+    }
+  };
+
+  // =========================
+  // 選択した記事のX投稿作成
+  // =========================
+
+
+  // =========================
+  // 関連記事を取得
+  // =========================
+
+  const loadRelatedNews = async (newsId: number) => {
+    setRelatedLoadingId(newsId);
+    setMessage("");
+
+    try {
+      const res = await fetch(
+        `/api/related-x-comment?newsId=${newsId}`
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(
+          data.error ?? "関連記事の取得に失敗しました"
+        );
+      }
+
+      setRelatedNews((prev) => ({
+        ...prev,
+        [newsId]: data.related ?? [],
+      }));
+
+      if (!data.related || data.related.length === 0) {
+        setMessage("関連記事が見つかりませんでした");
+      }
+    } catch (error) {
+      console.error("関連記事取得エラー:", error);
+
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "不明なエラーが発生しました";
+
+      setMessage(
+        `関連記事取得失敗：${errorMessage}`
+      );
+    } finally {
+      setRelatedLoadingId(null);
+    }
+  };
+
+  // =========================
+  // 選択した記事のX投稿作成
+  // =========================
+
+  const createXPostForNews = async (newsId: number) => {
+    setXPostLoadingId(newsId);
+    setMessage("");
+
+    // ボタンを押した瞬間に空タブを開く
+    // AI生成後のwindow.openはブラウザにブロックされるため、
+    // 先にタブだけ確保しておく。
+    const xWindow = window.open(
+      "about:blank",
+      "_blank"
+    );
+
+    try {
+      const res = await fetch("/api/post-x", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          newsId,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.intentUrl) {
+        if (xWindow && !xWindow.closed) {
+          xWindow.close();
+        }
+
+        throw new Error(
+          data.error ?? "X投稿の作成に失敗しました"
+        );
+      }
+
+      setMessage(
+        `X投稿を作成しました！ AI評価：${data.score}点`
+      );
+
+      // 先に開いておいたタブをX投稿画面へ移動
+      if (xWindow && !xWindow.closed) {
+        xWindow.location.href = data.intentUrl;
+      } else {
+        // ポップアップがブロックされた場合の予備処理
+        window.location.href = data.intentUrl;
+      }
+    } catch (error) {
+      console.error("X投稿作成エラー:", error);
+
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "不明なエラーが発生しました";
+
+      setMessage(
+        `X投稿作成失敗：${errorMessage}`
+      );
+    } finally {
+      setXPostLoadingId(null);
+    }
+  };
+
+  // =========================
+  // 関連記事を取得
+  // =========================
+
+  const findRelatedNews = async (newsId: number) => {
+    setRelatedLoadingId(newsId);
+    setMessage("");
+
+    try {
+      const res = await fetch(
+        `/api/related-x-comment?newsId=${newsId}`
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(
+          data.error ?? "関連記事の取得に失敗しました"
+        );
+      }
+
+      setRelatedNews((prev) => ({
+        ...prev,
+        [newsId]: data.related ?? [],
+      }));
+
+      if ((data.related ?? []).length === 0) {
+        setMessage("関連記事が見つかりませんでした");
+      } else {
+        setMessage(
+          `関連記事を${data.related.length}件見つけました`
+        );
+      }
+    } catch (error) {
+      console.error("関連記事取得エラー:", error);
+
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "不明なエラーです";
+
+      setMessage(
+        `関連記事取得失敗：${errorMessage}`
+      );
+    } finally {
+      setRelatedLoadingId(null);
+    }
+  };
+
   const [followerReplyLoading, setFollowerReplyLoading] =
     useState(false);
 
@@ -128,6 +385,38 @@ export default function AdminClient() {
   // コラム本文への漫画画像挿入
   const [columnImageUploading, setColumnImageUploading] =
     useState(false);
+
+      // =========================
+  // ニュース一覧取得
+  // =========================
+
+  const loadNews = async () => {
+    setNewsListLoading(true);
+
+    try {
+      const res = await fetch("/api/db-news?_=" + Date.now());
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(
+          data.error ?? "ニュースの取得に失敗しました"
+        );
+      }
+
+      setNewsList(data ?? []);
+    } catch (error) {
+      console.error(error);
+
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "不明なエラーが発生しました";
+
+      setMessage(`ニュース取得失敗：${errorMessage}`);
+    } finally {
+      setNewsListLoading(false);
+    }
+  };
 
   const loadColumns = async () => {
     setColumnListLoading(true);
@@ -378,6 +667,46 @@ export default function AdminClient() {
   };
   
   // =========================
+  // ニュース一覧
+  // =========================
+
+  const loadNewsList = async () => {
+    setNewsListLoading(true);
+
+    try {
+      const res = await fetch(
+        "/api/db-news?_=" + Date.now(),
+        {
+          cache: "no-store",
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(
+          data.error ?? "ニュース一覧の取得に失敗しました"
+        );
+      }
+
+      setNewsList(data ?? []);
+    } catch (error) {
+      console.error(error);
+
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "不明なエラーが発生しました";
+
+      setMessage(
+        `ニュース一覧取得失敗：${errorMessage}`
+      );
+    } finally {
+      setNewsListLoading(false);
+    }
+  };
+
+  // =========================
   // ニュース取得
   // =========================
 
@@ -398,6 +727,9 @@ export default function AdminClient() {
       setMessage(
         `取得完了：新規 ${data.added}件 / スキップ ${data.skipped}件 / 合計 ${data.total}件`
       );
+
+      // 最新記事一覧も更新
+      await loadNewsList();
     } catch (error) {
       console.error(error);
 
@@ -1127,6 +1459,207 @@ export default function AdminClient() {
           </section>
 
         </div>
+
+        {/* 最新ニュース一覧 */}
+        <section className="mt-6 rounded-3xl border border-slate-200 bg-white p-7 shadow-lg">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <div className="text-4xl">
+                🗞️
+              </div>
+
+              <h2 className="mt-4 text-2xl font-black text-slate-900">
+                最新ニュース
+              </h2>
+
+              <p className="mt-2 text-sm leading-6 text-slate-500">
+                Xに投稿したい記事をここから選択できます。
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={loadNewsList}
+              disabled={newsListLoading}
+              className="rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm font-bold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
+            >
+              {newsListLoading
+                ? "更新中..."
+                : "一覧を更新"}
+            </button>
+          </div>
+
+          <div className="mt-6 space-y-4">
+            {newsList.length === 0 ? (
+              <div className="rounded-2xl bg-slate-50 p-6 text-center text-sm font-bold text-slate-500">
+                {newsListLoading
+                  ? "ニュースを読み込んでいます..."
+                  : "ニュースがありません"}
+              </div>
+            ) : (
+              newsList.map((news) => (
+                <article
+                  key={news.id}
+                  className="rounded-2xl border border-slate-200 p-5 transition hover:border-slate-300"
+                >
+                  <div className="flex flex-wrap items-center gap-2 text-xs font-bold text-slate-400">
+                    <span>
+                      {news.source || "RSS"}
+                    </span>
+
+                    {news.category && (
+                      <>
+                        <span>・</span>
+                        <span>{news.category}</span>
+                      </>
+                    )}
+
+                    {news.publishedAt && (
+                      <>
+                        <span>・</span>
+                        <span>
+                          {new Date(
+                            news.publishedAt
+                          ).toLocaleString("ja-JP")}
+                        </span>
+                      </>
+                    )}
+
+                    <span className="ml-1 rounded-full bg-slate-900 px-3 py-1 text-xs font-black text-white">
+                      AI評価：{news.score}点
+                    </span>
+                  </div>
+
+                  <h3 className="mt-2 text-lg font-black leading-7 text-slate-900">
+                    {news.title}
+                  </h3>
+
+                  {news.summary && (
+                    <p className="mt-2 text-sm leading-6 text-slate-600">
+                      {news.summary}
+                    </p>
+                  )}
+
+                  <div className="mt-4 flex flex-wrap gap-3">
+                    <Link
+                      href={`/news/${news.id}`}
+                      target="_blank"
+                      className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
+                    >
+                      記事を見る
+                    </Link>
+
+                    <button
+                      onClick={() =>
+                        createXPostForNews(news.id)
+                      }
+                      disabled={
+                        xPostLoadingId === news.id
+                      }
+                      className="rounded-xl bg-black px-4 py-2 text-sm font-bold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {xPostLoadingId === news.id
+                        ? "X投稿を作成中..."
+                        : "𝕏 X投稿を作成"}
+                    </button>
+
+
+
+                    <button
+                      onClick={() =>
+                        loadRelatedNews(news.id)
+                      }
+                      disabled={
+                        relatedLoadingId === news.id
+                      }
+                      className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {relatedLoadingId === news.id
+                        ? "関連記事を検索中..."
+                        : "🔗 関連記事を探す"}
+                    </button>
+                  </div>
+
+                  {/* 関連記事 */}
+                  {relatedNews[news.id] &&
+                    relatedNews[news.id].length > 0 && (
+                      <div className="mt-5 rounded-2xl bg-blue-50 p-4">
+                        <h4 className="text-sm font-black text-slate-900">
+                          🔗 関連記事
+                        </h4>
+
+                        <div className="mt-3 space-y-3">
+                          {relatedNews[news.id].map(
+                            (related) => (
+                              <div
+                                key={related.id}
+                                className="rounded-xl border border-blue-100 bg-white p-4"
+                              >
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <span className="rounded-full bg-slate-900 px-2 py-1 text-xs font-black text-white">
+                                    AI評価：{related.score}点
+                                  </span>
+
+                                  {related.category && (
+                                    <span className="text-xs font-bold text-slate-400">
+                                      {related.category}
+                                    </span>
+                                  )}
+                                </div>
+
+                                <p className="mt-2 text-sm font-black leading-6 text-slate-900">
+                                  {related.title}
+                                </p>
+
+                                <div className="mt-3 flex flex-wrap gap-2">
+                                  <a
+                                    href={`/news/${related.id}`}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50"
+                                  >
+                                    記事を見る
+                                  </a>
+
+                                  <a
+                                    href={related.sourceUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50"
+                                  >
+                                    元記事
+                                  </a>
+
+                                  <button
+                                    onClick={() =>
+                                      createRelatedXReply(
+                                        news.id,
+                                        related.id
+                                      )
+                                    }
+                                    disabled={
+                                      relatedReplyLoadingId ===
+                                      related.id
+                                    }
+                                    className="rounded-lg bg-black px-3 py-2 text-xs font-bold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+                                  >
+                                    {relatedReplyLoadingId ===
+                                    related.id
+                                      ? "コメント作成中..."
+                                      : "💬 コメントをコピー"}
+                                  </button>
+                                </div>
+                              </div>
+                            )
+                          )}
+                        </div>
+                      </div>
+                    )}
+                </article>
+              ))
+            )}
+          </div>
+        </section>
 
         {/* メッセージ */}
         {message && (
