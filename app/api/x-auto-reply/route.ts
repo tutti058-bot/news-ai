@@ -50,7 +50,7 @@ export async function GET() {
     // =========================================
 
     const query =
-      'lang:ja -is:retweet -is:reply';
+      'の lang:ja -is:retweet -is:reply';
 
     const searchUrl =
       "https://api.x.com/2/tweets/search/recent?" +
