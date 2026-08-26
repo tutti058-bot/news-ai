@@ -361,7 +361,7 @@ export async function syncNews(limit?: number) {
 
   const dailyRemaining = Math.max(
     0,
-    20 - todayAdded
+    30 - todayAdded
   );
 
   if (dailyRemaining === 0) {
