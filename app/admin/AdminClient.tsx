@@ -26,6 +26,25 @@ export default function AdminClient() {
   const [message, setMessage] = useState("");
   const [summary, setSummary] = useState("");
 
+  const [followerReplyLoading, setFollowerReplyLoading] =
+    useState(false);
+
+  const [followerReply, setFollowerReply] = useState<{
+    follower?: {
+      id: string;
+      username: string;
+      name: string;
+    };
+    tweet?: {
+      id: string;
+      text: string;
+      created_at?: string;
+    };
+    reply?: string;
+    xReplyUrl?: string;
+    message?: string;
+  } | null>(null);
+
   // サイト全体の閲覧数
   const [totalViews, setTotalViews] = useState(0);
   const [todayViews, setTodayViews] = useState(0);
@@ -807,6 +826,39 @@ export default function AdminClient() {
     }
   };
 
+  const createFollowerReply = async () => {
+    setFollowerReplyLoading(true);
+    setFollowerReply(null);
+    setMessage("");
+
+    try {
+      const res = await fetch("/api/x-auto-reply");
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(
+          data.error ?? "返信候補の作成に失敗しました"
+        );
+      }
+
+      setFollowerReply(data);
+
+      if (data.message) {
+        setMessage(data.message);
+      }
+    } catch (error) {
+      console.error(error);
+
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "返信候補の作成に失敗しました"
+      );
+    } finally {
+      setFollowerReplyLoading(false);
+    }
+  };
+
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-10">
       <div className="mx-auto max-w-5xl">
@@ -910,6 +962,64 @@ export default function AdminClient() {
             </div>
           </div>
         </section>
+
+        {/* フォロワー交流 */}
+        <div className="mb-6 rounded-3xl border border-blue-200 bg-white p-6 shadow-sm">
+          <div className="mb-4">
+            <h2 className="text-xl font-black text-slate-900">
+              フォロワー交流
+            </h2>
+            <p className="mt-1 text-sm text-slate-500">
+              フォロワーからランダムに1人選び、最近の投稿への返信案を作成します。
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={createFollowerReply}
+            disabled={followerReplyLoading}
+            className="rounded-2xl bg-blue-600 px-5 py-3 font-bold text-white transition hover:bg-blue-700 disabled:opacity-50"
+          >
+            {followerReplyLoading
+              ? "返信候補を作成中..."
+              : "フォロワーに返信する"}
+          </button>
+
+          {followerReply?.tweet && (
+            <div className="mt-6 rounded-2xl bg-slate-50 p-5">
+              <p className="text-xs font-bold text-slate-400">
+                {followerReply.follower?.name ||
+                  followerReply.follower?.username ||
+                  "フォロワー"}
+              </p>
+
+              <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-800">
+                {followerReply.tweet.text}
+              </p>
+
+              <div className="mt-5 border-t border-slate-200 pt-5">
+                <p className="text-xs font-bold text-blue-600">
+                  やんすAIの返信案
+                </p>
+
+                <p className="mt-2 text-sm font-bold leading-6 text-slate-900">
+                  {followerReply.reply}
+                </p>
+
+                {followerReply.xReplyUrl && (
+                  <a
+                    href={followerReply.xReplyUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-4 inline-block rounded-2xl bg-black px-5 py-3 font-bold text-white"
+                  >
+                    𝕏 Xで返信する
+                  </a>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* ニュース・まとめ */}
         <div className="grid gap-6 md:grid-cols-2">
