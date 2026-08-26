@@ -831,7 +831,7 @@ export default function AdminClient() {
 
   const syncFollowers = async () => {
     setFollowerSyncLoading(true);
-    setMessage("");
+    setMessage("フォロワー情報を更新しています...");
 
     try {
       const res = await fetch("/api/x-auto-reply/sync");
