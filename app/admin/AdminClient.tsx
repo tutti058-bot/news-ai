@@ -29,6 +29,9 @@ export default function AdminClient() {
   const [followerReplyLoading, setFollowerReplyLoading] =
     useState(false);
 
+  const [followerSyncLoading, setFollowerSyncLoading] =
+    useState(false);
+
   const [followerReply, setFollowerReply] = useState<{
     follower?: {
       id: string;
@@ -826,6 +829,36 @@ export default function AdminClient() {
     }
   };
 
+  const syncFollowers = async () => {
+    setFollowerSyncLoading(true);
+    setMessage("");
+
+    try {
+      const res = await fetch("/api/x-auto-reply/sync");
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(
+          data.error ?? "フォロワー更新に失敗しました"
+        );
+      }
+
+      setMessage(
+        `フォロワー情報を更新しました：${data.followerCount ?? 0}人`
+      );
+    } catch (error) {
+      console.error(error);
+
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "フォロワー更新に失敗しました"
+      );
+    } finally {
+      setFollowerSyncLoading(false);
+    }
+  };
+
   const createFollowerReply = async () => {
     setFollowerReplyLoading(true);
     setFollowerReply(null);
@@ -974,16 +1007,29 @@ export default function AdminClient() {
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={createFollowerReply}
-            disabled={followerReplyLoading}
-            className="rounded-2xl bg-blue-600 px-5 py-3 font-bold text-white transition hover:bg-blue-700 disabled:opacity-50"
-          >
-            {followerReplyLoading
-              ? "返信候補を作成中..."
-              : "フォロワーに返信する"}
-          </button>
+          <div className="flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={createFollowerReply}
+              disabled={followerReplyLoading || followerSyncLoading}
+              className="rounded-2xl bg-blue-600 px-5 py-3 font-bold text-white transition hover:bg-blue-700 disabled:opacity-50"
+            >
+              {followerReplyLoading
+                ? "返信候補を作成中..."
+                : "フォロワーに返信する"}
+            </button>
+
+            <button
+              type="button"
+              onClick={syncFollowers}
+              disabled={followerReplyLoading || followerSyncLoading}
+              className="rounded-2xl border border-slate-300 bg-white px-5 py-3 font-bold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
+            >
+              {followerSyncLoading
+                ? "更新中..."
+                : "フォロワー情報を更新"}
+            </button>
+          </div>
 
           {followerReply?.message && (
             <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm font-bold text-slate-700">
