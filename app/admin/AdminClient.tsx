@@ -985,6 +985,12 @@ export default function AdminClient() {
               : "フォロワーに返信する"}
           </button>
 
+          {followerReply?.message && (
+            <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm font-bold text-slate-700">
+              {followerReply.message}
+            </div>
+          )}
+
           {followerReply?.tweet && (
             <div className="mt-6 rounded-2xl bg-slate-50 p-5">
               <p className="text-xs font-bold text-slate-400">
