@@ -62,7 +62,7 @@ export async function GET() {
 
     const searchResponse = await fetch(searchUrl, {
       headers: {
-        Authorization: `Bearer ${process.env.X_ACCESS_TOKEN}`,
+        Authorization: `Bearer ${process.env.X_Bearer_Token}`,
       },
     });
 
