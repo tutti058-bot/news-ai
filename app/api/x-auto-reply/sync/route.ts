@@ -35,7 +35,7 @@ export async function GET() {
 
     // ② 投稿検索
     const query =
-      '"の" lang:ja -is:retweet -is:reply';
+      '("の" OR "が" OR "は" OR "を" OR "に" OR "で") lang:ja -is:retweet -is:reply';
 
     const searchUrl =
       "https://api.x.com/2/tweets/search/recent?" +
