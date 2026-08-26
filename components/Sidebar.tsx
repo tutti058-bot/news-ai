@@ -154,6 +154,38 @@ export default async function Sidebar() {
         </div>
       )}
 
+      {/* やんすAI 公式X */}
+      <div className="rounded-3xl border border-slate-200 bg-black p-6 text-white shadow-lg">
+        <div className="flex items-center gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-xl font-black text-black">
+            𝕏
+          </div>
+
+          <div>
+            <p className="text-xs font-bold tracking-wide text-slate-300">
+              公式X
+            </p>
+            <h2 className="text-xl font-black">
+              やんすAI
+            </h2>
+          </div>
+        </div>
+
+        <p className="mt-4 text-sm leading-6 text-slate-300">
+          AI NEWS ジャパンの最新ニュースを
+          やんすAIがお届けするでやんす。
+        </p>
+
+        <a
+          href="https://x.com/news_ai_tutti"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-5 inline-flex w-full items-center justify-center rounded-xl bg-white px-4 py-3 text-sm font-black text-black transition hover:bg-slate-200"
+        >
+          𝕏 Xをフォローする →
+        </a>
+      </div>
+
     </aside>
   );
 }
