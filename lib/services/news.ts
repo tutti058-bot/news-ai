@@ -20,68 +20,81 @@ function normalizeTitle(title: string): string {
     .trim();
 }
 
-function isSimilarTitle(
-  titleA: string,
-  titleB: string
-): boolean {
-  const a = normalizeTitle(titleA);
-  const b = normalizeTitle(titleB);
+function titleTokens(title: string): Set<string> {
+  const normalized = title
+    .toLowerCase()
+    .replace(
+      /[「」『』【】［］\[\]（）()！？!?、。，．・:：;；"'`’‘/／\\|｜\-—_]/g,
+      ""
+    )
+    .replace(/\s+/g, "");
 
-  if (!a || !b) return false;
+  const tokens = new Set<string>();
 
-  // 完全一致
-  if (a === b) return true;
-
-  // 片方がもう片方を含む場合
-  const shorter =
-    a.length <= b.length ? a : b;
-
-  const longer =
-    a.length <= b.length ? b : a;
-
-  if (
-    shorter.length >= 15 &&
-    longer.includes(shorter)
-  ) {
-    return true;
+  // 日本語の2文字gram
+  for (let i = 0; i < normalized.length - 1; i++) {
+    tokens.add(normalized.slice(i, i + 2));
   }
 
-  /*
-   * 数字が異なる場合は別ニュースとして扱う。
-   *
-   * 例：
-   * 「大谷翔平が30号本塁打」
-   * 「大谷翔平が31号本塁打」
-   *
-   * → 別ニュース
-   */
+  // 英数字キーワード
+  const latinTokens =
+    normalized.match(/[a-z0-9]{2,}/g) ?? [];
 
-  const numbersA = a.match(/\d+/g) ?? [];
-  const numbersB = b.match(/\d+/g) ?? [];
+  for (const token of latinTokens) {
+    tokens.add(token);
+  }
 
-  if (
-    numbersA.length > 0 &&
-    numbersB.length > 0 &&
-    numbersA.join(",") !== numbersB.join(",")
-  ) {
+  return tokens;
+}
+
+function isSimilarTitle(
+  a: string,
+  b: string
+): boolean {
+  if (!a || !b) {
     return false;
   }
 
-  /*
-   * 共通する文字の割合を確認。
-   *
-   * 主要な文章がほぼ同じ場合だけ
-   * 類似記事として扱う。
-   */
+  const aTokens = titleTokens(a);
+  const bTokens = titleTokens(b);
 
-  const commonChars = [...a].filter((char) =>
-    b.includes(char)
-  ).length;
+  if (aTokens.size === 0 || bTokens.size === 0) {
+    return false;
+  }
 
-  const similarity =
-    commonChars / Math.min(a.length, b.length);
+  let overlap = 0;
 
-  return similarity >= 0.75;
+  for (const token of aTokens) {
+    if (bTokens.has(token)) {
+      overlap++;
+    }
+  }
+
+  const smaller =
+    Math.min(aTokens.size, bTokens.size);
+
+  const larger =
+    Math.max(aTokens.size, bTokens.size);
+
+  const containment = overlap / smaller;
+  const jaccard =
+    overlap / (aTokens.size + bTokens.size - overlap);
+
+  // 同じニュースタイトルと判断しやすい条件
+  if (overlap >= 8 && containment >= 0.55) {
+    return true;
+  }
+
+  if (overlap >= 12 && jaccard >= 0.35) {
+    return true;
+  }
+
+  // 短いタイトルはより厳しく判定
+  if (smaller <= 12 && overlap >= 6 && containment >= 0.7) {
+    return true;
+  }
+
+  return false;
 }
 
 /**
