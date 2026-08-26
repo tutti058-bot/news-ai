@@ -366,13 +366,13 @@ export async function syncNews(limit?: number) {
 
   if (dailyRemaining === 0) {
     console.log(
-      "本日の記事上限20件に到達。今回は保存しません。"
+      "本日の記事上限30件に到達。今回は保存しません。"
     );
 
     return {
       added: 0,
       skipped: 0,
-      message: "本日の記事上限20件に到達",
+      message: "本日の記事上限30件に到達",
     };
   }
 
