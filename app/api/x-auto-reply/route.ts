@@ -25,7 +25,7 @@ export async function GET() {
 
     const followerResponse = await fetch(followerUrl, {
       headers: {
-        Authorization: `Bearer ${process.env.X_ACCESS_TOKEN}`,
+        Authorization: `Bearer ${process.env.X_Bearer_Token}`,
       },
     });
 
