@@ -327,7 +327,8 @@ export async function syncNews(limit?: number) {
       ? Math.min(limit, 5)
       : 5;
 
-  // 日本時間の今日を基準に、1日20件を上限にする
+  // 日本時間を基準に記事数を制御する
+  // 0:00〜7:59は最大3件、8:00以降は1日最大30件
   const now = new Date();
   const jstNow = new Date(
     now.toLocaleString("en-US", {
@@ -359,26 +360,35 @@ export async function syncNews(limit?: number) {
     },
   });
 
-  const dailyRemaining = Math.max(
+  const isNightHours =
+    jstNow.getHours() < 8;
+
+  const currentLimit = isNightHours
+    ? 3
+    : 30;
+
+  const remaining = Math.max(
     0,
-    30 - todayAdded
+    currentLimit - todayAdded
   );
 
-  if (dailyRemaining === 0) {
-    console.log(
-      "本日の記事上限30件に到達。今回は保存しません。"
-    );
+  if (remaining === 0) {
+    const message = isNightHours
+      ? "0:00〜8:00の夜間上限3件に到達。今回は保存しません。"
+      : "本日の記事上限30件に到達。今回は保存しません。";
+
+    console.log(message);
 
     return {
       added: 0,
       skipped: 0,
-      message: "本日の記事上限30件に到達",
+      message,
     };
   }
 
   const actualTargetCount = Math.min(
     targetCount,
-    dailyRemaining
+    remaining
   );
 
   const candidateItems: typeof sortedItems = [];
