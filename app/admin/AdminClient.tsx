@@ -1530,15 +1530,27 @@ export default function AdminClient() {
                     </span>
                   </div>
 
-                  <h3 className="mt-2 text-lg font-black leading-7 text-slate-900">
-                    {news.title}
-                  </h3>
+                  <div className="mt-3 flex gap-4">
+                    <div className="h-20 w-28 shrink-0 overflow-hidden rounded-xl bg-slate-100">
+                      <img
+                        src={news.image ?? "/news.jpg"}
+                        alt=""
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
 
-                  {news.summary && (
-                    <p className="mt-2 text-sm leading-6 text-slate-600">
-                      {news.summary}
-                    </p>
-                  )}
+                    <div className="min-w-0 flex-1">
+                      <h3 className="text-lg font-black leading-7 text-slate-900">
+                        {news.title}
+                      </h3>
+
+                      {news.summary && (
+                        <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-600">
+                          {news.summary}
+                        </p>
+                      )}
+                    </div>
+                  </div>
 
                   <div className="mt-4 flex flex-wrap gap-3">
                     <Link
