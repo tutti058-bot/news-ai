@@ -1225,26 +1225,26 @@ export default function AdminClient() {
   };
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-10">
-      <div className="mx-auto max-w-5xl">
+    <main className="min-h-screen bg-slate-50 px-3 py-5 sm:px-4 sm:py-10">
+      <div className="mx-auto max-w-6xl">
 
         {/* ヘッダー */}
-        <div className="mb-10">
+        <div className="mb-6 sm:mb-10">
           <p className="font-bold text-blue-600">
             AI NEWS ジャパン
           </p>
 
-          <h1 className="mt-2 text-4xl font-black text-slate-900">
+          <h1 className="mt-1 text-3xl font-black text-slate-900 sm:mt-2 sm:text-4xl">
             管理画面
           </h1>
 
-                    <p className="mt-3 text-slate-500">
+                    <p className="mt-2 text-sm leading-6 text-slate-500 sm:mt-3 sm:text-base">
             ニュース取得・まとめ作成・X投稿・アフィリエイト案件を管理します。
           </p>
         </div>
 
         {/* サイト全体の閲覧数 */}
-        <section className="mb-8 rounded-3xl border border-slate-200 bg-white p-7 shadow-lg">
+        <section className="mb-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:mb-8 sm:rounded-3xl sm:p-7 sm:shadow-lg">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-black text-slate-400">
@@ -1329,7 +1329,7 @@ export default function AdminClient() {
         </section>
 
         {/* フォロワー交流 */}
-        <div className="mb-6 rounded-3xl border border-blue-200 bg-white p-6 shadow-sm">
+        <div className="mb-6 rounded-2xl border border-blue-200 bg-white p-4 shadow-sm sm:rounded-3xl sm:p-6">
           <div className="mb-4">
             <h2 className="text-xl font-black text-slate-900">
               フォロワー交流
@@ -1406,10 +1406,10 @@ export default function AdminClient() {
         </div>
 
         {/* ニュース・まとめ */}
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
 
           {/* ニュース取得 */}
-          <section className="rounded-3xl border border-slate-200 bg-white p-7 shadow-lg">
+          <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:rounded-3xl sm:p-7 sm:shadow-lg">
             <div className="text-4xl">
               🔄
             </div>
@@ -1434,7 +1434,7 @@ export default function AdminClient() {
           </section>
 
           {/* 今日のニュースまとめ */}
-          <section className="rounded-3xl border border-slate-200 bg-white p-7 shadow-lg">
+          <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:rounded-3xl sm:p-7 sm:shadow-lg">
             <div className="text-4xl">
               📰
             </div>
@@ -1461,14 +1461,14 @@ export default function AdminClient() {
         </div>
 
         {/* 最新ニュース一覧 */}
-        <section className="mt-6 rounded-3xl border border-slate-200 bg-white p-7 shadow-lg">
-          <div className="flex items-center justify-between gap-4">
+        <section className="mt-5 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:mt-6 sm:rounded-3xl sm:p-7 sm:shadow-lg">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <div className="text-4xl">
                 🗞️
               </div>
 
-              <h2 className="mt-4 text-2xl font-black text-slate-900">
+              <h2 className="mt-2 text-xl font-black text-slate-900 sm:mt-4 sm:text-2xl">
                 最新ニュース
               </h2>
 
@@ -1500,7 +1500,7 @@ export default function AdminClient() {
               newsList.map((news) => (
                 <article
                   key={news.id}
-                  className="rounded-2xl border border-slate-200 p-5 transition hover:border-slate-300"
+                  className="rounded-2xl border border-slate-200 p-3 transition hover:border-slate-300 sm:p-5"
                 >
                   <div className="flex flex-wrap items-center gap-2 text-xs font-bold text-slate-400">
                     <span>
@@ -1552,11 +1552,11 @@ export default function AdminClient() {
                     </div>
                   </div>
 
-                  <div className="mt-4 flex flex-wrap gap-3">
+                  <div className="mt-4 grid grid-cols-1 gap-2 sm:flex sm:flex-wrap">
                     <Link
                       href={`/news/${news.id}`}
                       target="_blank"
-                      className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
+                      className="flex min-h-11 items-center justify-center rounded-xl border border-slate-200 px-4 py-2 text-sm font-bold text-slate-700 transition hover:bg-slate-50 sm:min-h-0"
                     >
                       記事を見る
                     </Link>
@@ -1568,14 +1568,12 @@ export default function AdminClient() {
                       disabled={
                         xPostLoadingId === news.id
                       }
-                      className="rounded-xl bg-black px-4 py-2 text-sm font-bold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="min-h-11 rounded-xl bg-black px-4 py-2 text-sm font-bold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0"
                     >
                       {xPostLoadingId === news.id
                         ? "X投稿を作成中..."
                         : "𝕏 X投稿を作成"}
                     </button>
-
-
 
                     <button
                       onClick={() =>
@@ -1584,7 +1582,7 @@ export default function AdminClient() {
                       disabled={
                         relatedLoadingId === news.id
                       }
-                      className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="min-h-11 rounded-xl bg-blue-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0"
                     >
                       {relatedLoadingId === news.id
                         ? "関連記事を検索中..."
@@ -1623,12 +1621,12 @@ export default function AdminClient() {
                                   {related.title}
                                 </p>
 
-                                <div className="mt-3 flex flex-wrap gap-2">
+                                <div className="mt-3 grid grid-cols-1 gap-2 sm:flex sm:flex-wrap">
                                   <a
                                     href={`/news/${related.id}`}
                                     target="_blank"
                                     rel="noreferrer"
-                                    className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50"
+                                    className="flex min-h-10 items-center justify-center rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 sm:min-h-0"
                                   >
                                     記事を見る
                                   </a>
@@ -1637,7 +1635,7 @@ export default function AdminClient() {
                                     href={related.sourceUrl}
                                     target="_blank"
                                     rel="noreferrer"
-                                    className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50"
+                                    className="flex min-h-10 items-center justify-center rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 sm:min-h-0"
                                   >
                                     元記事
                                   </a>
@@ -1653,7 +1651,7 @@ export default function AdminClient() {
                                       relatedReplyLoadingId ===
                                       related.id
                                     }
-                                    className="rounded-lg bg-black px-3 py-2 text-xs font-bold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+                                    className="min-h-10 rounded-lg bg-black px-3 py-2 text-xs font-bold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0"
                                   >
                                     {relatedReplyLoadingId ===
                                     related.id
