@@ -466,6 +466,31 @@ ${url}
         className="mt-8 h-64 w-full rounded-3xl object-cover sm:h-80 lg:h-[460px]"
       />
 
+      {/* AI要約 */}
+      <div className="mt-8 rounded-3xl bg-white p-6 shadow-lg sm:p-8">
+
+        <h2 className="mb-4 text-xl font-black">
+          AI要約
+        </h2>
+
+        <p className="whitespace-pre-wrap text-base leading-8 text-slate-700 sm:text-lg">
+          {news.summary}
+        </p>
+
+        {news.sourceUrl && (
+          <a
+            href={news.sourceUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-8 inline-flex items-center rounded-full bg-blue-600 px-6 py-3 font-bold text-white transition hover:bg-blue-700"
+          >
+            元記事を読む →
+          </a>
+        )}
+
+      </div>
+
+
       {/* AI評価詳細 */}
       <div className="mt-6 w-full overflow-hidden rounded-3xl border border-slate-200 bg-white p-4 shadow-lg sm:p-6">
 
@@ -641,30 +666,6 @@ ${url}
         </div>
       </div>
 
-      {/* AI要約 */}
-      <div className="mt-8 rounded-3xl bg-white p-6 shadow-lg sm:p-8">
-
-        <h2 className="mb-4 text-xl font-black">
-          AI要約
-        </h2>
-
-        <p className="whitespace-pre-wrap text-base leading-8 text-slate-700 sm:text-lg">
-          {news.summary}
-        </p>
-
-        {news.sourceUrl && (
-          <a
-            href={news.sourceUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-8 inline-flex items-center rounded-full bg-blue-600 px-6 py-3 font-bold text-white transition hover:bg-blue-700"
-          >
-            元記事を読む →
-          </a>
-        )}
-
-      </div>
-
       {/* やんすAIの視点 */}
       <section className="mt-8 overflow-hidden rounded-3xl border border-blue-100 bg-gradient-to-br from-blue-50 via-white to-slate-50 shadow-lg">
 
@@ -713,28 +714,6 @@ ${url}
             <p className="mt-5 text-base font-bold leading-8 text-slate-700 sm:text-lg">
               「{yansuComment}」
             </p>
-
-          </div>
-
-          <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-5">
-
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-
-              <div>
-                <h3 className="font-black text-slate-900">
-                  AI NEWS ジャパン独自評価
-                </h3>
-
-                <p className="mt-1 text-xs leading-5 text-slate-400">
-                  ニュースの重要度・話題性・影響範囲などを総合的に評価しています。
-                </p>
-              </div>
-
-              <span className="w-fit rounded-full bg-amber-400 px-4 py-2 text-lg font-black text-slate-900">
-                {news.score ?? 0}点
-              </span>
-
-            </div>
 
           </div>
 
