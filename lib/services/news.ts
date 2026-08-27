@@ -246,6 +246,49 @@ function shouldAnalyzeSoccer(title: string): boolean {
 export async function syncNews(limit?: number) {
   console.log("=== SYNC START ===");
 
+  // 同時実行防止
+  // Cron + 手動実行などが重なっても、10分以内は1本だけ実行する
+  const lockNow = new Date();
+  const staleBefore = new Date(
+    lockNow.getTime() - 10 * 60 * 1000
+  );
+
+  await prisma.newsSyncLock.upsert({
+    where: { id: 1 },
+    create: {
+      id: 1,
+      lockedAt: null,
+    },
+    update: {},
+  });
+
+  const lockResult =
+    await prisma.newsSyncLock.updateMany({
+      where: {
+        id: 1,
+        OR: [
+          { lockedAt: null },
+          { lockedAt: { lt: staleBefore } },
+        ],
+      },
+      data: {
+        lockedAt: lockNow,
+      },
+    });
+
+  if (lockResult.count === 0) {
+    console.log(
+      "別のニュース同期が実行中のためスキップします。"
+    );
+
+    return {
+      added: 0,
+      skipped: 0,
+      message:
+        "別のニュース同期が実行中のため、今回はスキップしました。",
+    };
+  }
+
   console.log("① fetchNews開始");
 
   const items = await fetchNews();

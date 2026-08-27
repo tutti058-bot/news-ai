@@ -52,6 +52,11 @@ model NewsShare {
   @@index([createdAt])
 }
 
+model NewsSyncLock {
+  id       Int      @id @default(1)
+  lockedAt DateTime?
+}
+
 model DailySummary {
   id        Int      @id @default(autoincrement())
   date      DateTime @unique
