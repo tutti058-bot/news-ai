@@ -105,11 +105,24 @@ function cleanDescription(value: unknown): string {
   return text;
 }
 
-export async function POST() {
+export async function POST(request: Request) {
   try {
-    const news = await prisma.news.findFirst({
-      orderBy: {
-        publishedAt: "desc",
+    const body = await request.json().catch(() => ({}));
+
+    const newsId = Number(body.newsId);
+
+    if (!newsId) {
+      return NextResponse.json(
+        {
+          error: "newsIdが必要です",
+        },
+        { status: 400 }
+      );
+    }
+
+    const news = await prisma.news.findUnique({
+      where: {
+        id: newsId,
       },
     });
 
@@ -215,8 +228,8 @@ ${score}点
     const hook = cleanHook(parsed.hook);
     const description = cleanDescription(parsed.description);
 
-    const tweet = `やんすAI
-「${hook}」
+    const tweet = `「${hook}」
+
 ${description}
 
 AI評価：${score}点／100点
