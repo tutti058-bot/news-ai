@@ -28,3 +28,328 @@ body {
     transform: translateY(-3px);
   }
 }
+
+/* ========================================
+   JリーグDAY
+======================================== */
+
+.jleague-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 50px 20px 80px;
+}
+
+.jleague-hero {
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+  padding: 70px 30px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, #07111f 0%, #0d2740 55%, #0b5b45 100%);
+  color: #fff;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+}
+
+.jleague-hero::after {
+  content: "⚽";
+  position: absolute;
+  right: -25px;
+  bottom: -55px;
+  font-size: 180px;
+  opacity: 0.08;
+  transform: rotate(-15deg);
+}
+
+.jleague-badge {
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+  margin-bottom: 24px;
+  padding: 8px 18px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.jleague-hero h1 {
+  position: relative;
+  z-index: 1;
+  margin: 20px 0;
+  color: #fff;
+  font-size: clamp(30px, 5vw, 52px);
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.small-title {
+  position: relative;
+  z-index: 1;
+  margin: 0 0 15px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 16px;
+}
+
+.countdown {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  margin: 20px 0 28px;
+}
+
+.countdown > div {
+  min-width: 100px;
+  padding: 18px 14px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px);
+}
+
+.countdown strong {
+  display: block;
+  font-size: 42px;
+  line-height: 1;
+  font-weight: 800;
+}
+
+.countdown span {
+  display: block;
+  margin-top: 8px;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 13px;
+}
+
+.lead {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 17px;
+  line-height: 1.8;
+}
+
+.lead strong {
+  color: #fff;
+  font-size: 20px;
+}
+
+.jleague-content {
+  max-width: 850px;
+  margin: 55px auto 0;
+}
+
+.jleague-content h2 {
+  margin-bottom: 20px;
+  font-size: 28px;
+  font-weight: 800;
+}
+
+.jleague-content > p {
+  color: #555;
+  font-size: 16px;
+  line-height: 2;
+}
+
+.coming-card {
+  margin-top: 30px;
+  padding: 30px;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  background: #fff;
+}
+
+.coming-card span {
+  display: inline-block;
+  margin-bottom: 10px;
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.coming-card h3 {
+  margin: 0 0 10px;
+  font-size: 22px;
+}
+
+.coming-card p {
+  margin: 0;
+  color: #666;
+  line-height: 1.8;
+}
+
+@media (max-width: 600px) {
+  .jleague-page {
+    padding: 25px 14px 60px;
+  }
+
+  .jleague-hero {
+    padding: 50px 18px;
+    border-radius: 18px;
+  }
+
+  .countdown {
+    gap: 7px;
+  }
+
+  .countdown > div {
+    min-width: 0;
+    flex: 1;
+    padding: 14px 6px;
+    border-radius: 12px;
+  }
+
+  .countdown strong {
+    font-size: 30px;
+  }
+
+  .countdown span {
+    font-size: 11px;
+  }
+
+  .jleague-hero h1 {
+    font-size: 30px;
+  }
+
+  .lead {
+    font-size: 15px;
+  }
+
+  .jleague-content {
+    margin-top: 40px;
+  }
+
+  .jleague-content h2 {
+    font-size: 24px;
+  }
+}
+
+/* ========================================
+   JリーグDAY - トップページカード
+======================================== */
+
+.jleague-home-card {
+  max-width: 1180px;
+  margin: 24px auto;
+  padding: 0 20px;
+}
+
+.jleague-home-card-inner {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 22px 28px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #07111f 0%, #0d2740 55%, #0b5b45 100%);
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.jleague-home-card-inner::after {
+  content: "⚽";
+  position: absolute;
+  right: 20px;
+  bottom: -25px;
+  font-size: 100px;
+  opacity: 0.07;
+  pointer-events: none;
+}
+
+.jleague-home-badge {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  padding: 7px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.jleague-home-count {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  white-space: nowrap;
+}
+
+.jleague-home-count span {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.jleague-home-count strong {
+  font-size: 28px;
+  font-weight: 800;
+}
+
+.jleague-home-card-inner > p {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.jleague-home-card-inner > p strong {
+  color: #fff;
+}
+
+.jleague-home-link {
+  position: relative;
+  z-index: 2;
+  flex-shrink: 0;
+  display: inline-block;
+  padding: 10px 17px;
+  border-radius: 999px;
+  background: #fff;
+  color: #07111f;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: transform 0.2s ease;
+}
+
+.jleague-home-link:hover {
+  transform: translateY(-2px);
+  text-decoration: none;
+}
+
+@media (max-width: 700px) {
+  .jleague-home-card {
+    margin: 18px auto;
+    padding: 0 14px;
+  }
+
+  .jleague-home-card-inner {
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 20px;
+  }
+
+  .jleague-home-count {
+    width: 100%;
+  }
+
+  .jleague-home-count strong {
+    font-size: 26px;
+  }
+
+  .jleague-home-card-inner > p {
+    width: 100%;
+  }
+
+  .jleague-home-link {
+    margin-top: 4px;
+  }
+}

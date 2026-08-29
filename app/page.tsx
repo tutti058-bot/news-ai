@@ -1,4 +1,5 @@
 import TrendingBar from "@/components/TrendingBar";
+import JLeagueDayCard from "@/components/JLeagueDayCard";
 import HomeLayout from "@/components/HomeLayout";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
@@ -68,15 +69,17 @@ export default async function Home({
     (item): item is NonNullable<typeof item> => item !== null
   );
 
-  return (
-    <>
-      <TrendingBar news={filteredTrendingNews} />
+return (
+  <>
+    <TrendingBar news={filteredTrendingNews} />
 
-      <HomeLayout
-        keyword={q}
-        page={Number(page)}
-      />
+    <JLeagueDayCard />
 
-    </>
-  );
+    <HomeLayout
+      keyword={q}
+      page={Number(page)}
+    />
+
+  </>
+);
 }

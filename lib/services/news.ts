@@ -3,6 +3,7 @@ import { fetchNews } from "@/lib/fetchNews";
 import { analyzeArticle } from "@/lib/ai";
 import { getImage } from "@/lib/getImage";
 import { getArticle } from "@/lib/getArticle";
+import { isJLeagueDay } from "@/lib/jLeagueDays";
 
 function normalizeUrl(url: string): string {
   return url
@@ -289,9 +290,10 @@ export async function syncNews(limit?: number) {
     };
   }
 
-  console.log("① fetchNews開始");
+  try {
+    console.log("① fetchNews開始");
 
-  const items = await fetchNews();
+    const items = await fetchNews();
 
   console.log(
     "② fetchNews完了:",
@@ -379,6 +381,23 @@ export async function syncNews(limit?: number) {
     })
   );
 
+  const todayString =
+    `${jstNow.getFullYear()}-` +
+    `${String(jstNow.getMonth() + 1).padStart(2, "0")}-` +
+    `${String(jstNow.getDate()).padStart(2, "0")}`;
+
+  const jLeagueDay = isJLeagueDay(todayString);
+
+  console.log(
+    jLeagueDay
+      ? "⚽ 本日はJリーグDAY：サッカーニュース優先"
+      : "通常日：通常のニュース配分"
+  );
+
+  // JリーグDAYはサッカーを優先
+  const SOCCER_LIMIT = jLeagueDay ? 5 : 3;
+
+
   const jstStart = new Date(jstNow);
   jstStart.setHours(0, 0, 0, 0);
 
@@ -448,10 +467,24 @@ export async function syncNews(limit?: number) {
       (item.category ?? "") !== "テクノロジー"
   );
 
-  const prioritizedItems = [
-    ...technologyItems,
-    ...otherItems,
-  ];
+  const soccerItems = sortedItems.filter(
+    (item) => item.source === "ゲキサカ"
+  );
+
+  const nonSoccerItems = sortedItems.filter(
+    (item) => item.source !== "ゲキサカ"
+  );
+
+  const prioritizedItems = jLeagueDay
+    ? [
+        ...soccerItems,
+        ...technologyItems,
+        ...nonSoccerItems,
+      ]
+    : [
+        ...technologyItems,
+        ...otherItems,
+      ];
 
   for (const item of prioritizedItems) {
     if (candidateItems.length >= 20) {
@@ -628,7 +661,7 @@ export async function syncNews(limit?: number) {
 
     if (
       soccer &&
-      soccerAdded >= 3
+      soccerAdded >= SOCCER_LIMIT
     ) {
       continue;
     }
@@ -1032,7 +1065,7 @@ if (ai.score < MIN_SCORE) {
         );
 
         console.log(
-          `サッカー件数: ${soccerAdded}/3`
+          `サッカー件数: ${soccerAdded}/${SOCCER_LIMIT}`
         );
       } else {
         normalAdded++;
@@ -1127,7 +1160,7 @@ if (ai.score < MIN_SCORE) {
     "================================"
   );
 
-  return {
+    return {
     success: true,
 
     added,
@@ -1144,5 +1177,15 @@ if (ai.score < MIN_SCORE) {
     entertainmentAdded,
 
     soccerAdded,
-  };
+    };
+  } finally {
+    await prisma.newsSyncLock.update({
+      where: { id: 1 },
+      data: {
+        lockedAt: null,
+      },
+    });
+
+    console.log("ニュース同期ロック解除");
+  }
 }
