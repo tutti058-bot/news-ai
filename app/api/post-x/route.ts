@@ -78,22 +78,7 @@ function cleanText(value: unknown): string {
 function cleanHook(value: unknown): string {
   let text = cleanText(value)
     .replace(/^「|」$/g, "")
-    .replace(/でやんす[！!]?$/g, "")
-    .trim();
-
-  // JSON風の外側が残った場合
-  text = text
-    .replace(/^\s*\{\s*["'][^"']*["']\s*:\s*["']?/g, "")
-    .replace(/["']\s*\}\s*$/g, "")
-    .trim();
-
-  return `${text}でやんす`;
-}
-
-function cleanDescription(value: unknown): string {
-  let text = cleanText(value)
-    .replace(/^「|」$/g, "")
-    .replace(/でやんす[！!]?$/g, "")
+    .replace(/でやんす[。！!]?$/g, "")
     .trim();
 
   // JSON風の外側が残った場合
@@ -103,6 +88,27 @@ function cleanDescription(value: unknown): string {
     .trim();
 
   return text;
+}
+
+function cleanDescription(value: unknown): string {
+  let text = cleanText(value)
+    .replace(/^「|」$/g, "")
+    .replace(/でやんす[。！!]?$/g, "")
+    .trim();
+
+  // JSON風の外側が残った場合
+  text = text
+    .replace(/^\s*\{\s*["'][^"']*["']\s*:\s*["']?/g, "")
+    .replace(/["']\s*\}\s*$/g, "")
+    .trim();
+
+  const strongEnding =
+    /[！!]\s*$/.test(text) ||
+    /(大きな|劇的|快挙|決定|逆転|優勝|突破|初|注目|期待|衝撃)/.test(text);
+
+  text = text.replace(/[。！!]+$/g, "").trim();
+
+  return `${text}${strongEnding ? "でやんす！" : "でやんす。"}`;
 }
 
 export async function POST(request: Request) {
@@ -186,10 +192,16 @@ AI NEWS ジャパンのX投稿は、記事へのクリックを無理に誘導�
 
 ニュース内容を自然で分かりやすく説明してください。
 
-最後に必要な場合のみ、
-やんすAIらしい自然な一言を入れても構いません。
+最後は、やんすAIらしい自然な語尾で締めてください。
 
-「でやんす」を無理に付ける必要はありません。
+説明文の最後には「でやんす」を使います。
+
+落ち着いた通常ニュースは「でやんす。」、
+大きなニュース、驚き、期待感、スポーツの盛り上がりなどがある場合は
+「でやんす！」を使ってください。
+
+毎回同じ雰囲気にならないよう、
+ニュース内容に合わせて自然な温度感を選んでください。
 
 ロボットのような定型文は避け、
 ニュース内容に合わせた自然な文章にしてください。
