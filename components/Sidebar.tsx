@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { getRanking } from "@/lib/ranking";
+import { getImportanceRanking } from "@/lib/ranking";
+import RankingSwitcher from "./RankingSwitcher";
 import { prisma } from "@/lib/prisma";
 
 const medalColor = [
@@ -11,7 +12,15 @@ const medalColor = [
 ];
 
 export default async function Sidebar() {
-  const ranking = await getRanking();
+  const weeklyRanking = await getImportanceRanking("weekly");
+  const monthlyRanking = await getImportanceRanking("monthly");
+
+  const rankingData = (items: typeof weeklyRanking) =>
+    items.slice(0, 5).map((item) => ({
+      id: item.id,
+      title: item.title,
+      score: item.score,
+    }));
 
   const affiliatePrograms =
     await prisma.affiliateProgram.findMany({
@@ -33,47 +42,11 @@ export default async function Sidebar() {
     <aside className="space-y-8">
 
       <div className="rounded-3xl border border-gray-200 bg-white p-8 shadow-lg">
-
-        <h2 className="mb-8 text-3xl font-black text-slate-900">
-          🔥 AI重要度ランキング
-        </h2>
-
-        <div className="space-y-5">
-
-          {ranking.map((item, index) => (
-
-            <Link
-              key={item.id}
-              href={`/news/${item.id}`}
-              className="flex items-start gap-4 border-b border-gray-100 pb-5 last:border-none"
-            >
-
-              <div
-                className={`flex h-11 w-11 items-center justify-center rounded-full text-sm font-black text-white ${medalColor[index]}`}
-              >
-                {index + 1}
-              </div>
-
-              <div className="flex-1">
-
-                <div className="mb-2 inline-block rounded-full bg-red-100 px-3 py-1 text-xs font-bold text-red-600">
-                  AI {item.score}点
-                </div>
-
-                <h3 className="font-bold leading-6 text-slate-900 transition hover:text-blue-600">
-                  {item.title}
-                </h3>
-
-              </div>
-
-            </Link>
-
-          ))}
-
-        </div>
-
+        <RankingSwitcher
+          weekly={rankingData(weeklyRanking)}
+          monthly={rankingData(monthlyRanking)}
+        />
       </div>
-
       {/* カテゴリー */}
 
       <div className="rounded-3xl border border-gray-200 bg-white p-8 shadow-lg">
