@@ -477,16 +477,19 @@ export async function syncNews(limit?: number) {
 
   const prioritizedItems = jLeagueDay
     ? [
+        // JリーグDAYはサッカーを最優先
         ...soccerItems,
         ...technologyItems,
         ...nonSoccerItems,
       ]
     : [
+        // 通常日は通常ニュースを優先
         ...technologyItems,
-        ...soccerItems,
         ...otherItems.filter(
           (item) => item.source !== "ゲキサカ"
         ),
+        // サッカーは通常ニュースの後
+        ...soccerItems,
       ];
 
   for (const item of prioritizedItems) {
@@ -690,7 +693,7 @@ export async function syncNews(limit?: number) {
     // 必要件数に達したカテゴリは以降の候補を処理しない
     if (
       entertainment && entertainmentAdded >= 8 ||
-      soccer && soccerAdded >= 3 ||
+      soccer && soccerAdded >= SOCCER_LIMIT ||
       !entertainment && !soccer && normalAdded >= 5
     ) {
       continue;
