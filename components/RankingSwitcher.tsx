@@ -32,9 +32,15 @@ export default function RankingSwitcher({
 
   return (
     <>
-      <h2 className="mb-8 text-3xl font-black text-slate-900">
-        🔥 AI重要度ランキング{isMonthly ? "月間" : "週間"}
-      </h2>
+      <div className="mb-8">
+        <h2 className="text-3xl font-black text-slate-900">
+          🔥 重要度 RANKING
+        </h2>
+
+        <div className="mt-1 text-center text-sm font-bold text-slate-400">
+          {isMonthly ? "月間" : "週間"}
+        </div>
+      </div>
 
       <div className="space-y-5">
         {ranking.map((item, index) => (

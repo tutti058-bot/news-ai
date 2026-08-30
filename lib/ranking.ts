@@ -80,3 +80,62 @@ export async function getImportanceRanking(
     },
   });
 }
+
+/**
+ * 閲覧ランキング
+ * 直近7日間の実際の閲覧数TOP3
+ */
+export async function getViewRanking() {
+  const since = new Date(
+    Date.now() - 7 * 24 * 60 * 60 * 1000
+  );
+
+  const views = await prisma.newsView.groupBy({
+    by: ["newsId"],
+    where: {
+      createdAt: {
+        gte: since,
+      },
+    },
+    _count: {
+      newsId: true,
+    },
+    orderBy: {
+      _count: {
+        newsId: "desc",
+      },
+    },
+    take: 3,
+  });
+
+  const news = await Promise.all(
+    views.map(async (item) => {
+      const article = await prisma.news.findUnique({
+        where: {
+          id: item.newsId,
+        },
+        select: {
+          id: true,
+          title: true,
+          score: true,
+          category: true,
+          publishedAt: true,
+        },
+      });
+
+      if (!article) {
+        return null;
+      }
+
+      return {
+        ...article,
+        viewCount: item._count.newsId,
+      };
+    })
+  );
+
+  return news.filter(
+    (item): item is NonNullable<typeof item> =>
+      item !== null
+  );
+}
