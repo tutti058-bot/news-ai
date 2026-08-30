@@ -483,7 +483,10 @@ export async function syncNews(limit?: number) {
       ]
     : [
         ...technologyItems,
-        ...otherItems,
+        ...soccerItems,
+        ...otherItems.filter(
+          (item) => item.source !== "ゲキサカ"
+        ),
       ];
 
   for (const item of prioritizedItems) {
@@ -940,13 +943,20 @@ if (ai.score < MIN_SCORE) {
 
     if (entertainment) {
       /*
-       * ORICON NEWS
-       * マイナビ芸能
-       *
+       * 芸能ソース
        * → 必ず芸能
        */
 
       ai.category = "芸能";
+    }
+
+    if (soccer) {
+      /*
+       * ゲキサカ
+       * → 必ずサッカー
+       */
+
+      ai.category = "サッカー";
     }
 
     /*
