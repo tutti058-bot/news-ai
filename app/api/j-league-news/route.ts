@@ -4,6 +4,49 @@ import { getSoccerImportanceRanking, getSoccerViewRanking } from "@/lib/ranking"
 
 export const dynamic = "force-dynamic";
 
+function getSoccerCategory(
+  title: string,
+  summary: string,
+  source: string
+) {
+  const text =
+    `${title} ${summary} ${source}`.toLowerCase();
+
+  // 日本代表
+  const japanPattern =
+    /日本代表|samurai blue|サムライブルー|代表戦|代表メンバー|代表招集|代表招集|w杯|ワールドカップ/iu;
+
+  if (japanPattern.test(text)) {
+    return "日本代表";
+  }
+
+  // 海外日本人
+  const overseasJapanesePattern =
+    /海外日本人|海外組|海外でプレー|欧州.*日本人|日本人.*欧州|日本人選手|[^\s]+(?:伊藤|三笘|久保|遠藤|堂安|南野|鎌田|鈴木|冨安|守田|上田|古橋|前田|旗手|町田|板倉|菅原|伊東|浅野)/iu;
+
+  if (overseasJapanesePattern.test(text)) {
+    return "海外日本人";
+  }
+
+  // Jリーグ
+  const jLeaguePattern =
+    /jリーグ|j1|j2|j3|jクラブ|浦和レッズ|鹿島アントラーズ|fc東京|東京ヴェルディ|川崎フロンターレ|横浜f・マリノス|横浜fc|湘南ベルマーレ|柏レイソル|アルビレックス新潟|清水エスパルス|名古屋グランパス|京都サンガ|ガンバ大阪|セレッソ大阪|ヴィッセル神戸|サンフレッチェ広島|アビスパ福岡|ファジアーノ岡山|町田ゼルビア/iu;
+
+  if (jLeaguePattern.test(text)) {
+    return "Jリーグ";
+  }
+
+  // 海外クラブ・海外リーグ
+  const overseasPattern =
+    /プレミアリーグ|ラ・リーガ|リーガ|セリエa|ブンデスリーガ|リーグ・アン|チャンピオンズリーグ|europa|uefa|fifa|レアル・マドリー|レアル・マドリード|バルセロナ|マンチェスター|リヴァプール|アーセナル|チェルシー|バイエルン|ドルトムント|インテル|ミラン|ユベントス|パリsg/iu;
+
+  if (overseasPattern.test(text)) {
+    return "海外サッカー";
+  }
+
+  return "その他";
+}
+
 function isJLeagueRelated(
   title: string,
   summary: string,
@@ -92,7 +135,14 @@ export async function GET() {
       new Map(
         allNews.map((item) => [item.id, item])
       ).values()
-    );
+    ).map((item) => ({
+      ...item,
+      soccerCategory: getSoccerCategory(
+        item.title ?? "",
+        item.summary ?? "",
+        item.source ?? ""
+      ),
+    }));
 
     // 日付順
     uniqueNews.sort((a, b) => {

@@ -14,6 +14,7 @@ type NewsItem = {
   category: string | null;
   score: number | null;
   publishedAt: string | null;
+  soccerCategory?: string;
 };
 
 function getTodayString() {
@@ -52,6 +53,18 @@ export default function JLeagueDayPage() {
 
   const [soccerViewMonthly, setSoccerViewMonthly] =
     useState<any[]>([]);
+
+  const [selectedCategory, setSelectedCategory] =
+    useState("すべて");
+
+  const soccerCategories = [
+    "すべて",
+    "Jリーグ",
+    "海外サッカー",
+    "日本代表",
+    "海外日本人",
+    "その他",
+  ];
 
   const NEWS_PER_PAGE = 10;
 
@@ -148,15 +161,30 @@ export default function JLeagueDayPage() {
     Math.floor((diff / 1000) % 60)
   );
 
+  const filteredNews =
+    selectedCategory === "すべて"
+      ? news
+      : news.filter(
+          (item) =>
+            item.soccerCategory === selectedCategory
+        );
+
   const totalPages = Math.max(
     1,
-    Math.ceil(news.length / NEWS_PER_PAGE)
+    Math.ceil(
+      filteredNews.length / NEWS_PER_PAGE
+    )
+  );
+
+  const safePage = Math.min(
+    currentPage,
+    totalPages
   );
 
   const startIndex =
-    (currentPage - 1) * NEWS_PER_PAGE;
+    (safePage - 1) * NEWS_PER_PAGE;
 
-  const currentNews = news.slice(
+  const currentNews = filteredNews.slice(
     startIndex,
     startIndex + NEWS_PER_PAGE
   );
@@ -231,6 +259,26 @@ export default function JLeagueDayPage() {
           AI NEWSジャパンでは、Jリーグの試合が多く開催される日を
           「JリーグDAY」として、サッカー関連ニュースをいつもより多めにお届けします。
         </p>
+
+        <div className="mt-8 flex flex-wrap gap-2">
+          {soccerCategories.map((category) => (
+            <button
+              key={category}
+              type="button"
+              onClick={() => {
+                setSelectedCategory(category);
+                setCurrentPage(1);
+              }}
+              className={`rounded-full px-4 py-2 text-sm font-bold transition ${
+                selectedCategory === category
+                  ? "bg-green-600 text-white"
+                  : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-100"
+              }`}
+            >
+              {category}
+            </button>
+          ))}
+        </div>
 
         <div className="mt-10 grid gap-10 lg:grid-cols-[minmax(0,1fr)_360px]">
 
@@ -309,7 +357,7 @@ export default function JLeagueDayPage() {
                     behavior: "smooth",
                   });
                 }}
-                disabled={currentPage === 1}
+                disabled={safePage === 1}
                 className="rounded-lg border px-4 py-2 text-sm font-bold disabled:cursor-not-allowed disabled:opacity-40"
               >
                 ← 前へ
@@ -329,7 +377,7 @@ export default function JLeagueDayPage() {
                     });
                   }}
                   className={`rounded-lg px-4 py-2 text-sm font-bold transition ${
-                    currentPage === page
+                    safePage === page
                       ? "bg-green-600 text-white"
                       : "border bg-white text-slate-700 hover:bg-slate-100"
                   }`}
@@ -348,7 +396,7 @@ export default function JLeagueDayPage() {
                     behavior: "smooth",
                   });
                 }}
-                disabled={currentPage === totalPages}
+                disabled={safePage === totalPages}
                 className="rounded-lg border px-4 py-2 text-sm font-bold disabled:cursor-not-allowed disabled:opacity-40"
               >
                 次へ →
