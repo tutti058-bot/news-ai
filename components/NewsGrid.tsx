@@ -13,7 +13,7 @@ export default async function NewsGrid({
   keyword = "",
   page,
 }: NewsGridProps) {
-  const where = keyword
+  const searchWhere = keyword
     ? {
         OR: [
           {
@@ -28,7 +28,29 @@ export default async function NewsGrid({
           },
         ],
       }
-    : undefined;
+    : null;
+
+  // サッカー記事は通常ページでは90点以上のみ表示
+  // 現在はゲキサカの記事をサッカー記事として判定
+  const where = {
+    AND: [
+      ...(searchWhere ? [searchWhere] : []),
+      {
+        OR: [
+          {
+            source: {
+              not: "ゲキサカ",
+            },
+          },
+          {
+            score: {
+              gte: 90,
+            },
+          },
+        ],
+      },
+    ],
+  };
 
   const total = await prisma.news.count({
     where,
