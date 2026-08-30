@@ -38,8 +38,6 @@ function isJLeagueRelated(
     "ファジアーノ岡山",
     "町田ゼルビア",
 
-    // サッカー関連
-    "ゲキサカ",
     "jリーガー",
     "元jリーガー",
   ];
@@ -59,13 +57,23 @@ export async function GET() {
     });
 
     const jLeagueNews = news
-      .filter((item) =>
-        isJLeagueRelated(
+      .filter((item) => {
+        const source = item.source ?? "";
+
+        // ゲキサカから取得した記事は
+        // サッカー記事としてJリーグDAYページに表示
+        if (source === "ゲキサカ") {
+          return true;
+        }
+
+        // 他のニュースソースでも
+        // Jリーグ関連なら表示
+        return isJLeagueRelated(
           item.title ?? "",
           item.summary ?? "",
-          item.source ?? ""
-        )
-      )
+          source
+        );
+      })
       .slice(0, 20);
 
     return NextResponse.json(jLeagueNews);
