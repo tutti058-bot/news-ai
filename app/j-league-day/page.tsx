@@ -1,7 +1,18 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { getNextJLeagueDay } from "@/lib/jLeagueDays";
+
+type NewsItem = {
+  id: number;
+  title: string;
+  summary: string | null;
+  image: string | null;
+  category: string | null;
+  score: number | null;
+  publishedAt: string | null;
+};
 
 function getTodayString() {
   const now = new Date();
@@ -24,6 +35,11 @@ function formatDate(dateString: string) {
 
 export default function JLeagueDayPage() {
   const [now, setNow] = useState(new Date());
+  const [news, setNews] = useState<NewsItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const NEWS_PER_PAGE = 10;
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -33,6 +49,28 @@ export default function JLeagueDayPage() {
     return () => clearInterval(timer);
   }, []);
 
+  useEffect(() => {
+    async function fetchNews() {
+      try {
+        const response = await fetch("/api/j-league-news");
+
+        if (!response.ok) {
+          throw new Error("ニュース取得失敗");
+        }
+
+        const data = await response.json();
+
+        setNews(data);
+      } catch (error) {
+        console.error("Jリーグニュース取得エラー:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchNews();
+  }, []);
+
   const today = getTodayString();
   const nextDay = getNextJLeagueDay(today);
 
@@ -40,7 +78,10 @@ export default function JLeagueDayPage() {
     return (
       <main className="jleague-page">
         <section className="jleague-hero">
-          <div className="jleague-badge">⚽ J.LEAGUE DAY</div>
+          <div className="jleague-badge">
+            ⚽ J.LEAGUE DAY
+          </div>
+
           <h1>次回のJリーグDAYは準備中です</h1>
         </section>
       </main>
@@ -77,6 +118,19 @@ export default function JLeagueDayPage() {
     Math.floor((diff / 1000) % 60)
   );
 
+  const totalPages = Math.max(
+    1,
+    Math.ceil(news.length / NEWS_PER_PAGE)
+  );
+
+  const startIndex =
+    (currentPage - 1) * NEWS_PER_PAGE;
+
+  const currentNews = news.slice(
+    startIndex,
+    startIndex + NEWS_PER_PAGE
+  );
+
   return (
     <main className="jleague-page">
       <section className="jleague-hero">
@@ -89,7 +143,7 @@ export default function JLeagueDayPage() {
             <h1>本日はJリーグDAY！</h1>
 
             <p className="lead">
-              今日はJリーグのニュースを
+              今日はJリーグ・サッカー関連のニュースを
               <br />
               いつもより多めにお届けします。
             </p>
@@ -140,23 +194,139 @@ export default function JLeagueDayPage() {
       </section>
 
       <section className="jleague-content">
-        <h2>⚽ JリーグDAY</h2>
+        <div style={{ background: "red", color: "white", padding: "20px", marginBottom: "20px" }}>
+          DEBUG：loading = {String(loading)} / news件数 = {news.length}
+        </div>
+
+        <h2>⚽ Jリーグ・サッカーニュース</h2>
 
         <p>
           AI NEWSジャパンでは、Jリーグの試合が多く開催される日を
-          「JリーグDAY」として、サッカーニュースをいつもより多めにお届けします。
+          「JリーグDAY」として、サッカー関連ニュースをいつもより多めにお届けします。
         </p>
 
-        <div className="coming-card">
-          <span>AI NEWS JAPAN</span>
-
-          <h3>Jリーグニュース</h3>
-
-          <p>
-            試合情報・結果・注目ニュースなどを、
-            今後このページにまとめていきます。
+        {loading ? (
+          <p className="mt-8 text-center">
+            ニュースを読み込み中...
           </p>
-        </div>
+        ) : news.length === 0 ? (
+          <div className="coming-card">
+            <span>AI NEWS JAPAN</span>
+
+            <h3>Jリーグニュース</h3>
+
+            <p>
+              現在表示できるJリーグ関連ニュースを準備中です。
+            </p>
+          </div>
+        ) : (
+          <>
+          <div className="mt-8 grid gap-6 md:grid-cols-2">
+            {currentNews.map((item) => (
+              <Link
+                key={item.id}
+                href={`/news/${item.id}`}
+                className="block overflow-hidden rounded-2xl bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+              >
+                {item.image && (
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    className="h-48 w-full object-cover"
+                  />
+                )}
+
+                <div className="p-5">
+                  <div className="mb-3 flex items-center gap-2">
+                    <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-bold text-green-700">
+                      ⚽ サッカー
+                    </span>
+
+                    {item.score && (
+                      <span className="text-xs font-bold text-slate-500">
+                        AI評価 {item.score}点
+                      </span>
+                    )}
+                  </div>
+
+                  <h3 className="text-lg font-bold leading-relaxed text-slate-900">
+                    {item.title}
+                  </h3>
+
+                  {item.summary && (
+                    <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-slate-600">
+                      {item.summary}
+                    </p>
+                  )}
+
+                  <p className="mt-4 text-sm font-bold text-blue-600">
+                    記事を読む →
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          {totalPages > 1 && (
+            <div className="mt-10 flex flex-wrap items-center justify-center gap-2">
+              <button
+                onClick={() => {
+                  setCurrentPage((page) =>
+                    Math.max(1, page - 1)
+                  );
+                  window.scrollTo({
+                    top: 0,
+                    behavior: "smooth",
+                  });
+                }}
+                disabled={currentPage === 1}
+                className="rounded-lg border px-4 py-2 text-sm font-bold disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                ← 前へ
+              </button>
+
+              {Array.from(
+                { length: totalPages },
+                (_, index) => index + 1
+              ).map((page) => (
+                <button
+                  key={page}
+                  onClick={() => {
+                    setCurrentPage(page);
+                    window.scrollTo({
+                      top: 0,
+                      behavior: "smooth",
+                    });
+                  }}
+                  className={`rounded-lg px-4 py-2 text-sm font-bold transition ${
+                    currentPage === page
+                      ? "bg-green-600 text-white"
+                      : "border bg-white text-slate-700 hover:bg-slate-100"
+                  }`}
+                >
+                  {page}
+                </button>
+              ))}
+
+              <button
+                onClick={() => {
+                  setCurrentPage((page) =>
+                    Math.min(totalPages, page + 1)
+                  );
+                  window.scrollTo({
+                    top: 0,
+                    behavior: "smooth",
+                  });
+                }}
+                disabled={currentPage === totalPages}
+                className="rounded-lg border px-4 py-2 text-sm font-bold disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                次へ →
+              </button>
+            </div>
+          )}
+          </>
+        )}
       </section>
     </main>
   );
