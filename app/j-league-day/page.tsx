@@ -195,7 +195,6 @@ export default function JLeagueDayPage() {
 
       <section className="jleague-content">
         <div style={{ background: "red", color: "white", padding: "20px", marginBottom: "20px" }}>
-          DEBUG：loading = {String(loading)} / news件数 = {news.length}
         </div>
 
         <h2>⚽ Jリーグ・サッカーニュース</h2>
