@@ -139,3 +139,128 @@ export async function getViewRanking() {
       item !== null
   );
 }
+
+/**
+ * サッカー重要度ランキング
+ * ゲキサカまたはサッカーカテゴリの記事を対象
+ * weekly = 7日間 / monthly = 30日間
+ */
+export async function getSoccerImportanceRanking(
+  period: "weekly" | "monthly"
+) {
+  const days = period === "weekly" ? 7 : 30;
+
+  const since = new Date(
+    Date.now() - days * 24 * 60 * 60 * 1000
+  );
+
+  return prisma.news.findMany({
+    where: {
+      publishedAt: {
+        gte: since,
+      },
+      OR: [
+        {
+          source: "ゲキサカ",
+        },
+        {
+          category: "サッカー",
+        },
+      ],
+    },
+    orderBy: [
+      {
+        importanceScore: "desc",
+      },
+      {
+        score: "desc",
+      },
+      {
+        publishedAt: "desc",
+      },
+    ],
+    take: 3,
+    select: {
+      id: true,
+      title: true,
+      score: true,
+      importanceScore: true,
+      publishedAt: true,
+    },
+  });
+}
+
+/**
+ * サッカー閲覧ランキング
+ * ゲキサカまたはサッカーカテゴリの記事のみ
+ * weekly = 7日間 / monthly = 30日間
+ */
+export async function getSoccerViewRanking(
+  period: "weekly" | "monthly"
+) {
+  const days = period === "weekly" ? 7 : 30;
+
+  const since = new Date(
+    Date.now() - days * 24 * 60 * 60 * 1000
+  );
+
+  const views = await prisma.newsView.groupBy({
+    by: ["newsId"],
+    where: {
+      createdAt: {
+        gte: since,
+      },
+    },
+    _count: {
+      newsId: true,
+    },
+    orderBy: {
+      _count: {
+        newsId: "desc",
+      },
+    },
+    take: 20,
+  });
+
+  const news = await Promise.all(
+    views.map(async (item) => {
+      const article = await prisma.news.findUnique({
+        where: {
+          id: item.newsId,
+        },
+        select: {
+          id: true,
+          title: true,
+          source: true,
+          category: true,
+          score: true,
+          publishedAt: true,
+        },
+      });
+
+      if (!article) {
+        return null;
+      }
+
+      const isSoccer =
+        article.source === "ゲキサカ" ||
+        article.category === "サッカー";
+
+      if (!isSoccer) {
+        return null;
+      }
+
+      return {
+        ...article,
+        viewCount: item._count.newsId,
+      };
+    })
+  );
+
+  return news
+    .filter(
+      (item): item is NonNullable<typeof item> =>
+        item !== null
+    )
+    .slice(0, 3);
+}

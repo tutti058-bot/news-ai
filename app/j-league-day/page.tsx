@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { getNextJLeagueDay } from "@/lib/jLeagueDays";
+import SoccerRankingSidebar from "@/components/SoccerRankingSidebar";
+import SoccerAffiliateSidebar from "@/components/SoccerAffiliateSidebar";
 
 type NewsItem = {
   id: number;
@@ -39,6 +41,18 @@ export default function JLeagueDayPage() {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
 
+  const [soccerImportanceWeekly, setSoccerImportanceWeekly] =
+    useState<any[]>([]);
+
+  const [soccerImportanceMonthly, setSoccerImportanceMonthly] =
+    useState<any[]>([]);
+
+  const [soccerViewWeekly, setSoccerViewWeekly] =
+    useState<any[]>([]);
+
+  const [soccerViewMonthly, setSoccerViewMonthly] =
+    useState<any[]>([]);
+
   const NEWS_PER_PAGE = 10;
 
   useEffect(() => {
@@ -60,7 +74,23 @@ export default function JLeagueDayPage() {
 
         const data = await response.json();
 
-        setNews(data);
+        setNews(data.news ?? []);
+
+        setSoccerImportanceWeekly(
+          data.rankings?.importance?.weekly ?? []
+        );
+
+        setSoccerImportanceMonthly(
+          data.rankings?.importance?.monthly ?? []
+        );
+
+        setSoccerViewWeekly(
+          data.rankings?.views?.weekly ?? []
+        );
+
+        setSoccerViewMonthly(
+          data.rankings?.views?.monthly ?? []
+        );
       } catch (error) {
         console.error("Jリーグニュース取得エラー:", error);
       } finally {
@@ -202,6 +232,9 @@ export default function JLeagueDayPage() {
           「JリーグDAY」として、サッカー関連ニュースをいつもより多めにお届けします。
         </p>
 
+        <div className="mt-10 grid gap-10 lg:grid-cols-[minmax(0,1fr)_360px]">
+
+          <div>
         {loading ? (
           <p className="mt-8 text-center">
             ニュースを読み込み中...
@@ -324,6 +357,21 @@ export default function JLeagueDayPage() {
           )}
           </>
         )}
+
+          </div>
+
+          <div className="space-y-8">
+            <SoccerRankingSidebar
+              importanceWeekly={soccerImportanceWeekly}
+              importanceMonthly={soccerImportanceMonthly}
+              viewsWeekly={soccerViewWeekly}
+              viewsMonthly={soccerViewMonthly}
+            />
+
+            <SoccerAffiliateSidebar />
+          </div>
+
+        </div>
       </section>
     </main>
   );

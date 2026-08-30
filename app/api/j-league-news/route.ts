@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getSoccerImportanceRanking, getSoccerViewRanking } from "@/lib/ranking";
 
 export const dynamic = "force-dynamic";
 
@@ -106,9 +107,31 @@ export async function GET() {
       return bTime - aTime;
     });
 
-    return NextResponse.json(
-      uniqueNews.slice(0, 20)
-    );
+    const soccerImportanceWeekly =
+      await getSoccerImportanceRanking("weekly");
+
+    const soccerImportanceMonthly =
+      await getSoccerImportanceRanking("monthly");
+
+    const soccerViewWeekly =
+      await getSoccerViewRanking("weekly");
+
+    const soccerViewMonthly =
+      await getSoccerViewRanking("monthly");
+
+    return NextResponse.json({
+      news: uniqueNews.slice(0, 20),
+      rankings: {
+        importance: {
+          weekly: soccerImportanceWeekly,
+          monthly: soccerImportanceMonthly,
+        },
+        views: {
+          weekly: soccerViewWeekly,
+          monthly: soccerViewMonthly,
+        },
+      },
+    });
   } catch (error) {
     console.error(
       "Jリーグニュース取得エラー:",
