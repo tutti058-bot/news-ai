@@ -194,8 +194,6 @@ export default function JLeagueDayPage() {
       </section>
 
       <section className="jleague-content">
-        <div style={{ background: "red", color: "white", padding: "20px", marginBottom: "20px" }}>
-        </div>
 
         <h2>⚽ Jリーグ・サッカーニュース</h2>
 
