@@ -49,40 +49,76 @@ function isJLeagueRelated(
 
 export async function GET() {
   try {
-    const news = await prisma.news.findMany({
+    // まずゲキサカ記事を直接取得
+    const soccerNews = await prisma.news.findMany({
+      where: {
+        source: "ゲキサカ",
+      },
       orderBy: {
         publishedAt: "desc",
       },
-      take: 100,
+      take: 50,
     });
 
-    const jLeagueNews = news
-      .filter((item) => {
-        const source = item.source ?? "";
+    // その他の最新記事からJリーグ関連記事を探す
+    const otherNews = await prisma.news.findMany({
+      where: {
+        source: {
+          not: "ゲキサカ",
+        },
+      },
+      orderBy: {
+        publishedAt: "desc",
+      },
+      take: 300,
+    });
 
-        // ゲキサカから取得した記事は
-        // サッカー記事としてJリーグDAYページに表示
-        if (source === "ゲキサカ") {
-          return true;
-        }
+    const jLeagueRelatedNews = otherNews.filter((item) =>
+      isJLeagueRelated(
+        item.title ?? "",
+        item.summary ?? "",
+        item.source ?? ""
+      )
+    );
 
-        // 他のニュースソースでも
-        // Jリーグ関連なら表示
-        return isJLeagueRelated(
-          item.title ?? "",
-          item.summary ?? "",
-          source
-        );
-      })
-      .slice(0, 20);
+    // 重複なしで結合
+    const allNews = [
+      ...soccerNews,
+      ...jLeagueRelatedNews,
+    ];
 
-    return NextResponse.json(jLeagueNews);
+    const uniqueNews = Array.from(
+      new Map(
+        allNews.map((item) => [item.id, item])
+      ).values()
+    );
+
+    // 日付順
+    uniqueNews.sort((a, b) => {
+      const aTime = a.publishedAt
+        ? new Date(a.publishedAt).getTime()
+        : 0;
+
+      const bTime = b.publishedAt
+        ? new Date(b.publishedAt).getTime()
+        : 0;
+
+      return bTime - aTime;
+    });
+
+    return NextResponse.json(
+      uniqueNews.slice(0, 20)
+    );
   } catch (error) {
-    console.error("Jリーグニュース取得エラー:", error);
+    console.error(
+      "Jリーグニュース取得エラー:",
+      error
+    );
 
     return NextResponse.json(
       {
-        error: "Jリーグニュースの取得に失敗しました",
+        error:
+          "Jリーグニュースの取得に失敗しました",
       },
       {
         status: 500,
