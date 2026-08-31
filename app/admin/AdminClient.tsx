@@ -57,8 +57,60 @@ export default function AdminClient() {
   const [copiedRelatedId, setCopiedRelatedId] = useState<number | null>(null);
   const [relatedReplyLoadingId, setRelatedReplyLoadingId] = useState<number | null>(null);
 
+  type ContentRequestItem = {
+    id: number;
+    name: string | null;
+    message: string;
+    status: string;
+    createdAt: string;
+  };
+
+  const [contentRequests, setContentRequests] =
+    useState<ContentRequestItem[]>([]);
+  const [contentRequestsLoading, setContentRequestsLoading] =
+    useState(false);
+
+  const loadContentRequests = async () => {
+    setContentRequestsLoading(true);
+
+    try {
+      const res = await fetch(
+        "/api/admin/content-request?_=" + Date.now(),
+        {
+          cache: "no-store",
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(
+          data.error ??
+            "リクエスト一覧の取得に失敗しました"
+        );
+      }
+
+      setContentRequests(data.requests ?? []);
+    } catch (error) {
+      console.error(error);
+
+      setMessage(
+        error instanceof Error
+          ? `リクエスト取得失敗：${error.message}`
+          : "リクエスト一覧の取得に失敗しました"
+      );
+    } finally {
+      setContentRequestsLoading(false);
+    }
+  };
+
+  // 初回読み込み
+  useEffect(() => {
+    loadContentRequests();
+  }, []);
+
   // =========================
-  // 関連記事へのXコメント作成
+  // リクエストBOX
   // =========================
 
   const createRelatedXReply = async (
@@ -2639,6 +2691,215 @@ AIについて考えていたら、ふと昔のことを思い出した。
         </div>
 
       </div>
+        {/* リクエストBOX */}
+        <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:rounded-3xl sm:p-7 sm:shadow-lg">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <div className="text-4xl">
+                📩
+              </div>
+
+              <h2 className="mt-2 text-xl font-black text-slate-900 sm:mt-4 sm:text-2xl">
+                リクエストBOX
+              </h2>
+
+              <p className="mt-2 text-sm leading-6 text-slate-500">
+                読者から届いた記事・特集リクエストを確認できます。
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={loadContentRequests}
+              disabled={contentRequestsLoading}
+              className="rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm font-bold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
+            >
+              {contentRequestsLoading
+                ? "更新中..."
+                : "一覧を更新"}
+            </button>
+          </div>
+
+          <div className="mt-6 space-y-4">
+            {contentRequests.length === 0 ? (
+              <div className="rounded-2xl bg-slate-50 p-6 text-center text-sm font-bold text-slate-500">
+                {contentRequestsLoading
+                  ? "リクエストを読み込んでいます..."
+                  : "リクエストはありません"}
+              </div>
+            ) : (
+              contentRequests.map((request) => (
+                <article
+                  key={request.id}
+                  className="rounded-2xl border border-slate-200 p-4 sm:p-5"
+                >
+                  <div className="flex flex-wrap items-center gap-2 text-xs font-bold text-slate-400">
+                    <span>
+                      {new Date(
+                        request.createdAt
+                      ).toLocaleString("ja-JP")}
+                    </span>
+
+                    <span className="rounded-full bg-slate-100 px-2.5 py-1 text-slate-600">
+                      {request.status === "pending"
+                        ? "未対応"
+                        : request.status === "done"
+                        ? "対応済み"
+                        : "却下"}
+                    </span>
+
+                    {request.name && (
+                      <span>
+                        投稿者：{request.name}
+                      </span>
+                    )}
+                  </div>
+
+                  <p className="mt-4 whitespace-pre-wrap text-sm leading-7 text-slate-800">
+                    {request.message}
+                  </p>
+
+                  <div className="mt-5 flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        try {
+                          const res = await fetch(
+                            "/api/admin/content-request",
+                            {
+                              method: "PUT",
+                              headers: {
+                                "Content-Type":
+                                  "application/json",
+                              },
+                              body: JSON.stringify({
+                                id: request.id,
+                                status: "done",
+                              }),
+                            }
+                          );
+
+                          const data = await res.json();
+
+                          if (!res.ok || !data.success) {
+                            throw new Error(
+                              data.error ??
+                                "更新に失敗しました"
+                            );
+                          }
+
+                          await loadContentRequests();
+                        } catch (error) {
+                          setMessage(
+                            error instanceof Error
+                              ? error.message
+                              : "更新に失敗しました"
+                          );
+                        }
+                      }}
+                      className="rounded-xl bg-green-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-green-700"
+                    >
+                      対応済みにする
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        if (
+                          !window.confirm(
+                            "このリクエストを却下しますか？"
+                          )
+                        ) {
+                          return;
+                        }
+
+                        try {
+                          const res = await fetch(
+                            "/api/admin/content-request",
+                            {
+                              method: "PUT",
+                              headers: {
+                                "Content-Type":
+                                  "application/json",
+                              },
+                              body: JSON.stringify({
+                                id: request.id,
+                                status: "rejected",
+                              }),
+                            }
+                          );
+
+                          const data = await res.json();
+
+                          if (!res.ok || !data.success) {
+                            throw new Error(
+                              data.error ??
+                                "更新に失敗しました"
+                            );
+                          }
+
+                          await loadContentRequests();
+                        } catch (error) {
+                          setMessage(
+                            error instanceof Error
+                              ? error.message
+                              : "更新に失敗しました"
+                          );
+                        }
+                      }}
+                      className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
+                    >
+                      却下
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        if (
+                          !window.confirm(
+                            "このリクエストを削除しますか？"
+                          )
+                        ) {
+                          return;
+                        }
+
+                        try {
+                          const res = await fetch(
+                            `/api/admin/content-request?id=${request.id}`,
+                            {
+                              method: "DELETE",
+                            }
+                          );
+
+                          const data = await res.json();
+
+                          if (!res.ok || !data.success) {
+                            throw new Error(
+                              data.error ??
+                                "削除に失敗しました"
+                            );
+                          }
+
+                          await loadContentRequests();
+                        } catch (error) {
+                          setMessage(
+                            error instanceof Error
+                              ? error.message
+                              : "削除に失敗しました"
+                          );
+                        }
+                      }}
+                      className="rounded-xl bg-red-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-red-700"
+                    >
+                      削除
+                    </button>
+                  </div>
+                </article>
+              ))
+            )}
+          </div>
+        </section>
+
     </main>
   );
 }

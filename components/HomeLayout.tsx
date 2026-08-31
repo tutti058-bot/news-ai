@@ -3,6 +3,7 @@ import Hero from "./Hero";
 import NewsGrid from "./NewsGrid";
 import Sidebar from "./Sidebar";
 import ColumnPreview from "./ColumnPreview";
+import ContentRequestBox from "./ContentRequestBox";
 
 type Props = {
   keyword: string;
@@ -44,6 +45,11 @@ export default function HomeLayout({
             <Sidebar />
           </aside>
 
+        </div>
+
+        {/* みんなのリクエストBOX */}
+        <div className="mt-12">
+          <ContentRequestBox />
         </div>
 
       </div>
