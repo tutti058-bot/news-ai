@@ -179,7 +179,7 @@ export default async function ColumnDetailPage({
       {/* 本文 */}
       <article className="mx-auto max-w-3xl px-5 py-12 md:py-16">
 
-        <div className="text-[17px] leading-[2.1] text-slate-700 md:text-[19px] md:leading-[2.15]">
+        <div className="text-[17px] leading-[1.75] text-slate-700 md:text-[19px] md:leading-[1.8]">
 
           {column.content.replace(/\\n/g, "\n").split("\n").map((line, index) => {
             const trimmed = line.trim();
