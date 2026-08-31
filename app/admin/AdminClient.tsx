@@ -48,6 +48,25 @@ export default function AdminClient() {
     score: number;
   };
 
+  type RelatedXPost = {
+  id: string;
+  text: string;
+  createdAt: string | null;
+  author: {
+    id: string;
+    name: string;
+    username: string;
+  };
+  metrics: {
+    impressions: number;
+    likes: number;
+    reposts: number;
+    replies: number;
+    quotes: number;
+  };
+  url: string;
+};
+
   const [newsList, setNewsList] = useState<NewsItem[]>([]);
   const [newsListLoading, setNewsListLoading] = useState(false);
   const [xPostLoadingId, setXPostLoadingId] = useState<number | null>(null);
@@ -56,6 +75,27 @@ export default function AdminClient() {
   const [relatedNews, setRelatedNews] = useState<Record<number, RelatedNewsItem[]>>({});
   const [copiedRelatedId, setCopiedRelatedId] = useState<number | null>(null);
   const [relatedReplyLoadingId, setRelatedReplyLoadingId] = useState<number | null>(null);
+  const [relatedXLoadingId, setRelatedXLoadingId] =
+  useState<number | null>(null);
+
+const [relatedXPosts, setRelatedXPosts] =
+  useState<Record<number, RelatedXPost[]>>({});
+
+const [relatedXReplyLoadingId, setRelatedXReplyLoadingId] =
+  useState<string | null>(null);
+
+type RelatedXReply = {
+  reply1: string;
+  reply2: string;
+  replyWithUrl1: string;
+  replyWithUrl2: string;
+};
+
+const [relatedXReplies, setRelatedXReplies] =
+  useState<Record<string, RelatedXReply>>({});
+
+const [copiedRelatedXReplyId, setCopiedRelatedXReplyId] =
+  useState<string | null>(null);
 
   type ContentRequestItem = {
     id: number;
@@ -289,6 +329,141 @@ export default function AdminClient() {
   // =========================
   // 関連記事を取得
   // =========================
+
+  // =========================
+  // 関連X投稿を検索
+  // =========================
+  
+  const findRelatedXPosts = async (
+    newsId: number
+  ) => {
+    setRelatedXLoadingId(newsId);
+    setMessage("");
+  
+    try {
+      const res = await fetch(
+        `/api/search-related-x?newsId=${newsId}`
+      );
+  
+      const data = await res.json();
+  
+      if (!res.ok) {
+        throw new Error(
+          data.error ??
+            "関連X投稿の検索に失敗しました"
+        );
+      }
+  
+      setRelatedXPosts((prev) => ({
+        ...prev,
+        [newsId]: data.results ?? [],
+      }));
+  
+      if ((data.results ?? []).length === 0) {
+        setMessage(
+          "関連するX投稿が見つかりませんでした"
+        );
+      } else {
+        setMessage(
+          `関連X投稿を${data.results.length}件見つけました`
+        );
+      }
+    } catch (error) {
+      console.error(
+        "関連X投稿検索エラー:",
+        error
+      );
+  
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "不明なエラーです";
+  
+      setMessage(
+        `関連X投稿検索失敗：${errorMessage}`
+      );
+    } finally {
+      setRelatedXLoadingId(null);
+    }
+  };
+
+  // =========================
+  // 関連X投稿へのコメント案を生成
+  // =========================
+
+  const generateRelatedXReply = async (
+    newsId: number,
+    post: RelatedXPost
+  ) => {
+    setRelatedXReplyLoadingId(post.id);
+    setMessage("");
+
+    try {
+      const res = await fetch(
+        "/api/generate-x-reply",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            newsId,
+            tweetText: post.text,
+          }),
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(
+          data.error ??
+            "コメント案の生成に失敗しました"
+        );
+      }
+
+      if (
+        !data.reply1 ||
+        !data.reply2 ||
+        !data.replyWithUrl1 ||
+        !data.replyWithUrl2
+      ) {
+        throw new Error(
+          "コメント案が生成されませんでした"
+        );
+      }
+
+      setRelatedXReplies((prev) => ({
+        ...prev,
+        [post.id]: {
+          reply1: data.reply1,
+          reply2: data.reply2,
+          replyWithUrl1: data.replyWithUrl1,
+          replyWithUrl2: data.replyWithUrl2,
+        },
+      }));
+
+      setMessage(
+        "Xコメント案を2件生成しました"
+      );
+    } catch (error) {
+      console.error(
+        "関連Xコメント生成エラー:",
+        error
+      );
+
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "不明なエラーです";
+
+      setMessage(
+        `Xコメント生成失敗：${errorMessage}`
+      );
+    } finally {
+      setRelatedXReplyLoadingId(null);
+    }
+  };
 
   const findRelatedNews = async (newsId: number) => {
     setRelatedLoadingId(newsId);
@@ -1640,7 +1815,165 @@ export default function AdminClient() {
                         ? "関連記事を検索中..."
                         : "🔗 関連記事を探す"}
                     </button>
+
+                    <button
+                      onClick={() =>
+                        findRelatedXPosts(news.id)
+                      }
+                      disabled={
+                        relatedXLoadingId === news.id
+                      }
+                      className="min-h-11 rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0"
+                    >
+                      {relatedXLoadingId === news.id
+                        ? "X投稿を検索中..."
+                        : "𝕏 関連投稿を探す"}
+                    </button>
                   </div>
+
+                  {/* 関連X投稿 */}
+                  {relatedXPosts[news.id] &&
+                    relatedXPosts[news.id].length > 0 && (
+                      <div className="mt-5 rounded-2xl bg-slate-900 p-4">
+                        <h4 className="text-sm font-black text-white">
+                          𝕏 関連投稿
+                        </h4>
+
+                        <div className="mt-3 space-y-3">
+                          {relatedXPosts[news.id].map(
+                            (post) => (
+                              <div
+                                key={post.id}
+                                className="rounded-xl bg-white p-4"
+                              >
+                                <div className="flex flex-wrap items-center gap-2 text-xs">
+                                  <span className="font-black text-slate-900">
+                                    {post.author.name}
+                                  </span>
+
+                                  {post.author.username && (
+                                    <span className="text-slate-400">
+                                      @{post.author.username}
+                                    </span>
+                                  )}
+
+                                  <span className="ml-auto text-slate-400">
+                                    ❤️ {post.metrics.likes}
+                                  </span>
+
+                                  <span className="text-slate-400">
+                                    🔁 {post.metrics.reposts}
+                                  </span>
+                                </div>
+
+                                <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-slate-700">
+                                  {post.text}
+                                </p>
+
+                                {relatedXReplies[post.id] && (
+                                  <div className="mt-4 space-y-3 rounded-xl bg-slate-100 p-3">
+                                    <div className="text-xs font-black text-slate-900">
+                                      💬 やんすAIのコメント案
+                                    </div>
+
+                                    {[
+                                      {
+                                        label: "コメント案①",
+                                        text: relatedXReplies[post.id].replyWithUrl1,
+                                        copyId: `${post.id}-url1`,
+                                      },
+                                      {
+                                        label: "コメント案②",
+                                        text: relatedXReplies[post.id].replyWithUrl2,
+                                        copyId: `${post.id}-url2`,
+                                      },
+                                    ].map((item) => (
+                                      <div
+                                        key={item.copyId}
+                                        className="rounded-lg border border-slate-200 bg-white p-3"
+                                      >
+                                        <div className="flex items-center justify-between gap-3">
+                                          <span className="text-xs font-black text-slate-700">
+                                            {item.label}
+                                          </span>
+
+                                          <button
+                                            type="button"
+                                            onClick={async () => {
+                                              try {
+                                                await navigator.clipboard.writeText(
+                                                  item.text
+                                                );
+
+                                                setCopiedRelatedXReplyId(
+                                                  item.copyId
+                                                );
+
+                                                setTimeout(() => {
+                                                  setCopiedRelatedXReplyId(
+                                                    null
+                                                  );
+                                                }, 2000);
+                                              } catch (error) {
+                                                console.error(
+                                                  "コピーエラー:",
+                                                  error
+                                                );
+                                              }
+                                            }}
+                                            className="rounded-lg border border-slate-300 bg-white px-2 py-1 text-xs font-bold text-slate-700 transition hover:bg-slate-50"
+                                          >
+                                            {copiedRelatedXReplyId ===
+                                            item.copyId
+                                              ? "コピーしました"
+                                              : "コピー"}
+                                          </button>
+                                        </div>
+
+                                        <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-700">
+                                          {item.text}
+                                        </p>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+
+                                <div className="mt-4 flex flex-wrap justify-end gap-2">
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      generateRelatedXReply(
+                                        news.id,
+                                        post
+                                      )
+                                    }
+                                    disabled={
+                                      relatedXReplyLoadingId ===
+                                      post.id
+                                    }
+                                    className="rounded-lg bg-blue-600 px-3 py-2 text-xs font-bold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                                  >
+                                    {relatedXReplyLoadingId ===
+                                    post.id
+                                      ? "コメント案を作成中..."
+                                      : "💬 コメント案を作る"}
+                                  </button>
+
+                                  <a
+                                    href={post.url}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="rounded-lg bg-black px-3 py-2 text-xs font-bold text-white transition hover:bg-slate-800"
+                                  >
+                                    𝕏 投稿を見る
+                                  </a>
+                                </div>
+                              </div>
+                            )
+                          )}
+                        </div>
+                      </div>
+                    )}
 
                   {/* 関連記事 */}
                   {relatedNews[news.id] &&

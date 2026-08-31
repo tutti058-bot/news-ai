@@ -1,0 +1,198 @@
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+
+type XTweet = {
+  id: string;
+  text: string;
+  author_id: string;
+  created_at?: string;
+  public_metrics?: {
+    retweet_count?: number;
+    reply_count?: number;
+    like_count?: number;
+    quote_count?: number;
+    impression_count?: number;
+  };
+};
+
+type XUser = {
+  id: string;
+  name: string;
+  username: string;
+};
+
+function createSearchQuery(title: string) {
+  const cleaned = title
+    .replace(/[「」『』【】（）()[\]、。，．！？!?:：]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  return cleaned.length > 100
+    ? cleaned.slice(0, 100)
+    : cleaned;
+}
+
+export async function GET(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+
+    const newsId = Number(
+      searchParams.get("newsId")
+    );
+
+    if (!newsId) {
+      return NextResponse.json(
+        { error: "newsIdが必要です" },
+        { status: 400 }
+      );
+    }
+
+    const news = await prisma.news.findUnique({
+      where: { id: newsId },
+      select: {
+        id: true,
+        title: true,
+        summary: true,
+        category: true,
+      },
+    });
+
+    if (!news) {
+      return NextResponse.json(
+        { error: "記事が見つかりません" },
+        { status: 404 }
+      );
+    }
+
+    const query = createSearchQuery(news.title);
+
+    if (!query) {
+      return NextResponse.json(
+        { error: "検索キーワードを作成できませんでした" },
+        { status: 400 }
+      );
+    }
+
+    const xUrl =
+      "https://api.x.com/2/tweets/search/recent?" +
+      new URLSearchParams({
+        query: `(${query}) lang:ja -is:retweet`,
+        max_results: "20",
+        "tweet.fields":
+          "created_at,public_metrics,author_id",
+        expansions: "author_id",
+        "user.fields": "name,username",
+      }).toString();
+
+    const response = await fetch(xUrl, {
+      headers: {
+        Authorization:
+          `Bearer ${process.env.X_Bearer_Token}`,
+      },
+      cache: "no-store",
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error(
+        "X検索エラー:",
+        data
+      );
+
+      return NextResponse.json(
+        {
+          error: "X投稿の検索に失敗しました",
+          detail: data,
+        },
+        { status: response.status }
+      );
+    }
+
+    const users: XUser[] =
+      data.includes?.users ?? [];
+
+    const userMap = new Map(
+      users.map((user) => [
+        user.id,
+        user,
+      ])
+    );
+
+    const tweets: XTweet[] =
+      data.data ?? [];
+
+    const results = tweets
+      .filter(
+        (tweet) =>
+          tweet.text &&
+          tweet.public_metrics
+      )
+      .map((tweet) => {
+        const user =
+          userMap.get(tweet.author_id);
+
+        const metrics =
+          tweet.public_metrics ?? {};
+
+        return {
+          id: tweet.id,
+          text: tweet.text,
+          createdAt:
+            tweet.created_at ?? null,
+          author: {
+            id: tweet.author_id,
+            name: user?.name ?? "不明",
+            username:
+              user?.username ?? "",
+          },
+          metrics: {
+            impressions:
+              metrics.impression_count ?? 0,
+            likes:
+              metrics.like_count ?? 0,
+            reposts:
+              metrics.retweet_count ?? 0,
+            replies:
+              metrics.reply_count ?? 0,
+            quotes:
+              metrics.quote_count ?? 0,
+          },
+          url:
+            `https://x.com/${user?.username ?? "i"}/status/${tweet.id}`,
+        };
+      })
+      .sort(
+        (a, b) =>
+          b.metrics.impressions -
+          a.metrics.impressions
+      )
+      .slice(0, 10);
+
+    return NextResponse.json({
+      news: {
+        id: news.id,
+        title: news.title,
+        category: news.category,
+      },
+      query,
+      count: results.length,
+      results,
+    });
+  } catch (error) {
+    console.error(
+      "関連X投稿検索エラー:",
+      error
+    );
+
+    return NextResponse.json(
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "関連X投稿の検索に失敗しました",
+      },
+      { status: 500 }
+    );
+  }
+}
