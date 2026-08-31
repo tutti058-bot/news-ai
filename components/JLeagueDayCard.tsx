@@ -93,7 +93,7 @@ export default function JLeagueDayCard() {
           href="/j-league-day"
           className="jleague-home-link"
         >
-          JリーグDAYを見る →
+          サッカー記事はこちら →
         </Link>
 
       </div>
