@@ -2046,6 +2046,72 @@ const [copiedSupplementalId, setCopiedSupplementalId] =
                                   {post.text}
                                 </p>
 
+                                {supplementalInfo[news.id] &&
+                                  supplementalInfo[news.id].length > 0 && (
+                                    <div className="mt-4 rounded-xl bg-amber-50 p-3">
+                                      <div className="mb-2 text-xs font-black text-amber-800">
+                                        💡 補足情報
+                                      </div>
+
+                                      <div className="space-y-2">
+                                        {supplementalInfo[news.id]
+                                          .slice(0, 2)
+                                          .map((info, index) => {
+                                            const copyId =
+                                              `${post.id}-supplemental-${index}`;
+
+                                            return (
+                                              <div
+                                                key={copyId}
+                                                className="rounded-lg border border-amber-200 bg-white p-3"
+                                              >
+                                                <div className="flex items-center justify-between gap-3">
+                                                  <span className="text-xs font-black text-slate-700">
+                                                    補足情報{index + 1}
+                                                  </span>
+
+                                                  <button
+                                                    type="button"
+                                                    onClick={async () => {
+                                                      try {
+                                                        await navigator.clipboard.writeText(
+                                                          info.text
+                                                        );
+
+                                                        setCopiedSupplementalId(
+                                                          copyId
+                                                        );
+
+                                                        setTimeout(() => {
+                                                          setCopiedSupplementalId(
+                                                            null
+                                                          );
+                                                        }, 2000);
+                                                      } catch (error) {
+                                                        console.error(
+                                                          "コピーエラー:",
+                                                          error
+                                                        );
+                                                      }
+                                                    }}
+                                                    className="rounded-lg border border-slate-300 bg-white px-2 py-1 text-xs font-bold text-slate-700 transition hover:bg-slate-50"
+                                                  >
+                                                    {copiedSupplementalId === copyId
+                                                      ? "コピーしました"
+                                                      : "コピー"}
+                                                  </button>
+                                                </div>
+
+                                                <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-700">
+                                                  {info.text}
+                                                </p>
+                                              </div>
+                                            );
+                                          })}
+                                      </div>
+                                    </div>
+                                  )}
+
                                 {relatedXReplies[post.id] && (
                                   <div className="mt-4 space-y-3 rounded-xl bg-slate-100 p-3">
                                     <div className="text-xs font-black text-slate-900">

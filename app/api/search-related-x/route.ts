@@ -1,10 +1,5 @@
 import { NextResponse } from "next/server";
-import OpenAI from "openai";
 import { prisma } from "@/lib/prisma";
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
 
 type XTweet = {
   id: string;
@@ -24,159 +19,157 @@ type XUser = {
   id: string;
   name: string;
   username: string;
+  public_metrics?: {
+    followers_count?: number;
+  };
 };
 
-function createInitialQuery(title: string) {
-  let text = title;
+const MAJOR_NEWS_ACCOUNTS = [
+  "YahooNewsTopics",
+  "nhk_news",
+  "itmedia_news",
+  "impress_watch",
+  "Sankei_news",
+  "asahi",
+  "mainichi",
+  "Yomiuri_Online",
+  "jijicom",
+  "kyodo_official",
+  "gigazine",
+  "asciijpeditors",
+  "ktai_watch",
+  "game_watch",
+  "cnet_japan",
+  "internet_watch",
+];
 
-  text = text.replace(
-    /\s*[-｜|]\s*(産経ニュース|NHK|NHKニュース|Yahoo!ニュース|スポーツ報知|スポニチ|日刊スポーツ|デイリースポーツ|ORICON NEWS|毎日新聞|朝日新聞|読売新聞).*$/i,
-    ""
-  );
-
-  text = text
-    .replace(/[「」『』【】（）()[\]]/g, " ")
-    .replace(/[、。，．！？!?:：・]/g, " ")
+function cleanTitle(title: string) {
+  return title
+    .replace(
+      /\s*[-｜|]\s*(産経ニュース|NHK|NHKニュース|Yahoo!ニュース|スポーツ報知|スポニチ|日刊スポーツ|デイリースポーツ|ORICON NEWS|毎日新聞|朝日新聞|読売新聞).*$/i,
+      ""
+    )
+    .replace(
+      /[「」『』【】（）()[\]、。，．！？!?：:・]/g,
+      " "
+    )
     .replace(/\s+/g, " ")
     .trim();
-
-  return text.slice(0, 60).trim();
 }
 
-async function createAiSearchQuery(
-  title: string,
-  summary: string | null,
-  category: string | null
-) {
-  const response =
-    await openai.chat.completions.create({
-      model: "gpt-4.1-mini",
-      messages: [
-        {
-          role: "system",
-          content: `
-あなたは日本ニュースをXで検索するための検索キーワード生成AIです。
+function createKeywords(title: string) {
+  const text = cleanTitle(title);
 
-ニュース記事のタイトルと要約を読み、
-X検索で関連投稿を探しやすい検索語を作ってください。
+  const stopWords = new Set([
+    "新型",
+    "新",
+    "登場",
+    "発表",
+    "発売",
+    "詳細",
+    "詳細スペック",
+    "スペック",
+    "シリーズ",
+    "機種",
+    "モデル",
+    "全モデル",
+    "搭載",
+    "可能性",
+    "流出",
+    "最新",
+    "今回",
+    "記事",
+    "ニュース",
+    "開始",
+    "公開",
+    "対応",
+    "機能",
+    "サービス",
+    "について",
+    "など",
+  ]);
 
-目的はニュースタイトル全文を検索することではありません。
+  const words = text
+    .split(/\s+/)
+    .filter(
+      (word) =>
+        word.length >= 2 &&
+        !stopWords.has(word)
+    );
 
-【重要】
-ニュースの中心となる
+  const result: string[] = [];
 
-・人物名
-・企業名
-・団体名
-・商品名
-・場所
-・事件名
-・大会名
-・作品名
-
-など、X上で実際に検索されそうな固有名詞を優先してください。
-
-説明文や助詞は不要です。
-
-検索語は2〜4個程度の重要語だけにしてください。
-
-【例】
-
-記事タイトル：
-イオンモール熊本で2人死亡「ハビタ」が公式HPに謝罪文
-
-検索語：
-イオンモール熊本 ハビタ
-
-記事タイトル：
-大谷翔平が今季40号ホームラン
-
-検索語：
-大谷翔平 40号
-
-記事タイトル：
-Jリーグ浦和レッズが新外国人選手獲得を発表
-
-検索語：
-浦和レッズ 新外国人
-
-必ずJSONだけ返してください。
-
-{
-  "query": "X検索用キーワード"
-}
-`,
-        },
-        {
-          role: "user",
-          content: `
-タイトル：
-${title}
-
-要約：
-${summary ?? ""}
-
-カテゴリ：
-${category ?? ""}
-`,
-        },
-      ],
-      temperature: 0.2,
-      max_tokens: 60,
-      response_format: {
-        type: "json_schema",
-        json_schema: {
-          name: "x_search_query",
-          strict: true,
-          schema: {
-            type: "object",
-            properties: {
-              query: {
-                type: "string",
-              },
-            },
-            required: ["query"],
-            additionalProperties: false,
-          },
-        },
-      },
-    });
-
-  const raw =
-    response.choices[0]?.message?.content ?? "{}";
-
-  try {
-    const parsed = JSON.parse(raw);
+  // 連続する2語を優先
+  for (
+    let i = 0;
+    i < words.length - 1;
+    i++
+  ) {
+    const pair =
+      `${words[i]} ${words[i + 1]}`;
 
     if (
-      typeof parsed.query === "string" &&
-      parsed.query.trim()
+      pair.length >= 4 &&
+      !result.includes(pair)
     ) {
-      return parsed.query.trim();
+      result.push(pair);
     }
-  } catch {
-    console.error(
-      "AI検索キーワード解析失敗:",
-      raw
-    );
   }
 
-  return "";
+  // 単独の固有名詞候補
+  for (const word of words) {
+    if (
+      word.length >= 3 &&
+      !result.includes(word)
+    ) {
+      result.push(word);
+    }
+  }
+
+  return result.slice(0, 4);
 }
 
-async function searchX(query: string) {
-  const xUrl =
+function buildSearchQuery(
+  keywords: string[]
+) {
+  const accounts =
+    MAJOR_NEWS_ACCOUNTS
+      .map(
+        (username) =>
+          `from:${username}`
+      )
+      .join(" OR ");
+
+  const terms =
+    keywords
+      .map(
+        (keyword) =>
+          `"${keyword.replace(/"/g, "")}"`
+      )
+      .join(" OR ");
+
+  return `(${accounts}) (${terms}) lang:ja -is:retweet`;
+}
+
+async function searchX(
+  keyword: string
+) {
+  const query =
+    buildSearchQuery([keyword]);
+
+  const url =
     "https://api.x.com/2/tweets/search/recent?" +
     new URLSearchParams({
-      query: `${query} lang:ja -is:retweet`,
-      max_results: "20",
+      query,
+      max_results: "50",
       "tweet.fields":
         "created_at,public_metrics,author_id",
       expansions: "author_id",
-      "user.fields": "name,username",
+      "user.fields":
+        "name,username,public_metrics",
     }).toString();
 
-  const response = await fetch(xUrl, {
+  const response = await fetch(url, {
     headers: {
       Authorization:
         `Bearer ${process.env.X_Bearer_Token}`,
@@ -184,7 +177,8 @@ async function searchX(query: string) {
     cache: "no-store",
   });
 
-  const data = await response.json();
+  const data =
+    await response.json();
 
   if (!response.ok) {
     throw new Error(
@@ -193,46 +187,74 @@ async function searchX(query: string) {
     );
   }
 
-  return data;
+  return {
+    query,
+    data,
+  };
 }
 
-function getSearchKeywords(query: string) {
-  return query
+function normalize(text: string) {
+  return text
     .toLowerCase()
-    .split(/\s+/)
-    .map((keyword) =>
-      keyword.replace(/[「」『』【】（）()[\]、。,.!?！？:：]/g, "")
+    .replace(/https?:\/\/\S+/g, " ")
+    .replace(
+      /[「」『』【】（）()[\]、。，．！？!?：:・"'「」]/g,
+      " "
     )
-    .filter((keyword) => keyword.length >= 2);
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
-function calculateRelevance(
-  text: string,
-  keywords: string[]
+function isSameNews(
+  tweetText: string,
+  articleTitle: string
 ) {
-  const normalizedText =
-    text.toLowerCase();
+  const tweet =
+    normalize(tweetText);
 
-  let matchedCount = 0;
+  const title =
+    normalize(articleTitle);
 
-  for (const keyword of keywords) {
-    if (normalizedText.includes(keyword)) {
-      matchedCount++;
-    }
+  if (!tweet || !title) {
+    return false;
   }
 
-  const keywordScore =
-    matchedCount * 100;
+  // タイトル全文に近い場合だけ除外
+  if (
+    tweet.includes(title) ||
+    title.includes(tweet)
+  ) {
+    return true;
+  }
 
-  return {
-    matchedCount,
-    score: keywordScore,
-  };
+  const words =
+    title
+      .split(" ")
+      .filter(
+        (word) =>
+          word.length >= 3
+      );
+
+  if (words.length < 4) {
+    return false;
+  }
+
+  const matched =
+    words.filter(
+      (word) =>
+        tweet.includes(word)
+    ).length;
+
+  return (
+    matched >= 5 &&
+    matched / words.length >= 0.7
+  );
 }
 
 function formatResults(
   data: any,
-  query: string
+  articleTitle: string,
+  sourceUrl: string | null
 ) {
   const users: XUser[] =
     data.includes?.users ?? [];
@@ -247,34 +269,23 @@ function formatResults(
   const tweets: XTweet[] =
     data.data ?? [];
 
-  const keywords =
-    getSearchKeywords(query);
-
   return tweets
     .filter(
       (tweet) =>
         tweet.text &&
-        tweet.public_metrics
+        tweet.public_metrics &&
+        tweet.author_id
     )
     .map((tweet) => {
       const user =
         userMap.get(tweet.author_id);
 
-      const metrics =
-        tweet.public_metrics ?? {};
+      const username =
+        user?.username ?? "";
 
-      const relevance =
-        calculateRelevance(
-          tweet.text,
-          keywords
-        );
-
-      const engagement =
-        (metrics.impression_count ?? 0) * 0.01 +
-        (metrics.like_count ?? 0) * 2 +
-        (metrics.retweet_count ?? 0) * 3 +
-        (metrics.reply_count ?? 0) +
-        (metrics.quote_count ?? 0) * 2;
+      const followers =
+        user?.public_metrics
+          ?.followers_count ?? 0;
 
       return {
         id: tweet.id,
@@ -285,62 +296,96 @@ function formatResults(
           id: tweet.author_id,
           name:
             user?.name ?? "不明",
-          username:
-            user?.username ?? "",
+          username,
+          followers,
         },
         metrics: {
           impressions:
-            metrics.impression_count ?? 0,
+            tweet.public_metrics
+              ?.impression_count ?? 0,
           likes:
-            metrics.like_count ?? 0,
+            tweet.public_metrics
+              ?.like_count ?? 0,
           reposts:
-            metrics.retweet_count ?? 0,
+            tweet.public_metrics
+              ?.retweet_count ?? 0,
           replies:
-            metrics.reply_count ?? 0,
+            tweet.public_metrics
+              ?.reply_count ?? 0,
           quotes:
-            metrics.quote_count ?? 0,
+            tweet.public_metrics
+              ?.quote_count ?? 0,
         },
-        relevanceScore:
-          relevance.score + engagement,
-        matchedCount:
-          relevance.matchedCount,
+        sameSource:
+          Boolean(
+            sourceUrl &&
+            tweet.text.includes(sourceUrl)
+          ),
+        sameNews:
+          isSameNews(
+            tweet.text,
+            articleTitle
+          ),
+        isMajorNews:
+          MAJOR_NEWS_ACCOUNTS.some(
+            (name) =>
+              name.toLowerCase() ===
+              username.toLowerCase()
+          ),
         url:
-          `https://x.com/${user?.username ?? "i"}/status/${tweet.id}`,
+          `https://x.com/${username}/status/${tweet.id}`,
       };
     })
-    .filter((tweet) =>
-      keywords.length === 0 ||
-      tweet.matchedCount > 0
+    .filter(
+      (tweet) =>
+        !tweet.sameSource &&
+        !tweet.sameNews
     )
-    .sort(
-      (a, b) => {
-        if (
-          b.matchedCount !==
-          a.matchedCount
-        ) {
-          return (
-            b.matchedCount -
-            a.matchedCount
-          );
-        }
+    .sort((a, b) => {
+      // 大手ニュース媒体を優先
+      if (
+        a.isMajorNews !==
+        b.isMajorNews
+      ) {
+        return a.isMajorNews
+          ? -1
+          : 1;
+      }
 
+      // フォロワー数
+      if (
+        b.author.followers !==
+        a.author.followers
+      ) {
         return (
-          b.relevanceScore -
-          a.relevanceScore
+          b.author.followers -
+          a.author.followers
         );
       }
-    )
-    .slice(0, 3)
-    .map(
-      ({
-        relevanceScore,
-        matchedCount,
-        ...tweet
-      }) => tweet
-    );
+
+      // 反応
+      const aEngagement =
+        a.metrics.likes +
+        a.metrics.reposts * 2 +
+        a.metrics.replies +
+        a.metrics.quotes * 2;
+
+      const bEngagement =
+        b.metrics.likes +
+        b.metrics.reposts * 2 +
+        b.metrics.replies +
+        b.metrics.quotes * 2;
+
+      return (
+        bEngagement -
+        aEngagement
+      );
+    });
 }
 
-export async function GET(request: Request) {
+export async function GET(
+  request: Request
+) {
   try {
     const { searchParams } =
       new URL(request.url);
@@ -367,8 +412,8 @@ export async function GET(request: Request) {
         select: {
           id: true,
           title: true,
-          summary: true,
           category: true,
+          sourceUrl: true,
         },
       });
 
@@ -382,37 +427,120 @@ export async function GET(request: Request) {
       );
     }
 
-    // まずはコストゼロの簡易検索
-    let query =
-      createInitialQuery(news.title);
+    const keywords =
+      createKeywords(news.title);
 
-    let xData =
-      await searchX(query);
+    if (keywords.length === 0) {
+      return NextResponse.json({
+        news: {
+          id: news.id,
+          title: news.title,
+          category: news.category,
+        },
+        query: "",
+        keywords: [],
+        count: 0,
+        results: [],
+      });
+    }
 
-    let results =
-      formatResults(xData, query);
+    // 上位2キーワードでXを2回検索
+    const searchKeywords =
+      keywords.slice(0, 2);
 
-    let usedAi = false;
+     const resultMap = new Map<string, any>();
+    const queries: string[] = [];
 
-    // 0件の場合だけAIで検索語を作り直す
-    if (results.length === 0) {
-      const aiQuery =
-        await createAiSearchQuery(
+    for (const keyword of searchKeywords) {
+      const search =
+        await searchX(keyword);
+
+      queries.push(search.query);
+
+      const formatted =
+        formatResults(
+          search.data,
           news.title,
-          news.summary,
-          news.category
+          news.sourceUrl ?? null
         );
 
-      if (aiQuery) {
-        query = aiQuery;
+      for (const item of formatted) {
+        if (!resultMap.has(item.id)) {
+          resultMap.set(
+            item.id,
+            item
+          );
+        }
+      }
+    }
 
-        xData =
-          await searchX(query);
+    const formattedResults =
+      Array.from(
+        resultMap.values()
+      );
 
-        results =
-          formatResults(xData, query);
+    // 大手ニュース媒体を優先
+    formattedResults.sort(
+      (a, b) => {
+        if (
+          a.isMajorNews !==
+          b.isMajorNews
+        ) {
+          return a.isMajorNews
+            ? -1
+            : 1;
+        }
 
-        usedAi = true;
+        if (
+          b.author.followers !==
+          a.author.followers
+        ) {
+          return (
+            b.author.followers -
+            a.author.followers
+          );
+        }
+
+        const aEngagement =
+          a.metrics.likes +
+          a.metrics.reposts * 2 +
+          a.metrics.replies +
+          a.metrics.quotes * 2;
+
+        const bEngagement =
+          b.metrics.likes +
+          b.metrics.reposts * 2 +
+          b.metrics.replies +
+          b.metrics.quotes * 2;
+
+        return (
+          bEngagement -
+          aEngagement
+        );
+      }
+    );
+
+    // 同じアカウントは1件だけ、最大3件
+    const selected: typeof formattedResults = [];
+    const usedAccounts =
+      new Set<string>();
+
+    for (const item of formattedResults) {
+      const username =
+        item.author.username.toLowerCase();
+
+      if (
+        !username ||
+        usedAccounts.has(username)
+      ) {
+        continue;
+      }
+
+      usedAccounts.add(username);
+      selected.push(item);
+
+      if (selected.length >= 3) {
+        break;
       }
     }
 
@@ -422,11 +550,14 @@ export async function GET(request: Request) {
         title: news.title,
         category: news.category,
       },
-      query,
-      usedAi,
+      query:
+        queries.join(" / "),
+      keywords: searchKeywords,
       count:
-        results.length,
-      results,
+        selected.length,
+      majorNewsAccounts:
+        MAJOR_NEWS_ACCOUNTS,
+      results: selected,
     });
   } catch (error) {
     console.error(
