@@ -58,16 +58,18 @@ export async function GET(
 
     const scored = recent.map((item) => {
       const text =
-        `${item.title} ${item.category ?? ""}`.toLowerCase();
+        `${item.title} ${item.summary ?? ""} ${item.category ?? ""}`.toLowerCase();
 
-      let score = 0;
+      let relevanceScore = 0;
+      let keywordMatchCount = 0;
 
       for (const keyword of keywords) {
         if (
           keyword &&
           text.includes(keyword.toLowerCase())
         ) {
-          score += 2;
+          relevanceScore += 2;
+          keywordMatchCount += 1;
         }
       }
 
@@ -75,12 +77,13 @@ export async function GET(
         item.category &&
         item.category === current.category
       ) {
-        score += 3;
+        relevanceScore += 3;
       }
 
       return {
         ...item,
-        relevanceScore: score,
+        relevanceScore,
+        keywordMatchCount,
         score: item.score ?? 60,
       };
     });
@@ -97,7 +100,7 @@ export async function GET(
     );
 
     const related = scored
-      .filter((item) => item.score > 0)
+      .filter((item) => item.keywordMatchCount >= 1)
       .slice(0, 3);
 
     return NextResponse.json({
