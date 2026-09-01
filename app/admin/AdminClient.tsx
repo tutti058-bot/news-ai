@@ -97,6 +97,21 @@ const [relatedXReplies, setRelatedXReplies] =
 const [copiedRelatedXReplyId, setCopiedRelatedXReplyId] =
   useState<string | null>(null);
 
+type SupplementalInfo = {
+  text: string;
+  sourceName?: string;
+  sourceUrl?: string;
+};
+
+const [supplementalLoadingId, setSupplementalLoadingId] =
+  useState<number | null>(null);
+
+const [supplementalInfo, setSupplementalInfo] =
+  useState<Record<number, SupplementalInfo[]>>({});
+
+const [copiedSupplementalId, setCopiedSupplementalId] =
+  useState<string | null>(null);
+
   type ContentRequestItem = {
     id: number;
     name: string | null;
@@ -396,6 +411,63 @@ const [copiedRelatedXReplyId, setCopiedRelatedXReplyId] =
       );
     } finally {
       setRelatedXLoadingId(null);
+    }
+  };
+
+  // =========================
+  // 補足情報を検索
+  // =========================
+
+  const findSupplementalInfo = async (
+    newsId: number
+  ) => {
+    setSupplementalLoadingId(newsId);
+    setMessage("");
+
+    try {
+      const res = await fetch(
+        `/api/supplemental-info?newsId=${newsId}`
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(
+          data.error ??
+            "補足情報の取得に失敗しました"
+        );
+      }
+
+      setSupplementalInfo((prev) => ({
+        ...prev,
+        [newsId]: data.results ?? [],
+      }));
+
+      if ((data.results ?? []).length === 0) {
+        setMessage(
+          "面白い補足情報が見つかりませんでした"
+        );
+      } else {
+        setMessage(
+          `補足情報を${data.results.length}件見つけました`
+        );
+      }
+    } catch (error) {
+      console.error(
+        "補足情報検索エラー:",
+        error
+      );
+
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "不明なエラーです";
+
+      setMessage(
+        `補足情報取得失敗：${errorMessage}`
+      );
+    } finally {
+      setSupplementalLoadingId(null);
     }
   };
 
@@ -1841,7 +1913,99 @@ const [copiedRelatedXReplyId, setCopiedRelatedXReplyId] =
                         ? "X投稿を検索中..."
                         : "𝕏 関連投稿を探す"}
                     </button>
+
+                    <button
+                      onClick={() =>
+                        findSupplementalInfo(news.id)
+                      }
+                      disabled={
+                        supplementalLoadingId === news.id
+                      }
+                      className="min-h-11 rounded-xl bg-amber-500 px-4 py-2 text-sm font-bold text-white transition hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0"
+                    >
+                      {supplementalLoadingId === news.id
+                        ? "補足情報を検索中..."
+                        : "💡 補足情報"}
+                    </button>
                   </div>
+
+                  {/* 補足情報 */}
+                  {supplementalInfo[news.id] &&
+                    supplementalInfo[news.id].length > 0 && (
+                      <div className="mt-5 rounded-2xl bg-amber-50 p-4">
+                        <h4 className="text-sm font-black text-slate-900">
+                          💡 補足情報（Xコメント案）
+                        </h4>
+
+                        <div className="mt-3 space-y-3">
+                          {supplementalInfo[news.id].map(
+                            (info, index) => {
+                              const copyId = `${news.id}-${index}`;
+
+                              return (
+                                <div
+                                  key={copyId}
+                                  className="rounded-xl border border-amber-200 bg-white p-4"
+                                >
+                                  <div className="flex items-center justify-between gap-3">
+                                    <span className="text-xs font-black text-amber-700">
+                                      補足情報 {index + 1}
+                                    </span>
+
+                                    <button
+                                      type="button"
+                                      onClick={async () => {
+                                        try {
+                                          await navigator.clipboard.writeText(
+                                            info.text
+                                          );
+
+                                          setCopiedSupplementalId(
+                                            copyId
+                                          );
+
+                                          setTimeout(() => {
+                                            setCopiedSupplementalId(
+                                              null
+                                            );
+                                          }, 2000);
+                                        } catch (error) {
+                                          console.error(
+                                            "コピーエラー:",
+                                            error
+                                          );
+                                        }
+                                      }}
+                                      className="rounded-lg border border-slate-300 bg-white px-2 py-1 text-xs font-bold text-slate-700 transition hover:bg-slate-50"
+                                    >
+                                      {copiedSupplementalId === copyId
+                                        ? "コピーしました"
+                                        : "コピー"}
+                                    </button>
+                                  </div>
+
+                                  <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-slate-700">
+                                    {info.text}
+                                  </p>
+
+                                  {info.sourceName &&
+                                    info.sourceUrl && (
+                                      <a
+                                        href={info.sourceUrl}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="mt-3 inline-block text-xs font-bold text-blue-600 hover:underline"
+                                      >
+                                        出典：{info.sourceName}
+                                      </a>
+                                    )}
+                                </div>
+                              );
+                            }
+                          )}
+                        </div>
+                      </div>
+                    )}
 
                   {/* 関連X投稿 */}
                   {relatedXPosts[news.id] &&
