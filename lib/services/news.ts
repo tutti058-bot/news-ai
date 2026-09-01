@@ -1054,9 +1054,6 @@ if (ai.score < MIN_SCORE) {
       });
 
       added++;
-      if (added >= actualTargetCount) {
-        break;
-      }
 
       /*
        * =========================
@@ -1073,7 +1070,7 @@ if (ai.score < MIN_SCORE) {
         );
 
         console.log(
-          `芸能件数: ${entertainmentAdded}/10`
+          `芸能件数: ${entertainmentAdded}/8`
         );
       } else if (
         (item.category ?? "") === "テクノロジー"
@@ -1108,8 +1105,12 @@ if (ai.score < MIN_SCORE) {
         );
 
         console.log(
-          `通常ニュース件数: ${normalAdded}/20`
+          `通常ニュース件数: ${normalAdded}/5`
         );
+      }
+
+      if (added >= actualTargetCount) {
+        break;
       }
     } catch (error: any) {
       /*
