@@ -385,14 +385,14 @@ export async function syncNews(limit?: number) {
    */
 
   // 1回の同期は最大5件。
-  // 4時間おきの実行を前提に、1日最大20件とする。
+  // 4時間おきに1回最大5件。
   const targetCount =
     typeof limit === "number" && limit > 0
       ? Math.min(limit, 5)
       : 5;
 
   // 日本時間を基準に記事数を制御する
-  // 0:00〜7:59は最大3件、8:00以降は1日最大30件
+  // 0:00〜7:59は1回最大3件、8:00以降は1回最大5件
   const now = new Date();
   const jstNow = new Date(
     now.toLocaleString("en-US", {
@@ -413,10 +413,6 @@ export async function syncNews(limit?: number) {
       : "通常日：通常のニュース配分"
   );
 
-  // JリーグDAYはサッカーを優先
-  const SOCCER_LIMIT = jLeagueDay ? 5 : 3;
-
-
   const jstStart = new Date(jstNow);
   jstStart.setHours(0, 0, 0, 0);
 
@@ -432,50 +428,59 @@ export async function syncNews(limit?: number) {
     jstEnd.getTime() - 9 * 60 * 60 * 1000
   );
 
-  const todayAdded = await prisma.news.count({
-    where: {
-      createdAt: {
-        gte: todayStart,
-        lt: todayEnd,
-      },
-    },
-  });
-
+  // 1回の同期ごとの上限
+  // 0:00〜7:59 → 最大3件
+  // 8:00〜23:59 → 最大5件
   const isNightHours =
     jstNow.getHours() < 8;
 
-  const currentLimit = isNightHours
-    ? 3
-    : 30;
-
-  const remaining = Math.max(
-    0,
-    currentLimit - todayAdded
-  );
-
-  if (remaining === 0) {
-    const message = isNightHours
-      ? "0:00〜8:00の夜間上限3件に到達。今回は保存しません。"
-      : "本日の記事上限30件に到達。今回は保存しません。";
-
-    console.log(message);
-
-    return {
-      added: 0,
-      skipped: 0,
-      message,
-    };
-  }
+  const currentLimit =
+    isNightHours ? 3 : 5;
 
   const actualTargetCount = Math.min(
     targetCount,
-    remaining
+    currentLimit
   );
+
+  // サッカーは「1日単位」で制御する
+  // 通常日 → 1日最大3件
+  // JリーグDAY → 1日最大10件
+  const soccerDailyLimit =
+    jLeagueDay ? 10 : 3;
+
+  const todaySoccerAdded =
+    await prisma.news.count({
+      where: {
+        createdAt: {
+          gte: todayStart,
+          lt: todayEnd,
+        },
+        OR: [
+          { source: "ゲキサカ" },
+          { category: "サッカー" },
+        ],
+      },
+    });
+
+  const soccerRemainingToday =
+    Math.max(
+      0,
+      soccerDailyLimit - todaySoccerAdded
+    );
+
+  console.log(
+    `本日のサッカー件数: ${todaySoccerAdded}/${soccerDailyLimit}`
+  );
+
+  // 1回の同期で採用できるサッカー件数
+  // 通常日 → その日の残り枠まで（最大3件/日）
+  // JリーグDAY → その日の残り枠まで（最大10件/日）
+  const SOCCER_LIMIT = soccerRemainingToday;
 
   const candidateItems: typeof sortedItems = [];
 
-  // テクノロジーを優先するため、
-  // 新規候補を「テクノロジー → その他」の順に並べる。
+  // 通常日は通常ニュースをメインにする。
+  // JリーグDAYはサッカーを増やす。
   const technologyItems = sortedItems.filter(
     (item) =>
       (item.category ?? "") === "テクノロジー"
@@ -498,15 +503,13 @@ export async function syncNews(limit?: number) {
     ? [
         // JリーグDAYはサッカーを最優先
         ...soccerItems,
+        ...otherItems,
         ...technologyItems,
-        ...nonSoccerItems,
       ]
     : [
-        // 通常日は通常ニュースを優先
+        // 通常日は通常ニュースをメインにする
+        ...otherItems,
         ...technologyItems,
-        ...otherItems.filter(
-          (item) => item.source !== "ゲキサカ"
-        ),
         // サッカーは通常ニュースの後
         ...soccerItems,
       ];
