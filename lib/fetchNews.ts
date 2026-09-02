@@ -475,5 +475,23 @@ export async function fetchNews() {
     `RSS + ORICON 合計: ${uniqueNews.length}件`
   );
 
+  // =========================
+  // 全ニュースを公開日時の新しい順に並べる
+  // =========================
+  uniqueNews.sort((a, b) => {
+    const aDate = a.pubDate ?? a["dc:date"] ?? a.published ?? a.updated;
+    const bDate = b.pubDate ?? b["dc:date"] ?? b.published ?? b.updated;
+
+    const aTime = aDate
+      ? new Date(aDate).getTime()
+      : 0;
+
+    const bTime = bDate
+      ? new Date(bDate).getTime()
+      : 0;
+
+    return bTime - aTime;
+  });
+
   return uniqueNews;
 }

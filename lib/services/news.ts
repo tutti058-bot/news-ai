@@ -48,11 +48,47 @@ function titleTokens(title: string): Set<string> {
   return tokens;
 }
 
+function longestCommonSubstringLength(
+  a: string,
+  b: string
+): number {
+  if (!a || !b) {
+    return 0;
+  }
+
+  const prev = new Array(b.length + 1).fill(0);
+  let maxLength = 0;
+
+  for (let i = 1; i <= a.length; i++) {
+    const current = new Array(b.length + 1).fill(0);
+
+    for (let j = 1; j <= b.length; j++) {
+      if (a[i - 1] === b[j - 1]) {
+        current[j] = prev[j - 1] + 1;
+        maxLength = Math.max(maxLength, current[j]);
+      }
+    }
+
+    for (let j = 0; j <= b.length; j++) {
+      prev[j] = current[j];
+    }
+  }
+
+  return maxLength;
+}
+
 function isSimilarTitle(
   a: string,
   b: string
 ): boolean {
   if (!a || !b) {
+    return false;
+  }
+
+  const normalizedA = normalizeTitle(a);
+  const normalizedB = normalizeTitle(b);
+
+  if (!normalizedA || !normalizedB) {
     return false;
   }
 
@@ -74,14 +110,11 @@ function isSimilarTitle(
   const smaller =
     Math.min(aTokens.size, bTokens.size);
 
-  const larger =
-    Math.max(aTokens.size, bTokens.size);
-
   const containment = overlap / smaller;
   const jaccard =
     overlap / (aTokens.size + bTokens.size - overlap);
 
-  // 同じニュースタイトルと判断しやすい条件
+  // 従来の2-gram判定
   if (overlap >= 8 && containment >= 0.55) {
     return true;
   }
@@ -90,9 +123,30 @@ function isSimilarTitle(
     return true;
   }
 
-  // 短いタイトルはより厳しく判定
   if (smaller <= 12 && overlap >= 6 && containment >= 0.7) {
     return true;
+  }
+
+  // 長いタイトル同士は「連続した共通部分」も見る。
+  // 同じ出来事を別の言い回しで報じた記事を拾いやすくする。
+  if (
+    Math.min(normalizedA.length, normalizedB.length) >= 18
+  ) {
+    const commonLength = longestCommonSubstringLength(
+      normalizedA,
+      normalizedB
+    );
+
+    const shorterLength = Math.min(
+      normalizedA.length,
+      normalizedB.length
+    );
+
+    const commonRatio = commonLength / shorterLength;
+
+    if (commonLength >= 14 && commonRatio >= 0.55) {
+      return true;
+    }
   }
 
   return false;
@@ -499,20 +553,45 @@ export async function syncNews(limit?: number) {
     (item) => item.source !== "ゲキサカ"
   );
 
-  const prioritizedItems = jLeagueDay
-    ? [
-        // JリーグDAYはサッカーを最優先
-        ...soccerItems,
-        ...otherItems,
-        ...technologyItems,
-      ]
-    : [
-        // 通常日は通常ニュースをメインにする
-        ...otherItems,
-        ...technologyItems,
-        // サッカーは通常ニュースの後
-        ...soccerItems,
-      ];
+  // fetchNews() の最新順を基本とする。
+  // JリーグDAYでも日中は通常配分。
+  // 16時以降はサッカーを少し増やすが、サッカーだけにはしない。
+  const soccerBoostTime =
+    jLeagueDay && jstNow.getHours() >= 16;
+
+  let prioritizedItems = sortedItems;
+
+  if (soccerBoostTime) {
+    const boostedItems: typeof sortedItems = [];
+    let soccerIndex = 0;
+    let nonSoccerCount = 0;
+
+    for (const item of nonSoccerItems) {
+      boostedItems.push(item);
+      nonSoccerCount++;
+
+      // サッカー以外2本につき、サッカーを1本差し込む。
+      if (
+        nonSoccerCount % 2 === 0 &&
+        soccerIndex < soccerItems.length
+      ) {
+        boostedItems.push(soccerItems[soccerIndex]);
+        soccerIndex++;
+      }
+    }
+
+    // サッカー以外の記事が少ない場合も、
+    // 残りのサッカーを少しだけ追加する。
+    while (
+      soccerIndex < soccerItems.length &&
+      boostedItems.filter((item) => item.source === "ゲキサカ").length < 3
+    ) {
+      boostedItems.push(soccerItems[soccerIndex]);
+      soccerIndex++;
+    }
+
+    prioritizedItems = boostedItems;
+  }
 
   for (const item of prioritizedItems) {
     if (candidateItems.length >= 20) {
