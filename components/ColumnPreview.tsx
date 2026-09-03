@@ -66,17 +66,17 @@ export default async function ColumnPreview() {
           <img
             src={featured.image}
             alt={featured.title}
-            className="h-64 w-full object-cover transition duration-500 group-hover:scale-105 sm:h-80"
+            className="h-56 w-full object-cover transition duration-500 group-hover:scale-105 sm:h-68"
           />
         ) : (
-          <div className="flex h-64 items-center justify-center bg-gradient-to-br from-blue-50 via-white to-slate-100 sm:h-80">
+          <div className="flex h-56 items-center justify-center bg-gradient-to-br from-blue-50 via-white to-slate-100 sm:h-68">
             <span className="text-6xl font-black text-blue-600/70">
               AI
             </span>
           </div>
         )}
 
-        <div className="p-6 sm:p-8">
+        <div className="p-5 sm:p-6">
 
           <div className="flex items-center gap-3">
             <span className="rounded-full bg-blue-50 px-3 py-1 text-[11px] font-black tracking-widest text-blue-600">
@@ -90,17 +90,17 @@ export default async function ColumnPreview() {
             )}
           </div>
 
-          <h3 className="mt-4 text-2xl font-black leading-tight tracking-tight text-slate-950 transition group-hover:text-blue-600 sm:text-3xl">
+          <h3 className="mt-3 text-xl font-black leading-tight tracking-tight text-slate-950 transition group-hover:text-blue-600 sm:text-[22px]">
             {featured.title}
           </h3>
 
           {featured.excerpt && (
-            <p className="mt-4 line-clamp-3 text-sm leading-7 text-slate-500">
+            <p className="mt-3 line-clamp-3 text-sm leading-7 text-slate-500">
               {featured.excerpt}
             </p>
           )}
 
-          <div className="mt-5 font-black text-blue-600">
+          <div className="mt-4 font-black text-blue-600">
             続きを読む →
           </div>
 

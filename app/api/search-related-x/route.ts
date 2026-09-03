@@ -132,14 +132,6 @@ function createKeywords(title: string) {
 function buildSearchQuery(
   keywords: string[]
 ) {
-  const accounts =
-    MAJOR_NEWS_ACCOUNTS
-      .map(
-        (username) =>
-          `from:${username}`
-      )
-      .join(" OR ");
-
   const terms =
     keywords
       .map(
@@ -148,7 +140,7 @@ function buildSearchQuery(
       )
       .join(" OR ");
 
-  return `(${accounts}) (${terms}) lang:ja -is:retweet`;
+  return `(${terms}) lang:ja -is:retweet`;
 }
 
 async function searchX(
@@ -444,9 +436,9 @@ export async function GET(
       });
     }
 
-    // 上位2キーワードでXを2回検索
+    // 上位4キーワードでXを検索
     const searchKeywords =
-      keywords.slice(0, 2);
+      keywords.slice(0, 4);
 
      const resultMap = new Map<string, any>();
     const queries: string[] = [];
@@ -479,16 +471,17 @@ export async function GET(
         resultMap.values()
       );
 
-    // 大手ニュース媒体を優先
+    // 影響力の高いアカウントを優先
+    // ただし、大手ニュース媒体だけに限定しない
     formattedResults.sort(
       (a, b) => {
-        if (
-          a.isMajorNews !==
-          b.isMajorNews
-        ) {
-          return a.isMajorNews
-            ? -1
-            : 1;
+        const a100k =
+          a.author.followers >= 100000;
+        const b100k =
+          b.author.followers >= 100000;
+
+        if (a100k !== b100k) {
+          return b100k ? 1 : -1;
         }
 
         if (

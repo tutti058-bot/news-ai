@@ -46,7 +46,7 @@ export async function GET(
       orderBy: {
         publishedAt: "desc",
       },
-      take: 30,
+      take: 100,
     });
 
     const keywords =
@@ -100,7 +100,11 @@ export async function GET(
     );
 
     const related = scored
-      .filter((item) => item.keywordMatchCount >= 1)
+      .filter(
+        (item) =>
+          item.keywordMatchCount >= 1 ||
+          item.relevanceScore >= 3
+      )
       .slice(0, 3);
 
     return NextResponse.json({
