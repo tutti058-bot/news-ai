@@ -11,6 +11,7 @@ model News {
   id              Int         @id @default(autoincrement())
   title           String
   summary         String?
+  supplement      String?
   content         String?
   image           String?
   category        String?

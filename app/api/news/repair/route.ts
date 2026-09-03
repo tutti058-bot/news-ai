@@ -80,6 +80,7 @@ export async function GET() {
           data: {
             sourceUrl: cleanUrl,
             summary: ai.summary,
+            supplement: ai.supplement,
             category: ai.category,
             score: ai.score,
             importanceScore: ai.importanceScore,

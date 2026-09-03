@@ -1104,6 +1104,9 @@ if (ai.score < MIN_SCORE) {
           summary:
             ai.summary,
 
+          supplement:
+            ai.supplement,
+
           category:
             ai.category,
 

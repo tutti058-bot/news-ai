@@ -361,10 +361,20 @@ scoreは必ず0〜100点です。
 ・「やんす」は連発しない
 ・最後は自然な「でやんす」で締める
 
+【補足情報】
+この記事を理解するうえで役立つ「背景・注目ポイント」を、記事本文に書かれている事実だけを使って1〜2文で説明してください。
+
+・summaryの単なる言い換えにしない
+・記事本文にない情報を追加しない
+・推測や憶測を書かない
+・記事本文から読み取れる背景や、特に注目すべきポイントを優先する
+・補足できる情報がない場合は空文字にする
+
 必ずJSONだけ返してください。
 
 {
   "summary": "",
+  "supplement": "",
   "category": "",
   "score": 0,
   "importanceScore": 0,
@@ -449,6 +459,7 @@ console.log("AI解析JSON:", result);
 
     return {
       summary: result.summary ?? "",
+      supplement: result.supplement ?? "",
       category: result.category ?? "国内",
       score,
       importanceScore,
