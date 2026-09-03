@@ -711,25 +711,23 @@ ${url}
 
             </div>
 
-            <p className="mt-5 text-base font-bold leading-8 text-slate-700 sm:text-lg">
-              「{yansuComment}」
-            </p>
+            {news.supplement ? (
+              <>
+                <p className="text-sm font-black text-blue-600">
+                  💡 やんすAIの補足
+                </p>
+
+                <p className="mt-3 text-sm leading-7 text-slate-600 sm:text-base">
+                  {news.supplement}
+                </p>
+              </>
+            ) : (
+              <p className="mt-5 text-base font-bold leading-8 text-slate-700 sm:text-lg">
+                「{yansuComment}」
+              </p>
+            )}
 
           </div>
-
-          {news.supplement && (
-            <div className="mt-4 rounded-2xl border border-blue-100 bg-white p-5 shadow-sm sm:p-6">
-
-              <p className="text-sm font-black text-blue-600">
-                💡 やんすAIの補足
-              </p>
-
-              <p className="mt-3 text-sm leading-7 text-slate-600 sm:text-base">
-                {news.supplement}
-              </p>
-
-            </div>
-          )}
 
         </div>
 
