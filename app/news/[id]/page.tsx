@@ -713,10 +713,6 @@ ${url}
 
             {news.supplement ? (
               <>
-                <p className="text-sm font-black text-blue-600">
-                  💡 やんすAIの補足
-                </p>
-
                 <p className="mt-3 text-sm leading-7 text-slate-600 sm:text-base">
                   {news.supplement}
                 </p>
