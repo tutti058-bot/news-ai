@@ -9,7 +9,7 @@ export default async function ColumnPreview() {
     orderBy: {
       publishedAt: "desc",
     },
-    take: 4,
+    take: 1,
     select: {
       id: true,
       title: true,
@@ -24,7 +24,7 @@ export default async function ColumnPreview() {
     return null;
   }
 
-  const [featured, ...others] = columns;
+  const featured = columns[0];
 
   return (
     <section className="mt-12">
@@ -107,43 +107,6 @@ export default async function ColumnPreview() {
         </div>
 
       </Link>
-
-      {/* サブコラム */}
-      {others.length > 0 && (
-        <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-
-          {others.map((column) => (
-            <Link
-              key={column.id}
-              href={`/column/${column.slug}`}
-              className="group flex min-h-32 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg"
-            >
-
-              {column.image ? (
-                <img
-                  src={column.image}
-                  alt={column.title}
-                  className="h-32 w-24 shrink-0 object-cover transition duration-500 group-hover:scale-105"
-                />
-              ) : (
-                <div className="flex h-32 w-24 shrink-0 items-center justify-center bg-gradient-to-br from-blue-50 to-slate-100 text-2xl font-black text-blue-600">
-                  AI
-                </div>
-              )}
-
-              <div className="flex min-w-0 flex-1 items-center p-4">
-
-                <h3 className="line-clamp-3 text-base font-black leading-relaxed text-slate-900 transition group-hover:text-blue-600">
-                  {column.title}
-                </h3>
-
-              </div>
-
-            </Link>
-          ))}
-
-        </div>
-      )}
 
       {/* スマホ用一覧ボタン */}
       <div className="mt-5 sm:hidden">
