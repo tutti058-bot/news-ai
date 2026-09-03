@@ -516,19 +516,28 @@ export async function syncNews(limit?: number) {
       },
     });
 
+  // JリーグDAYは16時まではサッカーを抑え、
+  // 16時以降にサッカー枠を10件まで開放する。
+  // 通常日は従来どおり1日3件まで。
+  const soccerLimitForCurrentTime =
+    jLeagueDay && jstNow.getHours() >= 16
+      ? 10
+      : 3;
+
   const soccerRemainingToday =
     Math.max(
       0,
-      soccerDailyLimit - todaySoccerAdded
+      soccerLimitForCurrentTime - todaySoccerAdded
     );
 
   console.log(
-    `本日のサッカー件数: ${todaySoccerAdded}/${soccerDailyLimit}`
+    `本日のサッカー件数: ${todaySoccerAdded}/${soccerLimitForCurrentTime}`
   );
 
   // 1回の同期で採用できるサッカー件数
-  // 通常日 → その日の残り枠まで（最大3件/日）
-  // JリーグDAY → その日の残り枠まで（最大10件/日）
+  // 16時前 → 最大3件/日
+  // JリーグDAYの16時以降 → 最大10件/日
+  // 通常日 → 最大3件/日
   const SOCCER_LIMIT = soccerRemainingToday;
 
   const candidateItems: typeof sortedItems = [];
