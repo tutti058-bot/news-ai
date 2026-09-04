@@ -91,6 +91,41 @@ export default function AboutPage() {
 
             <section>
               <h2 className="text-xl font-black text-slate-900">
+                ニュースの選定・評価基準
+              </h2>
+
+              <p className="mt-3 leading-8 text-slate-600">
+                AI NEWS ジャパンでは、掲載するニュースをAIによって
+                「重要度・話題性・影響度・新規性・今後の注目度」の
+                5つの観点から評価しています。
+              </p>
+
+              <p className="mt-3 leading-8 text-slate-600">
+                この評価を使ってニュースの特徴を整理し、読者が
+                複数のニュースの中から注目すべき情報を見つけやすい
+                形で提供しています。
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-xl font-black text-slate-900">
+                AI NEWSジャパン独自の情報整理
+              </h2>
+
+              <p className="mt-3 leading-8 text-slate-600">
+                各ニュースではAI要約に加えて、記事の内容をもとに
+                背景や注目ポイントを「やんすAIの視点」として
+                補足しています。
+              </p>
+
+              <p className="mt-3 leading-8 text-slate-600">
+                また、ニュースとは異なる読み物として、AI・仕事・社会・
+                人生などを扱うオリジナルコラムも掲載しています。
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-xl font-black text-slate-900">
                 コラムについて
               </h2>
 

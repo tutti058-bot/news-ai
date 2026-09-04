@@ -4,6 +4,7 @@ import NewsGrid from "./NewsGrid";
 import Sidebar from "./Sidebar";
 import ColumnPreview from "./ColumnPreview";
 import ContentRequestBox from "./ContentRequestBox";
+import NewsAnalysisGuide from "./NewsAnalysisGuide";
 
 type Props = {
   keyword: string;
@@ -27,6 +28,8 @@ export default function HomeLayout({
           <SearchBar />
         </div>
 
+        {/* ニュース分析について */}
+        <NewsAnalysisGuide />
 
         {/* 注目コラム */}
         <ColumnPreview />

@@ -107,7 +107,21 @@ export default async function NewsDetail({
     },
   });
 
-  const related = await prisma.news.findMany({
+  // 関連記事をタイトル・要約のキーワードで選定
+  const baseText = `${news.title} ${news.summary ?? ""}`
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}\s]/gu, " ");
+
+  const baseWords = Array.from(
+    new Set(
+      baseText
+        .split(/\s+/)
+        .map((word) => word.trim())
+        .filter((word) => word.length >= 2)
+    )
+  );
+
+  const relatedCandidates = await prisma.news.findMany({
     where: {
       id: {
         not: news.id,
@@ -117,8 +131,33 @@ export default async function NewsDetail({
     orderBy: {
       publishedAt: "desc",
     },
-    take: 3,
+    take: 30,
   });
+
+  const related = relatedCandidates
+    .map((item) => {
+      const candidateText = `${item.title} ${item.summary ?? ""}`
+        .toLowerCase()
+        .replace(/[^\p{L}\p{N}\s]/gu, " ");
+
+      const score = baseWords.reduce((total, word) => {
+        return candidateText.includes(word)
+          ? total + 1
+          : total;
+      }, 0);
+
+      return {
+        ...item,
+        relatedScore: score,
+      };
+    })
+    .sort(
+      (a, b) =>
+        b.relatedScore - a.relatedScore ||
+        (b.publishedAt?.getTime() ?? 0) -
+          (a.publishedAt?.getTime() ?? 0)
+    )
+    .slice(0, 3);
 
   // おすすめアフィリエイト案件
   const affiliatePrograms =
@@ -491,6 +530,21 @@ ${url}
       </div>
 
 
+      {/* AI NEWSジャパン独自の分析 */}
+      <section className="mt-6 rounded-3xl border border-blue-100 bg-blue-50/60 p-6 shadow-sm sm:p-7">
+        <p className="text-xs font-black tracking-[0.2em] text-blue-600">
+          AI NEWS JAPAN ANALYSIS
+        </p>
+
+        <h2 className="mt-2 text-xl font-black text-slate-900 sm:text-2xl">
+          AI NEWSジャパン独自の分析
+        </h2>
+
+        <p className="mt-3 text-sm leading-7 text-slate-600 sm:text-base">
+          元記事の内容をもとに、ニュースの重要度・話題性・影響範囲・新規性・今後の注目度をAIが分析しています。
+        </p>
+      </section>
+
       {/* AI評価詳細 */}
       <div className="mt-6 w-full overflow-hidden rounded-3xl border border-slate-200 bg-white p-4 shadow-lg sm:p-6">
 
@@ -667,9 +721,9 @@ ${url}
       </div>
 
       {/* やんすAIの視点 */}
-      <section className="mt-8 overflow-hidden rounded-3xl border border-blue-100 bg-gradient-to-br from-blue-50 via-white to-slate-50 shadow-lg">
+      <section className="mt-8 overflow-hidden rounded-3xl border border-blue-200 bg-blue-50 shadow-lg">
 
-        <div className="border-b border-blue-100 px-6 py-5 sm:px-8">
+        <div className="border-b border-blue-200 bg-white px-6 py-5 sm:px-8">
 
           <p className="text-xs font-black tracking-[0.2em] text-blue-600">
             YANSU AI VIEW
@@ -679,7 +733,7 @@ ${url}
             やんすAIの視点
           </h2>
 
-          <p className="mt-2 text-sm leading-6 text-slate-500">
+          <p className="mt-2 text-sm leading-6 text-slate-600">
             AI NEWS ジャパン独自の視点から、このニュースをひとこと解説します。
           </p>
 
@@ -687,11 +741,11 @@ ${url}
 
         <div className="p-6 sm:p-8">
 
-          <div className="rounded-2xl bg-white p-5 shadow-sm sm:p-6">
+          <div className="rounded-2xl border border-white/70 bg-white/80 p-5 shadow-sm backdrop-blur-sm sm:p-6">
 
             <div className="flex items-center gap-3">
 
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full ring-2 ring-blue-200">
                 <img
                   src="/yans-ai.jpg"
                   alt="やんすAI"
@@ -704,7 +758,7 @@ ${url}
                   やんすAI
                 </p>
 
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-blue-500">
                   AI NEWS ジャパン
                 </p>
               </div>
@@ -712,13 +766,11 @@ ${url}
             </div>
 
             {news.supplement ? (
-              <>
-                <p className="mt-3 text-sm leading-7 text-slate-600 sm:text-base">
-                  {news.supplement}
-                </p>
-              </>
+              <p className="mt-4 border-l-4 border-violet-500 pl-4 text-sm leading-7 text-slate-700 sm:text-base">
+                {news.supplement}
+              </p>
             ) : (
-              <p className="mt-5 text-base font-bold leading-8 text-slate-700 sm:text-lg">
+              <p className="mt-5 border-l-4 border-amber-400 pl-4 text-base font-bold leading-8 text-slate-700 sm:text-lg">
                 「{yansuComment}」
               </p>
             )}
