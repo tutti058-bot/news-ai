@@ -69,6 +69,12 @@ export default function RootLayout({
     src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6538997075638239"
     crossOrigin="anonymous"
   />
+
+  <Script
+    async
+    src="https://adm.shinobi.jp/st/auto.js"
+    data-admax-id="7cf7a85e729873455f5f86de2e11a8d8"
+  />
   
   <Header />
 
