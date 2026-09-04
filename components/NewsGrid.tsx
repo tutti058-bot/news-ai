@@ -86,7 +86,7 @@ export default async function NewsGrid({
         </p>
       </div>
 
-      <div className="grid gap-8 md:grid-cols-2">
+      <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:gap-8">
         {news.map((item) => (
           <NewsCard
             key={item.id}

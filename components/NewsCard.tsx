@@ -57,29 +57,29 @@ export default function NewsCard({
 
         </div>
 
-        <div className="p-5 sm:p-6">
+        <div className="p-3 sm:p-4 lg:p-6">
 
-          <h3 className="line-clamp-2 text-xl font-black leading-snug text-slate-900 transition group-hover:text-blue-600 sm:text-2xl">
+          <h3 className="line-clamp-3 text-base font-black leading-snug text-slate-900 transition group-hover:text-blue-600 sm:line-clamp-2 sm:text-lg lg:text-2xl">
             {title}
           </h3>
 
-          <p className="mt-3 line-clamp-3 text-sm leading-7 text-slate-600 sm:text-base">
+          <p className="mt-2 hidden line-clamp-2 text-xs leading-5 text-slate-600 sm:mt-3 sm:block sm:text-sm sm:leading-6 lg:text-base lg:leading-7">
             {summary}
           </p>
 
-                    <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-4">
+                    <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-3 sm:mt-4 sm:pt-4">
 
             <div className="flex items-center gap-2">
-              <span className="text-sm text-slate-500">
+              <span className="text-[10px] text-slate-500 sm:text-sm">
                 📅 {date}
               </span>
 
-              <span className="rounded-full bg-red-50 px-3 py-1 text-sm font-black text-red-500">
+              <span className="rounded-full bg-red-50 px-2 py-1 text-[10px] font-black text-red-500 sm:px-3 sm:text-sm">
                 AI {score}点
               </span>
             </div>
 
-            <span className="rounded-full bg-blue-600 px-4 py-2 text-sm font-bold text-white transition duration-300 group-hover:bg-slate-900">
+            <span className="rounded-full bg-blue-600 px-2.5 py-1.5 text-[10px] font-bold text-white transition duration-300 group-hover:bg-slate-900 sm:px-4 sm:py-2 sm:text-sm">
               続きを読む →
             </span>
 

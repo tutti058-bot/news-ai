@@ -24,7 +24,7 @@ export default function HomeLayout({
         <Hero />
 
         {/* Search */}
-        <div className="mt-8">
+        <div className="mt-5 sm:mt-8">
           <SearchBar />
         </div>
 
@@ -35,7 +35,7 @@ export default function HomeLayout({
         <ColumnPreview />
 
         {/* Main */}
-        <div className="mt-10 grid grid-cols-1 gap-10 lg:grid-cols-[2fr_360px]">
+        <div className="mt-7 grid grid-cols-1 gap-7 lg:mt-10 lg:gap-10 lg:grid-cols-[2fr_360px]">
 
           <div>
             <NewsGrid
@@ -51,7 +51,7 @@ export default function HomeLayout({
         </div>
 
         {/* みんなのリクエストBOX */}
-        <div className="mt-12">
+        <div className="mt-8 sm:mt-12">
           <ContentRequestBox />
         </div>
 

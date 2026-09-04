@@ -27,21 +27,21 @@ export default async function ColumnPreview() {
   const featured = columns[0];
 
   return (
-    <section className="mt-12">
+    <section className="mt-7 sm:mt-12">
 
       {/* セクションヘッダー */}
-      <div className="mb-6 flex items-end justify-between">
+      <div className="mb-4 flex items-end justify-between sm:mb-6">
 
         <div>
-          <p className="text-xs font-black tracking-[0.25em] text-blue-600">
+          <p className="text-[10px] font-black tracking-[0.2em] text-blue-600 sm:text-xs sm:tracking-[0.25em]">
             AI NEWS JAPAN COLUMN
           </p>
 
-          <h2 className="mt-2 text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">
+          <h2 className="mt-1 text-xl font-black leading-tight tracking-tight text-slate-950 sm:mt-2 sm:text-3xl">
             ニュースでは、語れない話。
           </h2>
 
-          <p className="mt-2 text-sm leading-6 text-slate-500">
+          <p className="mt-1 text-xs leading-5 text-slate-500 sm:mt-2 sm:text-sm sm:leading-6">
             ニュースだけでは伝えきれない、
             AI・仕事・社会・日々の出来事を独自の視点で。
           </p>
@@ -66,17 +66,17 @@ export default async function ColumnPreview() {
           <img
             src={featured.image}
             alt={featured.title}
-            className="h-56 w-full object-cover transition duration-500 group-hover:scale-105 sm:h-68"
+            className="h-40 w-full object-cover transition duration-500 group-hover:scale-105 sm:h-68"
           />
         ) : (
-          <div className="flex h-56 items-center justify-center bg-gradient-to-br from-blue-50 via-white to-slate-100 sm:h-68">
+          <div className="flex h-40 items-center justify-center bg-gradient-to-br from-blue-50 via-white to-slate-100 sm:h-68">
             <span className="text-6xl font-black text-blue-600/70">
               AI
             </span>
           </div>
         )}
 
-        <div className="p-5 sm:p-6">
+        <div className="p-4 sm:p-6">
 
           <div className="flex items-center gap-3">
             <span className="rounded-full bg-blue-50 px-3 py-1 text-[11px] font-black tracking-widest text-blue-600">
@@ -90,12 +90,12 @@ export default async function ColumnPreview() {
             )}
           </div>
 
-          <h3 className="mt-3 text-xl font-black leading-tight tracking-tight text-slate-950 transition group-hover:text-blue-600 sm:text-[22px]">
+          <h3 className="mt-2 text-lg font-black leading-tight tracking-tight text-slate-950 transition group-hover:text-blue-600 sm:mt-3 sm:text-[22px]">
             {featured.title}
           </h3>
 
           {featured.excerpt && (
-            <p className="mt-3 line-clamp-3 text-sm leading-7 text-slate-500">
+            <p className="mt-2 line-clamp-2 text-xs leading-5 text-slate-500 sm:mt-3 sm:line-clamp-3 sm:text-sm sm:leading-7">
               {featured.excerpt}
             </p>
           )}
@@ -109,7 +109,7 @@ export default async function ColumnPreview() {
       </Link>
 
       {/* スマホ用一覧ボタン */}
-      <div className="mt-5 sm:hidden">
+      <div className="mt-4 sm:hidden">
         <Link
           href="/column"
           className="flex w-full items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-black text-slate-700 transition hover:text-blue-600"
