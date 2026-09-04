@@ -23,6 +23,17 @@ export default async function WeeklyRankingPage() {
             AIが分析したニュースの重要度をもとに、
             直近7日間の記事をランキング形式で紹介します。
           </p>
+
+          <div className="mt-5 rounded-2xl border border-blue-100 bg-blue-50 p-5">
+            <p className="text-sm font-black text-blue-600">
+              AI NEWSジャパンのランキング基準
+            </p>
+
+            <p className="mt-2 text-sm leading-7 text-slate-700">
+              ニュースの重要度・話題性・影響範囲・新規性・今後の注目度などをAIが分析し、
+              その評価結果をもとにランキングを作成しています。
+            </p>
+          </div>
         </div>
 
         <div className="mb-8 flex gap-3">

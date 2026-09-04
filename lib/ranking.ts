@@ -262,5 +262,5 @@ export async function getSoccerViewRanking(
       (item): item is NonNullable<typeof item> =>
         item !== null
     )
-    .slice(0, 3);
+    .slice(0, 5);
 }

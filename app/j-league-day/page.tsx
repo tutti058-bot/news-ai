@@ -42,12 +42,6 @@ export default function JLeagueDayPage() {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
 
-  const [soccerImportanceWeekly, setSoccerImportanceWeekly] =
-    useState<any[]>([]);
-
-  const [soccerImportanceMonthly, setSoccerImportanceMonthly] =
-    useState<any[]>([]);
-
   const [soccerViewWeekly, setSoccerViewWeekly] =
     useState<any[]>([]);
 
@@ -88,14 +82,6 @@ export default function JLeagueDayPage() {
         const data = await response.json();
 
         setNews(data.news ?? []);
-
-        setSoccerImportanceWeekly(
-          data.rankings?.importance?.weekly ?? []
-        );
-
-        setSoccerImportanceMonthly(
-          data.rankings?.importance?.monthly ?? []
-        );
 
         setSoccerViewWeekly(
           data.rankings?.views?.weekly ?? []
@@ -260,6 +246,12 @@ export default function JLeagueDayPage() {
           「JリーグDAY」として、サッカー関連ニュースをいつもより多めにお届けします。
         </p>
 
+        <p className="mt-3">
+          JリーグDAYでは、サッカー関連ニュースをカテゴリ別に整理し、
+          AI評価もあわせて掲載しています。試合開催日に合わせて、
+          Jリーグを中心とした注目ニュースをまとめてチェックできます。
+        </p>
+
         <div className="mt-8 flex flex-wrap gap-2">
           {soccerCategories.map((category) => (
             <button
@@ -410,8 +402,6 @@ export default function JLeagueDayPage() {
 
           <div className="space-y-8">
             <SoccerRankingSidebar
-              importanceWeekly={soccerImportanceWeekly}
-              importanceMonthly={soccerImportanceMonthly}
               viewsWeekly={soccerViewWeekly}
               viewsMonthly={soccerViewMonthly}
             />

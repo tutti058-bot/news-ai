@@ -36,6 +36,19 @@ const categories = [
   "テクノロジー",
 ];
 
+const categoryDescriptions: Record<string, string> = {
+  国内:
+    "国内で報じられているニュースを整理し、社会や暮らしに関わる話題をわかりやすく紹介しています。",
+  芸能:
+    "芸能界やエンターテインメントに関するニュースを整理し、話題になっている動きをわかりやすく紹介しています。",
+  スポーツ:
+    "国内外のスポーツニュースを整理し、試合結果や選手・チームの動きをわかりやすく紹介しています。",
+  経済:
+    "企業や市場、社会経済に関するニュースを整理し、経済の動きをわかりやすく紹介しています。",
+  テクノロジー:
+    "AIやテクノロジー、IT業界に関するニュースを整理し、注目すべき動きをわかりやすく紹介しています。",
+};
+
 const PER_PAGE = 12;
 
 export default async function CategoryPage({
@@ -90,6 +103,22 @@ export default async function CategoryPage({
         <p className="mt-3 text-slate-500">
           {category}に関する最新ニュースをAIがわかりやすくお届けします。
         </p>
+
+        <div className="mt-6 rounded-3xl border border-blue-100 bg-blue-50 p-5 sm:p-6">
+          <p className="text-sm font-black text-blue-600">
+            AI NEWSジャパンの見方
+          </p>
+
+          <p className="mt-2 text-sm leading-7 text-slate-700 sm:text-base">
+            {categoryDescriptions[category] ??
+              `${category}に関するニュースを整理し、重要なポイントをわかりやすく紹介しています。`}
+          </p>
+
+          <p className="mt-3 text-sm leading-7 text-slate-600">
+            掲載ニュースは、重要度・話題性・影響範囲・新規性・今後の注目度の
+            5つの観点からAIが評価しています。
+          </p>
+        </div>
       </div>
 
       <nav className="sticky top-0 z-30 mt-8 flex gap-2 overflow-x-auto bg-white py-3 pb-2">

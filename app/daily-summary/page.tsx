@@ -95,6 +95,17 @@ ${summaryUrl}`;
         <p className="mt-3 text-slate-500">
           {data?.date} / {data?.count}件のニュースからAIが厳選
         </p>
+
+        <div className="mt-5 rounded-2xl border border-blue-100 bg-blue-50 p-5">
+          <p className="text-sm font-black text-blue-600">
+            今日のニュースをAIが整理
+          </p>
+
+          <p className="mt-2 text-sm leading-7 text-slate-700 sm:text-base">
+            その日のニュースから注目度の高い話題を整理し、
+            短時間で1日のニュースを把握できるようまとめています。
+          </p>
+        </div>
       </div>
 
       <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-lg sm:p-10">
