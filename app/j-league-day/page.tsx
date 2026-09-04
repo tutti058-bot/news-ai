@@ -5,6 +5,7 @@ import Link from "next/link";
 import { getNextJLeagueDay } from "@/lib/jLeagueDays";
 import SoccerRankingSidebar from "@/components/SoccerRankingSidebar";
 import SoccerAffiliateSidebar from "@/components/SoccerAffiliateSidebar";
+import JLeagueStandings from "@/components/JLeagueStandings";
 
 type NewsItem = {
   id: number;
@@ -405,6 +406,8 @@ export default function JLeagueDayPage() {
               viewsWeekly={soccerViewWeekly}
               viewsMonthly={soccerViewMonthly}
             />
+
+            <JLeagueStandings />
 
             <SoccerAffiliateSidebar />
           </div>
