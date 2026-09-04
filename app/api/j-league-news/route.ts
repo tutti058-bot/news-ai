@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getSoccerImportanceRanking, getSoccerViewRanking } from "@/lib/ranking";
+import { getSoccerViewRanking } from "@/lib/ranking";
 
 export const dynamic = "force-dynamic";
 
@@ -113,29 +113,63 @@ function isJLeagueRelated(
 
 export async function GET() {
   try {
-    // まずゲキサカ記事を直接取得
-    const soccerNews = await prisma.news.findMany({
-      where: {
-        source: "ゲキサカ",
-      },
-      orderBy: {
-        publishedAt: "desc",
-      },
-      take: 50,
-    });
-
-    // その他の最新記事からJリーグ関連記事を探す
-    const otherNews = await prisma.news.findMany({
-      where: {
-        source: {
-          not: "ゲキサカ",
+    // ゲキサカ記事とその他記事を並列取得
+    const [soccerNews, otherNews] = await Promise.all([
+      prisma.news.findMany({
+        where: {
+          source: "ゲキサカ",
         },
-      },
-      orderBy: {
-        publishedAt: "desc",
-      },
-      take: 300,
-    });
+        orderBy: {
+          publishedAt: "desc",
+        },
+        take: 50,
+      }),
+      prisma.news.findMany({
+        where: {
+          AND: [
+            {
+              source: {
+                not: "ゲキサカ",
+              },
+            },
+            {
+              OR: [
+                { title: { contains: "Jリーグ" } },
+                { title: { contains: "J1" } },
+                { title: { contains: "J2" } },
+                { title: { contains: "J3" } },
+                { title: { contains: "浦和レッズ" } },
+                { title: { contains: "鹿島アントラーズ" } },
+                { title: { contains: "FC東京" } },
+                { title: { contains: "東京ヴェルディ" } },
+                { title: { contains: "川崎フロンターレ" } },
+                { title: { contains: "横浜F・マリノス" } },
+                { title: { contains: "横浜FC" } },
+                { title: { contains: "湘南ベルマーレ" } },
+                { title: { contains: "柏レイソル" } },
+                { title: { contains: "アルビレックス新潟" } },
+                { title: { contains: "清水エスパルス" } },
+                { title: { contains: "名古屋グランパス" } },
+                { title: { contains: "京都サンガ" } },
+                { title: { contains: "ガンバ大阪" } },
+                { title: { contains: "セレッソ大阪" } },
+                { title: { contains: "ヴィッセル神戸" } },
+                { title: { contains: "サンフレッチェ広島" } },
+                { title: { contains: "アビスパ福岡" } },
+                { title: { contains: "ファジアーノ岡山" } },
+                { title: { contains: "町田ゼルビア" } },
+                { title: { contains: "Jリーガー" } },
+                { title: { contains: "元Jリーガー" } },
+              ],
+            },
+          ],
+        },
+        orderBy: {
+          publishedAt: "desc",
+        },
+        take: 100,
+      }),
+    ]);
 
     const jLeagueRelatedNews = otherNews.filter((item) =>
       isJLeagueRelated(
@@ -177,25 +211,16 @@ export async function GET() {
       return bTime - aTime;
     });
 
-    const soccerImportanceWeekly =
-      await getSoccerImportanceRanking("weekly");
-
-    const soccerImportanceMonthly =
-      await getSoccerImportanceRanking("monthly");
-
-    const soccerViewWeekly =
-      await getSoccerViewRanking("weekly");
-
-    const soccerViewMonthly =
-      await getSoccerViewRanking("monthly");
+    // 現在のJ.LEAGUE DAYでは閲覧ランキングのみ使用
+    const [soccerViewWeekly, soccerViewMonthly] =
+      await Promise.all([
+        getSoccerViewRanking("weekly"),
+        getSoccerViewRanking("monthly"),
+      ]);
 
     return NextResponse.json({
       news: uniqueNews.slice(0, 20),
       rankings: {
-        importance: {
-          weekly: soccerImportanceWeekly,
-          monthly: soccerImportanceMonthly,
-        },
         views: {
           weekly: soccerViewWeekly,
           monthly: soccerViewMonthly,
