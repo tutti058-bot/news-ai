@@ -39,13 +39,25 @@ export async function getArticle(url: string) {
           .trim()
           .slice(0, 5000);
 
-        if (text.length >= 300) {
+        const looksLikeCode =
+          /window\.|wiz_progress|wiz_tick|<script|javascript:|function\s*\(/.test(
+            text
+          );
+
+        if (text.length >= 300 && !looksLikeCode) {
           console.log(
             "article-extractor取得成功:",
             url
           );
 
           return text;
+        }
+
+        if (looksLikeCode) {
+          console.log(
+            "article-extractor本文がコードのため破棄:",
+            url
+          );
         }
       }
     } catch (error) {
@@ -241,6 +253,20 @@ export async function getArticle(url: string) {
       .replace(/\s+/g, " ")
       .trim()
       .slice(0, 5000);
+
+    const fetchedTextLooksLikeCode =
+      /window\.|wiz_progress|wiz_tick|<script|javascript:|function\s*\(/.test(
+        text
+      );
+
+    if (text.length < 300 || fetchedTextLooksLikeCode) {
+      console.log(
+        "通常fetch本文が不正または不自然なため破棄:",
+        url
+      );
+
+      return "";
+    }
 
     console.log(
       "本文取得文字数:",
