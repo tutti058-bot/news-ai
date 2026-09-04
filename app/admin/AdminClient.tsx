@@ -25,6 +25,7 @@ export default function AdminClient() {
   const [summaryLoading, setSummaryLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [summary, setSummary] = useState("");
+  const [soccerRepairLoading, setSoccerRepairLoading] = useState(false);
 
   // ニュース一覧・X投稿・関連記事
   type NewsItem = {
@@ -163,6 +164,51 @@ const [copiedSupplementalId, setCopiedSupplementalId] =
   useEffect(() => {
     loadContentRequests();
   }, []);
+
+  // =========================
+  // サッカー記事スコア修正
+  // =========================
+
+  const repairSoccerScores = async () => {
+    if (soccerRepairLoading) return;
+
+    const confirmed = window.confirm(
+      "69点以上の「試合記録」記事を再分析します。実行しますか？"
+    );
+
+    if (!confirmed) return;
+
+    setSoccerRepairLoading(true);
+    setMessage("");
+
+    try {
+      const res = await fetch("/api/news/repair-soccer", {
+        cache: "no-store",
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(
+          data.error ?? "サッカー記事の再分析に失敗しました"
+        );
+      }
+
+      setMessage(
+        `サッカー記事の再分析完了：${data.repaired}件修正 / ${data.failed}件失敗 / 対象${data.requested}件`
+      );
+    } catch (error) {
+      console.error("サッカー記事再分析エラー:", error);
+
+      setMessage(
+        error instanceof Error
+          ? `サッカー記事再分析失敗：${error.message}`
+          : "サッカー記事再分析に失敗しました"
+      );
+    } finally {
+      setSoccerRepairLoading(false);
+    }
+  };
 
   // =========================
   // リクエストBOX
@@ -1553,6 +1599,34 @@ const [copiedSupplementalId, setCopiedSupplementalId] =
             ニュース取得・まとめ作成・X投稿・アフィリエイト案件を管理します。
           </p>
         </div>
+
+        {/* サッカー記事スコア修正 */}
+        <section className="mb-6 rounded-2xl border border-green-200 bg-green-50 p-4 shadow-sm sm:mb-8 sm:rounded-3xl sm:p-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm font-black text-green-700">
+                SOCCER SCORE REPAIR
+              </p>
+              <h2 className="mt-1 text-lg font-black text-slate-900 sm:text-xl">
+                ⚽ 試合記録のAIスコア修正
+              </h2>
+              <p className="mt-1 text-xs leading-5 text-slate-500 sm:text-sm">
+                現在69点以上の「試合記録」記事だけを再分析します。
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={repairSoccerScores}
+              disabled={soccerRepairLoading}
+              className="rounded-xl bg-green-600 px-4 py-3 text-sm font-black text-white transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {soccerRepairLoading
+                ? "再分析中..."
+                : "試合記録を再分析"}
+            </button>
+          </div>
+        </section>
 
         {/* サイト全体の閲覧数 */}
         <section className="mb-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:mb-8 sm:rounded-3xl sm:p-7 sm:shadow-lg">
