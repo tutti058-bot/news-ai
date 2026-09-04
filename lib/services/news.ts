@@ -1008,7 +1008,7 @@ export async function syncNews(limit?: number) {
  * =========================
  *
  * サッカー
- * → 80点以上
+ * → 75点以上
  *
  * 芸能
  * → 75点以上
@@ -1025,7 +1025,7 @@ const aiCategory = ai?.category ?? "";
 let MIN_SCORE = 60;
 
 if (soccer || aiCategory === "サッカー") {
-  MIN_SCORE = 80;
+  MIN_SCORE = 75;
 } else if (
   entertainment ||
   aiCategory === "芸能"

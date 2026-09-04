@@ -30,7 +30,7 @@ export default async function NewsGrid({
       }
     : null;
 
-  // サッカー記事は通常ページでは90点以上のみ表示
+  // サッカー記事は通常ページでは75点以上のみ表示
   // 現在はゲキサカの記事をサッカー記事として判定
   const where = {
     AND: [
@@ -44,7 +44,7 @@ export default async function NewsGrid({
           },
           {
             score: {
-              gte: 90,
+              gte: 75,
             },
           },
         ],
