@@ -292,7 +292,7 @@ export default function JLeagueDayPage() {
           </div>
         ) : (
           <>
-          <div className="mt-8 grid gap-6 md:grid-cols-2">
+          <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-5 lg:gap-6">
             {currentNews.map((item) => (
               <Link
                 key={item.id}
