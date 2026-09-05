@@ -23,7 +23,7 @@ export default function Header() {
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
 
         {/* ロゴ */}
-        <Link href="/" className="flex items-center gap-3">
+        <Link href="/" className="-ml-2 flex items-center gap-3 sm:-ml-4 lg:-ml-10">
           <Image
             src="/logo04.jpg"
             alt="AI News ジャパン"

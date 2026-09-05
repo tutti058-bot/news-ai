@@ -107,7 +107,7 @@ export default async function NewsGrid({
 
             {index === 3 && (
               <div className="col-span-2">
-                <RakutenWidget type="ranking" />
+                {/* <RakutenWidget type="ranking" /> */}
               </div>
             )}
           </React.Fragment>

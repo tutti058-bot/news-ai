@@ -25,7 +25,7 @@ export default function HomeLayout({
         <Hero />
 
         {/* 楽天ページマッチ */}
-        <RakutenWidget type="page-match" />
+        {/* <RakutenWidget type="page-match" /> */}
 
         {/* Search */}
         <div className="mt-5 sm:mt-8">
