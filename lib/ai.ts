@@ -524,12 +524,24 @@ ${article.slice(0, 1800)}
       Math.min(15, Number(result.attentionScore) || 0)
     );
 
-    const score =
+    const rawScore =
       importanceScore +
       buzzScore +
       impactScore +
       noveltyScore +
       attentionScore;
+
+    // サッカーの通常試合記録は、AIが過剰評価しても
+    // 55〜68点のレンジに収める
+    const isRegularMatchRecord =
+      /試合記録|試合結果/.test(title) &&
+      !/優勝決定|降格決定|歴史的|決勝|準決勝|タイトル決定|代表|w杯|ワールドカップ/i.test(
+        `${title} ${article}`
+      );
+
+    const score = isRegularMatchRecord
+      ? Math.min(68, Math.max(55, rawScore))
+      : rawScore;
 
     return {
       summary: result.summary ?? "",
