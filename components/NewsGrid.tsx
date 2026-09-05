@@ -1,5 +1,7 @@
+import React from "react";
 import Link from "next/link";
 import NewsCard from "./NewsCard";
+import RakutenWidget from "./RakutenWidget";
 import { prisma } from "@/lib/prisma";
 
 interface NewsGridProps {
@@ -87,21 +89,28 @@ export default async function NewsGrid({
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:gap-8">
-        {news.map((item) => (
-          <NewsCard
-            key={item.id}
-            id={item.id}
-            title={item.title}
-            summary={item.summary ?? ""}
-            image={item.image || "/news.jpg"}
-            category={item.category ?? "国内"}
-            score={item.score ?? 60}
-            date={
-              item.publishedAt
-                ? new Date(item.publishedAt).toLocaleDateString("ja-JP")
-                : ""
-            }
-          />
+        {news.map((item, index) => (
+          <React.Fragment key={item.id}>
+            <NewsCard
+              id={item.id}
+              title={item.title}
+              summary={item.summary ?? ""}
+              image={item.image || "/news.jpg"}
+              category={item.category ?? "国内"}
+              score={item.score ?? 60}
+              date={
+                item.publishedAt
+                  ? new Date(item.publishedAt).toLocaleDateString("ja-JP")
+                  : ""
+              }
+            />
+
+            {index === 3 && (
+              <div className="col-span-2">
+                <RakutenWidget type="ranking" />
+              </div>
+            )}
+          </React.Fragment>
         ))}
       </div>
 

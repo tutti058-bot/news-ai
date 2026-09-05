@@ -24,13 +24,13 @@ export default function HomeLayout({
         {/* Hero */}
         <Hero />
 
+        {/* 楽天ページマッチ */}
+        <RakutenWidget type="page-match" />
+
         {/* Search */}
         <div className="mt-5 sm:mt-8">
           <SearchBar />
         </div>
-
-        {/* 楽天ページマッチ */}
-        <RakutenWidget type="page-match" />
 
         {/* ニュース分析について */}
         <NewsAnalysisGuide />
@@ -38,16 +38,10 @@ export default function HomeLayout({
         {/* 注目コラム */}
         <ColumnPreview />
 
-        {/* 楽天ランキング */}
-        <RakutenWidget type="ranking" />
-
         {/* Main */}
         <div className="mt-7 grid grid-cols-1 gap-7 lg:mt-10 lg:gap-10 lg:grid-cols-[2fr_360px]">
 
           <div>
-            {/* 楽天ページマッチ */}
-            <RakutenWidget type="page-match" />
-
             <NewsGrid
               keyword={keyword}
               page={page}
