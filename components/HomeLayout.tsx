@@ -29,6 +29,9 @@ export default function HomeLayout({
           <SearchBar />
         </div>
 
+        {/* 楽天ページマッチ */}
+        <RakutenWidget type="page-match" />
+
         {/* ニュース分析について */}
         <NewsAnalysisGuide />
 
