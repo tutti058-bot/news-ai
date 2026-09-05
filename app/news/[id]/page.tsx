@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { generateYansuComment } from "@/lib/ai";
 import Link from "next/link";
 import type { Metadata } from "next";
+import NewsRakutenWidget from "@/components/NewsRakutenWidget";
 
 type Props = {
   params: Promise<{
@@ -529,6 +530,9 @@ ${url}
 
       </div>
 
+
+      {/* 楽天おすすめ */}
+      <NewsRakutenWidget />
 
       {/* AI NEWSジャパン独自の分析 */}
       <section className="mt-6 rounded-3xl border border-blue-100 bg-blue-50/60 p-6 shadow-sm sm:p-7">
