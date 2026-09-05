@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import RakutenWidget from "@/components/RakutenWidget";
+import SoccerRakutenWidget from "@/components/SoccerRakutenWidget";
 import { getNextJLeagueDay } from "@/lib/jLeagueDays";
 import SoccerRankingSidebar from "@/components/SoccerRankingSidebar";
 import SoccerAffiliateSidebar from "@/components/SoccerAffiliateSidebar";
@@ -275,10 +275,7 @@ export default function JLeagueDayPage() {
         </div>
 
         {/* 楽天スポーツランキング */}
-        <RakutenWidget
-          type="ranking"
-          genreId="101070"
-        />
+        <SoccerRakutenWidget />
 
         <div className="mt-10 grid gap-10 lg:grid-cols-[minmax(0,1fr)_360px]">
 
