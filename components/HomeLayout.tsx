@@ -18,14 +18,13 @@ export default function HomeLayout({
 }: Props) {
   return (
     <main className="min-h-screen bg-slate-100">
-
       <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-8 lg:px-8">
 
         {/* Hero */}
         <Hero />
 
         {/* 楽天ページマッチ */}
-        <RakutenWidget />
+        <RakutenWidget type="page-match" />
 
         {/* Search */}
         <div className="mt-5 sm:mt-8">
@@ -40,18 +39,21 @@ export default function HomeLayout({
 
         {/* Main */}
         <div className="mt-7 grid grid-cols-1 gap-7 lg:mt-10 lg:gap-10 lg:grid-cols-[2fr_360px]">
-
           <div>
             <NewsGrid
               keyword={keyword}
               page={page}
             />
+
+            {/* 楽天ランキング */}
+            <div className="mt-8 sm:mt-10">
+              <RakutenWidget type="ranking" />
+            </div>
           </div>
 
           <aside className="order-last lg:order-none">
             <Sidebar />
           </aside>
-
         </div>
 
         {/* みんなのリクエストBOX */}
@@ -60,8 +62,6 @@ export default function HomeLayout({
         </div>
 
       </div>
-
-
     </main>
   );
 }
