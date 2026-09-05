@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
 
 type Props = {
   type: "page-match" | "ranking";
@@ -11,57 +11,48 @@ export default function RakutenWidget({
   type,
   genreId = "0",
 }: Props) {
-  const [isMobile, setIsMobile] = useState<boolean | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    const update = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
+    const container = containerRef.current;
 
-    update();
-    window.addEventListener("resize", update);
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    const config = document.createElement("script");
+    config.type = "text/javascript";
+    config.text = `
+      rakuten_design="slide";
+      rakuten_affiliateId="57306437.624edf72.57306438.8f4aa83f";
+      rakuten_items="${type === "page-match" ? "ctsmatch" : "ranking"}";
+      rakuten_genreId="${genreId}";
+      rakuten_size="728x200";
+      rakuten_target="_blank";
+      rakuten_theme="gray";
+      rakuten_border="${type === "page-match" ? "on" : "off"}";
+      rakuten_auto_mode="on";
+      rakuten_genre_title="off";
+      rakuten_recommend="on";
+      rakuten_ts="${Date.now()}";
+    `;
+
+    const loader = document.createElement("script");
+    loader.type = "text/javascript";
+    loader.src =
+      "https://xml.affiliate.rakuten.co.jp/widget/js/rakuten_widget.js?20230106";
+
+    container.appendChild(config);
+    container.appendChild(loader);
 
     return () => {
-      window.removeEventListener("resize", update);
+      container.innerHTML = "";
     };
-  }, []);
-
-  if (isMobile === null) {
-    return null;
-  }
-
-  const isPageMatch = type === "page-match";
-
-  // PC: 728x200 / スマホ: 320x100
-  const size = isMobile ? "320x100" : "728x200";
+  }, [type, genreId]);
 
   return (
-    <div className="my-6 flex w-full justify-center overflow-hidden sm:my-8">
-      <div className="w-full max-w-[728px] overflow-hidden">
-        <div
-          dangerouslySetInnerHTML={{
-            __html: `
-              <script type="text/javascript">
-                rakuten_design="slide";
-                rakuten_affiliateId="57306437.624edf72.57306438.8f4aa83f";
-                rakuten_items="${isPageMatch ? "ctsmatch" : "ranking"}";
-                rakuten_genreId="${genreId}";
-                rakuten_size="${size}";
-                rakuten_target="_blank";
-                rakuten_theme="gray";
-                rakuten_border="${isPageMatch ? "on" : "off"}";
-                rakuten_auto_mode="on";
-                rakuten_genre_title="off";
-                rakuten_recommend="on";
-              </script>
-              <script
-                type="text/javascript"
-                src="https://xml.affiliate.rakuten.co.jp/widget/js/rakuten_widget.js?20230106">
-              </script>
-            `,
-          }}
-        />
-      </div>
+    <div className="my-8 flex w-full justify-center overflow-hidden">
+      <div ref={containerRef} className="w-full max-w-[728px]" />
     </div>
   );
 }
