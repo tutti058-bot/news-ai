@@ -25,7 +25,7 @@ export default function Header() {
         {/* ロゴ */}
         <Link href="/" className="flex items-center gap-3">
           <Image
-            src="/logo02.png"
+            src="/logo03.png"
             alt="AI News ジャパン"
             width={190}
             height={48}
