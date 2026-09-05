@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import RakutenWidget from "@/components/RakutenWidget";
 import { getNextJLeagueDay } from "@/lib/jLeagueDays";
 import SoccerRankingSidebar from "@/components/SoccerRankingSidebar";
 import SoccerAffiliateSidebar from "@/components/SoccerAffiliateSidebar";
@@ -273,6 +274,12 @@ export default function JLeagueDayPage() {
           ))}
         </div>
 
+        {/* 楽天スポーツランキング */}
+        <RakutenWidget
+          type="ranking"
+          genreId="101070"
+        />
+
         <div className="mt-10 grid gap-10 lg:grid-cols-[minmax(0,1fr)_360px]">
 
           <div>
@@ -292,48 +299,64 @@ export default function JLeagueDayPage() {
           </div>
         ) : (
           <>
-          <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-5 lg:gap-6">
+          <div className="mt-8 grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-6">
             {currentNews.map((item) => (
               <Link
                 key={item.id}
                 href={`/news/${item.id}`}
-                className="block overflow-hidden rounded-2xl bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+                className="group block h-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg lg:rounded-3xl"
               >
-                {item.image && (
-                  <img
-                    src={item.image}
-                    alt={item.title}
-                    className="h-48 w-full object-cover"
-                  />
-                )}
+                <article className="flex h-full flex-row lg:flex-col">
 
-                <div className="p-5">
-                  <div className="mb-3 flex items-center gap-2">
-                    <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-bold text-green-700">
+                  {/* 画像 */}
+                  <div className="relative h-28 w-32 shrink-0 sm:h-32 sm:w-40 lg:h-auto lg:w-full">
+                    {item.image ? (
+                      <img
+                        src={item.image}
+                        alt={item.title}
+                        className="h-full w-full object-cover transition duration-500 group-hover:scale-105 lg:aspect-video"
+                      />
+                    ) : (
+                      <div className="h-full w-full bg-slate-100 lg:aspect-video" />
+                    )}
+
+                    <span className="absolute left-2 top-2 rounded-full bg-green-600 px-2 py-0.5 text-[9px] font-bold text-white lg:left-3 lg:top-3 lg:px-3 lg:py-1 lg:text-xs">
                       ⚽ サッカー
                     </span>
-
-                    {item.score && (
-                      <span className="text-xs font-bold text-slate-500">
-                        AI評価 {item.score}点
-                      </span>
-                    )}
                   </div>
 
-                  <h3 className="text-lg font-bold leading-relaxed text-slate-900">
-                    {item.title}
-                  </h3>
+                  {/* 内容 */}
+                  <div className="flex min-w-0 flex-1 flex-col p-3 sm:p-4 lg:p-6">
+                    <h3 className="line-clamp-3 text-sm font-black leading-5 text-slate-900 transition group-hover:text-green-600 sm:text-base sm:leading-6 lg:line-clamp-2 lg:text-xl lg:leading-snug">
+                      {item.title}
+                    </h3>
 
-                  {item.summary && (
-                    <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-slate-600">
-                      {item.summary}
-                    </p>
-                  )}
+                    {/* PCのみ概要 */}
+                    {item.summary && (
+                      <p className="mt-3 hidden line-clamp-2 text-sm leading-6 text-slate-600 lg:block">
+                        {item.summary}
+                      </p>
+                    )}
 
-                  <p className="mt-4 text-sm font-bold text-blue-600">
-                    記事を読む →
-                  </p>
-                </div>
+                    <div className="mt-auto flex items-center justify-between gap-2 pt-3 lg:border-t lg:border-slate-100 lg:pt-4">
+                      <div className="flex min-w-0 items-center gap-2">
+                        <span className="truncate text-[10px] text-slate-500 sm:text-xs lg:text-sm">
+                          📅 {item.publishedAt
+                            ? new Date(item.publishedAt).toLocaleDateString("ja-JP")
+                            : ""}
+                        </span>
+
+                        <span className="shrink-0 rounded-full bg-red-50 px-2 py-1 text-[10px] font-black text-red-500 sm:text-xs lg:px-3 lg:text-sm">
+                          AI {item.score ?? 0}点
+                        </span>
+                      </div>
+
+                      <span className="shrink-0 rounded-full bg-green-600 px-2.5 py-1.5 text-[9px] font-bold text-white transition duration-300 group-hover:bg-slate-900 sm:text-[10px] lg:px-4 lg:py-2 lg:text-sm">
+                        記事を読む →
+                      </span>
+                    </div>
+                  </div>
+                </article>
               </Link>
             ))}
           </div>

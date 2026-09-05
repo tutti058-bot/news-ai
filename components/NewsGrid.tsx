@@ -88,7 +88,7 @@ export default async function NewsGrid({
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:gap-8">
+      <div className="grid grid-cols-1 gap-4 sm:gap-5 lg:grid-cols-2 lg:gap-8">
         {news.map((item, index) => (
           <React.Fragment key={item.id}>
             <NewsCard

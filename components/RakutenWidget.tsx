@@ -1,8 +1,12 @@
 type Props = {
   type: "page-match" | "ranking";
+  genreId?: string;
 };
 
-export default function RakutenWidget({ type }: Props) {
+export default function RakutenWidget({
+  type,
+  genreId = "0",
+}: Props) {
   const isPageMatch = type === "page-match";
 
   return (
@@ -15,7 +19,7 @@ export default function RakutenWidget({ type }: Props) {
                 rakuten_design="slide";
                 rakuten_affiliateId="57306437.624edf72.57306438.8f4aa83f";
                 rakuten_items="${isPageMatch ? "ctsmatch" : "ranking"}";
-                rakuten_genreId="0";
+                rakuten_genreId="${genreId}";
                 rakuten_size="728x200";
                 rakuten_target="_blank";
                 rakuten_theme="gray";
