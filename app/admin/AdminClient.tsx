@@ -113,6 +113,16 @@ const [supplementalInfo, setSupplementalInfo] =
 const [copiedSupplementalId, setCopiedSupplementalId] =
   useState<string | null>(null);
 
+type XPostDraft = {
+  newsId: number;
+  tweet: string;
+  reply: string;
+  image: string;
+};
+
+const [xPostDraft, setXPostDraft] =
+  useState<XPostDraft | null>(null);
+
   type ContentRequestItem = {
     id: number;
     name: string | null;
@@ -339,63 +349,125 @@ const [copiedSupplementalId, setCopiedSupplementalId] =
 
   const createXPostForNews = async (newsId: number) => {
     setXPostLoadingId(newsId);
+    setXPostConfirmLoadingId(newsId);
     setMessage("");
-
-    // ボタンを押した瞬間に空タブを開く
-    // AI生成後のwindow.openはブラウザにブロックされるため、
-    // 先にタブだけ確保しておく。
-    const xWindow = window.open(
-      "about:blank",
-      "_blank"
-    );
+    setXPostDraft(null);
 
     try {
-      const res = await fetch("/api/post-x", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          newsId,
-        }),
-      });
+      const [postRes, imageRes, supplementalRes] =
+        await Promise.all([
+          fetch("/api/post-x", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              newsId,
+            }),
+          }),
+          fetch("/api/generate-x-image", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              newsId,
+            }),
+          }),
+          fetch(
+            `/api/supplemental-info?newsId=${newsId}`
+          ),
+        ]);
 
-      const data = await res.json();
+      const postData = await postRes.json();
+      const imageData = await imageRes.json();
+      const supplementalData =
+        await supplementalRes.json();
 
-      if (!res.ok || !data.intentUrl) {
-        if (xWindow && !xWindow.closed) {
-          xWindow.close();
-        }
-
+      if (!postRes.ok || !postData.tweet) {
         throw new Error(
-          data.error ?? "X投稿の作成に失敗しました"
+          postData.error ??
+            "X投稿文の生成に失敗しました"
         );
       }
 
-      setMessage(
-        `X投稿を作成しました！ AI評価：${data.score}点`
-      );
-
-      // 先に開いておいたタブをX投稿画面へ移動
-      if (xWindow && !xWindow.closed) {
-        xWindow.location.href = data.intentUrl;
-      } else {
-        // ポップアップがブロックされた場合の予備処理
-        window.location.href = data.intentUrl;
+      if (!imageRes.ok || !imageData.image) {
+        throw new Error(
+          imageData.error ??
+            "X画像の生成に失敗しました"
+        );
       }
+
+      if (!supplementalRes.ok) {
+        throw new Error(
+          supplementalData.error ??
+            "補足情報の取得に失敗しました"
+        );
+      }
+
+      const articleUrl =
+        `https://tutti-news-ai-bay.vercel.app/news/${newsId}`;
+
+      const rawTweet = String(postData.tweet);
+
+      const tweetWithoutUrl =
+        rawTweet.endsWith(articleUrl)
+          ? rawTweet
+              .slice(0, -articleUrl.length)
+              .trim()
+          : rawTweet;
+
+      const tweet =
+        `${tweetWithoutUrl}
+
+追加情報は👇`;
+
+      const results = Array.isArray(
+        supplementalData.results
+      )
+        ? supplementalData.results
+        : [];
+
+      const supplementalText = results
+        .map(
+          (item: {
+            text?: string;
+          }) => item.text?.trim() ?? ""
+        )
+        .filter(Boolean)
+        .join("\n\n");
+
+      const reply = supplementalText
+        ? `${supplementalText}\n\n${articleUrl}`
+        : articleUrl;
+
+      setXPostDraft({
+        newsId,
+        tweet,
+        reply,
+        image: imageData.image,
+      });
+
+      setMessage(
+        `X投稿を作成しました！ AI評価：${postData.score}点`
+      );
     } catch (error) {
-      console.error("X投稿作成エラー:", error);
+      console.error(
+        "X投稿作成エラー:",
+        error
+      );
 
       const errorMessage =
         error instanceof Error
           ? error.message
-          : "不明なエラーが発生しました";
+          : "不明なエラーです";
 
       setMessage(
         `X投稿作成失敗：${errorMessage}`
       );
     } finally {
       setXPostLoadingId(null);
+      setXPostConfirmLoadingId(null);
     }
   };
 
@@ -2002,6 +2074,78 @@ const [copiedSupplementalId, setCopiedSupplementalId] =
                         : "💡 補足情報"}
                     </button>
                   </div>
+
+                  {/* X投稿プレビュー */}
+                  {xPostDraft?.newsId === news.id && (
+                    <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                      <h4 className="text-sm font-black text-slate-900">
+                        𝕏 X投稿プレビュー
+                      </h4>
+
+                      <div className="mt-4 grid gap-4 lg:grid-cols-2">
+                        <div>
+                          <img
+                            src={xPostDraft.image}
+                            alt="X投稿用AI生成画像"
+                            className="w-full rounded-xl border border-slate-200 bg-white object-cover"
+                          />
+
+                          <a
+                            href={xPostDraft.image}
+                            download={`ai-news-x-${news.id}.png`}
+                            className="mt-3 flex min-h-11 items-center justify-center rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-800 shadow-sm ring-1 ring-slate-200 transition hover:bg-slate-100"
+                          >
+                            🖼️ 画像を保存
+                          </a>
+                        </div>
+
+                        <div className="space-y-4">
+                          <div className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+                            <div className="mb-2 text-xs font-black text-slate-500">
+                              本投稿
+                            </div>
+
+                            <p className="whitespace-pre-wrap text-sm leading-7 text-slate-800">
+                              {xPostDraft.tweet}
+                            </p>
+                          </div>
+
+                          <div className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+                            <div className="mb-2 text-xs font-black text-slate-500">
+                              1つ目のリプ
+                            </div>
+
+                            <p className="whitespace-pre-wrap text-sm leading-7 text-slate-800">
+                              {xPostDraft.reply}
+                            </p>
+                          </div>
+
+                          <button
+                            onClick={() => {
+                              const intentUrl =
+                                "https://x.com/intent/post?text=" +
+                                encodeURIComponent(
+                                  xPostDraft.tweet
+                                );
+
+                              window.open(
+                                intentUrl,
+                                "_blank",
+                                "noopener,noreferrer"
+                              );
+                            }}
+                            className="w-full min-h-11 rounded-xl bg-black px-4 py-3 text-sm font-bold text-white transition hover:bg-slate-800"
+                          >
+                            𝕏 X投稿画面を開く
+                          </button>
+
+                          <p className="text-xs leading-5 text-slate-500">
+                            画像を保存してX投稿画面に添付してください。リプには上の補足情報＋URLを貼り付けます。
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   {/* 補足情報 */}
                   {supplementalInfo[news.id] &&
