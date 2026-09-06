@@ -630,6 +630,15 @@ export async function syncNews(limit?: number) {
     const candidateCategory = item.category ?? "";
     const candidateSource = item.source ?? "";
 
+    // サッカー記事は通常ニュースから除外
+    if (candidateSource === "ゲキサカ") {
+      console.log(
+        "サッカー記事のため通常ニュースから除外:",
+        candidateTitle
+      );
+      continue;
+    }
+
     // ゲーム・アニメ・アイドル等はAIに送る前に除外
     if (
       isExcludedTopic(
