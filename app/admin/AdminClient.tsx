@@ -116,12 +116,18 @@ const [copiedSupplementalId, setCopiedSupplementalId] =
 type XPostDraft = {
   newsId: number;
   tweet: string;
+  legacyTweet: string;
   reply: string;
   image: string;
 };
 
 const [xPostDraft, setXPostDraft] =
   useState<XPostDraft | null>(null);
+
+type XPostMode = "ai-image" | "legacy";
+
+const [xPostMode, setXPostMode] =
+  useState<XPostMode>("ai-image");
 
   type ContentRequestItem = {
     id: number;
@@ -422,6 +428,11 @@ const [xPostDraft, setXPostDraft] =
 
 追加情報は👇`;
 
+      const legacyTweet =
+        `${tweetWithoutUrl}
+
+${articleUrl}`;
+
       const results = Array.isArray(
         supplementalData.results
       )
@@ -444,9 +455,12 @@ const [xPostDraft, setXPostDraft] =
       setXPostDraft({
         newsId,
         tweet,
+        legacyTweet,
         reply,
         image: imageData.image,
       });
+
+      setXPostMode("ai-image");
 
       setMessage(
         `X投稿を作成しました！ AI評価：${postData.score}点`
@@ -2082,21 +2096,69 @@ const [xPostDraft, setXPostDraft] =
                         𝕏 X投稿プレビュー
                       </h4>
 
+                      <div className="mt-4 rounded-xl bg-white p-2 shadow-sm ring-1 ring-slate-200">
+                        <div className="grid grid-cols-2 gap-2">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setXPostMode("ai-image")
+                            }
+                            className={`rounded-lg px-3 py-2 text-sm font-black transition ${
+                              xPostMode === "ai-image"
+                                ? "bg-black text-white"
+                                : "text-slate-600 hover:bg-slate-100"
+                            }`}
+                          >
+                            🖼️ AI画像版
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setXPostMode("legacy")
+                            }
+                            className={`rounded-lg px-3 py-2 text-sm font-black transition ${
+                              xPostMode === "legacy"
+                                ? "bg-black text-white"
+                                : "text-slate-600 hover:bg-slate-100"
+                            }`}
+                          >
+                            🔗 従来版
+                          </button>
+                        </div>
+                      </div>
+
                       <div className="mt-4 grid gap-4 lg:grid-cols-2">
                         <div>
-                          <img
-                            src={xPostDraft.image}
-                            alt="X投稿用AI生成画像"
-                            className="w-full rounded-xl border border-slate-200 bg-white object-cover"
-                          />
+                          {xPostMode === "ai-image" ? (
+                            <>
+                              <img
+                                src={xPostDraft.image}
+                                alt="X投稿用AI生成画像"
+                                className="w-full rounded-xl border border-slate-200 bg-white object-cover"
+                              />
 
-                          <a
-                            href={xPostDraft.image}
-                            download={`ai-news-x-${news.id}.png`}
-                            className="mt-3 flex min-h-11 items-center justify-center rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-800 shadow-sm ring-1 ring-slate-200 transition hover:bg-slate-100"
-                          >
-                            🖼️ 画像を保存
-                          </a>
+                              <a
+                                href={xPostDraft.image}
+                                download={`ai-news-x-${news.id}.png`}
+                                className="mt-3 flex min-h-11 items-center justify-center rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-800 shadow-sm ring-1 ring-slate-200 transition hover:bg-slate-100"
+                              >
+                                🖼️ 画像を保存
+                              </a>
+                            </>
+                          ) : (
+                            <div className="flex min-h-[220px] items-center justify-center rounded-xl border border-dashed border-slate-300 bg-white p-6 text-center">
+                              <div>
+                                <div className="text-3xl">🔗</div>
+                                <p className="mt-3 text-sm font-bold text-slate-700">
+                                  従来版
+                                </p>
+                                <p className="mt-1 text-xs text-slate-500">
+                                  今までどおりURL付きで投稿します
+                                </p>
+                              </div>
+                            </div>
+                          )}
                         </div>
 
                         <div className="space-y-4">
@@ -2106,7 +2168,9 @@ const [xPostDraft, setXPostDraft] =
                             </div>
 
                             <p className="whitespace-pre-wrap text-sm leading-7 text-slate-800">
-                              {xPostDraft.tweet}
+                              {xPostMode === "ai-image"
+                                ? xPostDraft.tweet
+                                : xPostDraft.legacyTweet}
                             </p>
                           </div>
 
@@ -2122,10 +2186,15 @@ const [xPostDraft, setXPostDraft] =
 
                           <button
                             onClick={() => {
+                              const currentTweet =
+                                xPostMode === "ai-image"
+                                  ? xPostDraft.tweet
+                                  : xPostDraft.legacyTweet;
+
                               const intentUrl =
                                 "https://x.com/intent/post?text=" +
                                 encodeURIComponent(
-                                  xPostDraft.tweet
+                                  currentTweet
                                 );
 
                               window.open(
