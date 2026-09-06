@@ -4,9 +4,8 @@ export default function NewsRakutenWidget() {
       <iframe
         src="/rakuten-news.html"
         title="楽天おすすめ商品"
-        width="468"
-        height="160"
-        style={{ border: 0 }}
+        className="w-full max-w-[468px] border-0"
+        style={{ height: 160 }}
         scrolling="no"
       />
     </div>

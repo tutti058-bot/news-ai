@@ -3,20 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rakuten News</title>
+  <title>Rakuten Page Match</title>
 </head>
 <body style="margin:0;padding:0;display:flex;justify-content:center;overflow:hidden;">
 <script>
+  const params = new URLSearchParams(location.search);
+  const genreId = params.get("genreId") || "0";
   const isMobile = window.innerWidth <= 480;
 
   rakuten_design = "slide";
   rakuten_affiliateId = "57306437.624edf72.57306438.8f4aa83f";
   rakuten_items = "ctsmatch";
-  rakuten_genreId = "0";
-  rakuten_size = isMobile ? "300x160" : "468x160";
+  rakuten_genreId = genreId;
+  rakuten_size = isMobile ? "300x160" : "728x200";
   rakuten_target = "_blank";
   rakuten_theme = "gray";
-  rakuten_border = "off";
+  rakuten_border = "on";
   rakuten_auto_mode = "on";
   rakuten_genre_title = "off";
   rakuten_recommend = "on";
