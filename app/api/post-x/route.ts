@@ -437,11 +437,106 @@ ${score}点
     }
 
     const hook = cleanHook(parsed.hook);
-    const description = cleanDescription(parsed.description);
 
-    const tweet = `【${hook}】
+    // X冒頭用の短いリアクションを別AIで生成
+    const reactionResponse = await openai.chat.completions.create({
+      model: "gpt-4.1-mini",
+      messages: [
+        {
+          role: "system",
+          content:
+            "ニュースを見た瞬間にXへ書きそうな短いリアクションを1文だけ作ってください。ニュースの説明や要約は禁止。少しネット・オタクっぽい表現や顔文字を自然に使って構いません。25〜70文字程度。「でやんす」「です」「ます」「注目」「重要」「ポイント」「今後の展開」などは禁止。例えば「何百年もかかってたのに11日ってやべーーー(ﾟдﾟ)ーーー!!」「初飛行失敗から1年半で成功ってすげえな(；ﾟДﾟ)」「ここまで来たか……」のような、思わず出る一言にしてください。"
+        },
+        {
+          role: "user",
+          content:
+            `タイトル：
+${news.title}
 
-${description}
+要約：
+${news.summary ?? ""}`,
+        },
+      ],
+      temperature: 1,
+      max_tokens: 80,
+    });
+
+    let reaction = cleanDescription(
+      reactionResponse.choices[0]?.message?.content ?? ""
+    );
+
+    // キャラクター口調を機械的に除去
+    reaction = reaction
+      .replace(/でやんす[。！!]?/gi, "")
+      .replace(/でやんすね[。！!]?/gi, "")
+      .replace(/^「|」$/g, "")
+      .trim();
+
+    // リアクションが長すぎる場合は説明文になっている可能性が高いので不採用
+    if (reaction.length > 70) {
+      reaction = "";
+    }
+
+    // 解説調・キャスター調になった場合は不採用
+    const badReactionPatterns = [
+      "注目したいのは",
+      "今回のポイント",
+      "重要なのは",
+      "注目される",
+      "期待される",
+      "可能性がある",
+      "大きな動き",
+      "新たな風を吹き込",
+      "時代へ",
+      "時代の幕開け",
+      "〜点だ",
+      "点だ",
+    ];
+
+    if (
+      badReactionPatterns.some((pattern) =>
+        reaction.includes(pattern)
+      )
+    ) {
+      reaction = "";
+    }
+
+    // 見出しの内容をリアクションで繰り返していたら不採用
+    const segmenter = new Intl.Segmenter("ja", {
+      granularity: "word",
+    });
+
+    const titleWords = Array.from(
+      segmenter.segment(news.title)
+    )
+      .filter((item) => item.isWordLike)
+      .map((item) => item.segment)
+      .filter((word) => word.length >= 2);
+
+    const matchedWords = titleWords.filter((word) =>
+      reaction.includes(word)
+    );
+
+    const explanationLike =
+      reaction.includes("注目") ||
+      reaction.includes("ポイント") ||
+      reaction.includes("新時代") && reaction.length > 22 ||
+      reaction.includes("可能性") ||
+      reaction.includes("期待") ||
+      reaction.includes("成功とか") ||
+      reaction.includes("産ロケット");
+
+    const repeatedHeadlineInfo =
+      matchedWords.length >= 2 || explanationLike;
+
+    const description =
+      !repeatedHeadlineInfo && reaction
+        ? reaction
+        : "これは普通にすごいな(ﾟдﾟ)";
+
+    const tweet = `${description}
+
+【${hook}】
 
 ${url}`;
 

@@ -117,8 +117,8 @@ type XPostDraft = {
   newsId: number;
   tweet: string;
   legacyTweet: string;
-  reply: string;
-  image: string;
+  image: string | null;
+  imageError?: string;
 };
 
 const [xPostDraft, setXPostDraft] =
@@ -360,54 +360,23 @@ const [xPostMode, setXPostMode] =
     setXPostDraft(null);
 
     try {
-      const [postRes, imageRes, supplementalRes] =
-        await Promise.all([
-          fetch("/api/post-x", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              newsId,
-            }),
-          }),
-          fetch("/api/generate-x-image", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              newsId,
-            }),
-          }),
-          fetch(
-            `/api/supplemental-info?newsId=${newsId}`
-          ),
-        ]);
+      // X本文だけ先に生成
+      const postRes = await fetch("/api/post-x", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          newsId,
+        }),
+      });
 
       const postData = await postRes.json();
-      const imageData = await imageRes.json();
-      const supplementalData =
-        await supplementalRes.json();
 
       if (!postRes.ok || !postData.tweet) {
         throw new Error(
           postData.error ??
             "X投稿文の生成に失敗しました"
-        );
-      }
-
-      if (!imageRes.ok || !imageData.image) {
-        throw new Error(
-          imageData.error ??
-            "X画像の生成に失敗しました"
-        );
-      }
-
-      if (!supplementalRes.ok) {
-        throw new Error(
-          supplementalData.error ??
-            "補足情報の取得に失敗しました"
         );
       }
 
@@ -424,46 +393,58 @@ const [xPostMode, setXPostMode] =
           : rawTweet;
 
       const tweet =
-        `${tweetWithoutUrl}
-
-追加情報は👇`;
+        `${tweetWithoutUrl}\n\n追加情報は👇`;
 
       const legacyTweet =
-        `${tweetWithoutUrl}
+        `${tweetWithoutUrl}\n\n${articleUrl}`;
 
-${articleUrl}`;
+      let image: string | null = null;
+      let imageError = "";
 
-      const results = Array.isArray(
-        supplementalData.results
-      )
-        ? supplementalData.results
-        : [];
+      // AI画像版を選んだ場合だけ生成
+      if (xPostMode === "ai-image") {
+        try {
+          const imageRes = await fetch(
+            "/api/generate-x-image",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                newsId,
+              }),
+            }
+          );
 
-      const supplementalText = results
-        .map(
-          (item: {
-            text?: string;
-          }) => item.text?.trim() ?? ""
-        )
-        .filter(Boolean)
-        .join("\n\n");
+          const imageData = await imageRes.json();
 
-      const reply = supplementalText
-        ? `${supplementalText}\n\n${articleUrl}`
-        : articleUrl;
+          if (!imageRes.ok || !imageData.image) {
+            imageError =
+              imageData.error ??
+              "画像生成に失敗しました";
+          } else {
+            image = imageData.image;
+          }
+        } catch {
+          imageError =
+            "画像生成に失敗しました";
+        }
+      }
 
       setXPostDraft({
         newsId,
         tweet,
         legacyTweet,
-        reply,
-        image: imageData.image,
+        image,
+        imageError:
+          imageError || undefined,
       });
 
-      setXPostMode("ai-image");
-
       setMessage(
-        `X投稿を作成しました！ AI評価：${postData.score}点`
+        imageError
+          ? `X投稿を作成しました。画像だけ生成できませんでした。AI画像版または従来版を選択できます。`
+          : `X投稿を作成しました！ AI評価：${postData.score}点`
       );
     } catch (error) {
       console.error(
@@ -2032,6 +2013,38 @@ ${articleUrl}`;
                       記事を見る
                     </Link>
 
+                    <div className="flex min-h-11 overflow-hidden rounded-xl border border-slate-200 bg-white">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setXPostMode("ai-image")
+                        }
+                        disabled={xPostLoadingId === news.id}
+                        className={`px-4 py-2 text-sm font-black transition ${
+                          xPostMode === "ai-image"
+                            ? "bg-black text-white"
+                            : "text-slate-600 hover:bg-slate-50"
+                        }`}
+                      >
+                        🖼️ AI画像版
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setXPostMode("legacy")
+                        }
+                        disabled={xPostLoadingId === news.id}
+                        className={`border-l border-slate-200 px-4 py-2 text-sm font-black transition ${
+                          xPostMode === "legacy"
+                            ? "bg-black text-white"
+                            : "text-slate-600 hover:bg-slate-50"
+                        }`}
+                      >
+                        🔗 従来版
+                      </button>
+                    </div>
+
                     <button
                       onClick={() =>
                         createXPostForNews(news.id)
@@ -2096,41 +2109,9 @@ ${articleUrl}`;
                         𝕏 X投稿プレビュー
                       </h4>
 
-                      <div className="mt-4 rounded-xl bg-white p-2 shadow-sm ring-1 ring-slate-200">
-                        <div className="grid grid-cols-2 gap-2">
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setXPostMode("ai-image")
-                            }
-                            className={`rounded-lg px-3 py-2 text-sm font-black transition ${
-                              xPostMode === "ai-image"
-                                ? "bg-black text-white"
-                                : "text-slate-600 hover:bg-slate-100"
-                            }`}
-                          >
-                            🖼️ AI画像版
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setXPostMode("legacy")
-                            }
-                            className={`rounded-lg px-3 py-2 text-sm font-black transition ${
-                              xPostMode === "legacy"
-                                ? "bg-black text-white"
-                                : "text-slate-600 hover:bg-slate-100"
-                            }`}
-                          >
-                            🔗 従来版
-                          </button>
-                        </div>
-                      </div>
-
                       <div className="mt-4 grid gap-4 lg:grid-cols-2">
                         <div>
-                          {xPostMode === "ai-image" ? (
+                          {xPostMode === "ai-image" && xPostDraft.image ? (
                             <>
                               <img
                                 src={xPostDraft.image}
@@ -2146,6 +2127,18 @@ ${articleUrl}`;
                                 🖼️ 画像を保存
                               </a>
                             </>
+                          ) : xPostMode === "ai-image" ? (
+                            <div className="flex min-h-[220px] items-center justify-center rounded-xl border border-dashed border-amber-300 bg-amber-50 p-6 text-center">
+                              <div>
+                                <div className="text-3xl">⚠️</div>
+                                <p className="mt-3 text-sm font-bold text-slate-700">
+                                  AI画像を生成できませんでした
+                                </p>
+                                <p className="mt-1 text-xs text-slate-500">
+                                  従来版に切り替えて投稿できます
+                                </p>
+                              </div>
+                            </div>
                           ) : (
                             <div className="flex min-h-[220px] items-center justify-center rounded-xl border border-dashed border-slate-300 bg-white p-6 text-center">
                               <div>
@@ -2174,16 +2167,6 @@ ${articleUrl}`;
                             </p>
                           </div>
 
-                          <div className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
-                            <div className="mb-2 text-xs font-black text-slate-500">
-                              1つ目のリプ
-                            </div>
-
-                            <p className="whitespace-pre-wrap text-sm leading-7 text-slate-800">
-                              {xPostDraft.reply}
-                            </p>
-                          </div>
-
                           <button
                             onClick={() => {
                               const currentTweet =
@@ -2209,7 +2192,7 @@ ${articleUrl}`;
                           </button>
 
                           <p className="text-xs leading-5 text-slate-500">
-                            画像を保存してX投稿画面に添付してください。リプには上の補足情報＋URLを貼り付けます。
+                            AI画像版は生成画像を保存してXに添付。補足情報は「💡 補足情報」から選んで使います。
                           </p>
                         </div>
                       </div>
@@ -2243,8 +2226,11 @@ ${articleUrl}`;
                                       type="button"
                                       onClick={async () => {
                                         try {
+                                          const articleUrl =
+                                            `https://tutti-news-ai-bay.vercel.app/news/${news.id}`;
+
                                           await navigator.clipboard.writeText(
-                                            info.text
+                                            `${info.text}\n\n${articleUrl}`
                                           );
 
                                           setCopiedSupplementalId(
