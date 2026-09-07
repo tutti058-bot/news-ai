@@ -4,6 +4,7 @@ import { analyzeArticle } from "@/lib/ai";
 import { getImage } from "@/lib/getImage";
 import { getArticle } from "@/lib/getArticle";
 import { isJLeagueDay } from "@/lib/jLeagueDays";
+import { generateNewsImage } from "@/lib/services/news-image";
 
 function normalizeUrl(url: string): string {
   return url
@@ -1103,7 +1104,7 @@ if (ai.score < MIN_SCORE) {
      */
 
     try {
-      await prisma.news.create({
+      const createdNews = await prisma.news.create({
         data: {
           title,
 
@@ -1155,6 +1156,26 @@ if (ai.score < MIN_SCORE) {
                 : null,
         },
       });
+
+      /*
+       * =========================
+       * AI記事画像を自動生成
+       * =========================
+       *
+       * 画像生成に失敗しても記事保存は成功扱いにする
+       */
+      try {
+        console.log("AI記事画像生成開始:", title);
+
+        await generateNewsImage(createdNews.id);
+
+        console.log("AI記事画像生成完了:", title);
+      } catch (imageError) {
+        console.error(
+          "AI記事画像自動生成エラー:",
+          imageError
+        );
+      }
 
       added++;
 

@@ -26,6 +26,7 @@ export default function AdminClient() {
   const [message, setMessage] = useState("");
   const [summary, setSummary] = useState("");
   const [soccerRepairLoading, setSoccerRepairLoading] = useState(false);
+  const [newsImageLoadingId, setNewsImageLoadingId] = useState<number | null>(null);
 
   // ニュース一覧・X投稿・関連記事
   type NewsItem = {
@@ -300,6 +301,49 @@ const [xPostMode, setXPostMode] =
   };
 
   // =========================
+  // 記事AI画像を生成・再生成
+  // =========================
+  const generateNewsImage = async (newsId: number) => {
+    setNewsImageLoadingId(newsId);
+    setMessage("");
+
+    try {
+      const res = await fetch("/api/generate-news-image", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ newsId }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        throw new Error(data.error || "画像生成に失敗しました");
+      }
+
+      setNewsList((prev) =>
+        prev.map((item) =>
+          item.id === newsId
+            ? { ...item, image: data.image }
+            : item
+        )
+      );
+
+      setMessage("AIアイキャッチ画像を更新しました");
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "画像生成に失敗しました";
+
+      setMessage(`AI画像生成失敗：${errorMessage}`);
+    } finally {
+      setNewsImageLoadingId(null);
+    }
+  };
+
+  // =========================
   // 選択した記事のX投稿作成
   // =========================
 
@@ -401,11 +445,11 @@ const [xPostMode, setXPostMode] =
       let image: string | null = null;
       let imageError = "";
 
-      // AI画像版を選んだ場合だけ生成
+      // AI画像版は、必ず記事AI画像を生成して使用
       if (xPostMode === "ai-image") {
         try {
           const imageRes = await fetch(
-            "/api/generate-x-image",
+            "/api/generate-news-image",
             {
               method: "POST",
               headers: {
@@ -421,14 +465,25 @@ const [xPostMode, setXPostMode] =
 
           if (!imageRes.ok || !imageData.image) {
             imageError =
-              imageData.error ??
-              "画像生成に失敗しました";
+              imageData.details
+                ? `${imageData.error ?? "記事AI画像の生成に失敗しました"}：${imageData.details}`
+                : imageData.error ??
+                  "記事AI画像の生成に失敗しました";
           } else {
             image = imageData.image;
+
+            setNewsList((prev) =>
+              prev.map((item) =>
+                item.id === newsId
+                  ? { ...item, image: imageData.image }
+                  : item
+              )
+            );
           }
-        } catch {
+        } catch (error) {
+          console.error("記事AI画像生成エラー:", error);
           imageError =
-            "画像生成に失敗しました";
+            "記事AI画像の生成に失敗しました";
         }
       }
 
@@ -443,7 +498,7 @@ const [xPostMode, setXPostMode] =
 
       setMessage(
         imageError
-          ? `X投稿を作成しました。画像だけ生成できませんでした。AI画像版または従来版を選択できます。`
+          ? `画像生成エラー：${imageError}`
           : `X投稿を作成しました！ AI評価：${postData.score}点`
       );
     } catch (error) {
@@ -1982,13 +2037,27 @@ const [xPostMode, setXPostMode] =
                     </span>
                   </div>
 
-                  <div className="mt-3 flex gap-4">
-                    <div className="h-20 w-28 shrink-0 overflow-hidden rounded-xl bg-slate-100">
+                  <div className="mt-3 flex flex-col gap-4 sm:flex-row">
+                    <div className="h-44 w-full shrink-0 overflow-hidden rounded-xl bg-slate-100 sm:h-20 sm:w-28">
                       <img
                         src={news.image ?? "/news.jpg"}
                         alt=""
                         className="h-full w-full object-cover"
                       />
+                    </div>
+
+                    <div className="mb-3 flex flex-wrap gap-2">
+                      <button
+                        onClick={() => generateNewsImage(news.id)}
+                        disabled={newsImageLoadingId === news.id}
+                        className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-bold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {newsImageLoadingId === news.id
+                          ? "画像を生成中..."
+                          : news.image
+                            ? "🔄 画像を作り直す"
+                            : "🖼️ AI画像を生成"}
+                      </button>
                     </div>
 
                     <div className="min-w-0 flex-1">
