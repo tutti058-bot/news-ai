@@ -448,8 +448,6 @@ const [xPostMode, setXPostMode] =
 
       const legacyHook =
         String(postData.hook ?? "")
-          .replace(/^【+/, "")
-          .replace(/】+$/, "")
           .trim();
 
       const legacyTweet =
