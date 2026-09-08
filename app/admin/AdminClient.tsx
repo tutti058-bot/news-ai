@@ -398,6 +398,12 @@ const [xPostMode, setXPostMode] =
   // =========================
 
   const createXPostForNews = async (newsId: number) => {
+    const news = newsList.find((item) => item.id === newsId);
+
+    if (!news) {
+      setMessage("記事が見つかりません");
+      return;
+    }
     setXPostLoadingId(newsId);
     setXPostConfirmLoadingId(newsId);
     setMessage("");
@@ -445,45 +451,53 @@ const [xPostMode, setXPostMode] =
       let image: string | null = null;
       let imageError = "";
 
-      // AI画像版は、必ず記事AI画像を生成して使用
+      // AI画像版は、保存済みAI画像があれば再利用。
+      // 未生成の場合だけ生成して保存する。
       if (xPostMode === "ai-image") {
-        try {
-          const imageRes = await fetch(
-            "/api/generate-news-image",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                newsId,
-              }),
-            }
-          );
+        const existingAiImage =
+          news.image && news.image.includes("/news-images/");
 
-          const imageData = await imageRes.json();
-
-          if (!imageRes.ok || !imageData.image) {
-            imageError =
-              imageData.details
-                ? `${imageData.error ?? "記事AI画像の生成に失敗しました"}：${imageData.details}`
-                : imageData.error ??
-                  "記事AI画像の生成に失敗しました";
-          } else {
-            image = imageData.image;
-
-            setNewsList((prev) =>
-              prev.map((item) =>
-                item.id === newsId
-                  ? { ...item, image: imageData.image }
-                  : item
-              )
+        if (existingAiImage) {
+          image = news.image;
+        } else {
+          try {
+            const imageRes = await fetch(
+              "/api/generate-news-image",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  newsId,
+                }),
+              }
             );
+
+            const imageData = await imageRes.json();
+
+            if (!imageRes.ok || !imageData.image) {
+              imageError =
+                imageData.details
+                  ? `${imageData.error ?? "記事AI画像の生成に失敗しました"}：${imageData.details}`
+                  : imageData.error ??
+                    "記事AI画像の生成に失敗しました";
+            } else {
+              image = imageData.image;
+
+              setNewsList((prev) =>
+                prev.map((item) =>
+                  item.id === newsId
+                    ? { ...item, image: imageData.image }
+                    : item
+                )
+              );
+            }
+          } catch (error) {
+            console.error("記事AI画像生成エラー:", error);
+            imageError =
+              "記事AI画像の生成に失敗しました";
           }
-        } catch (error) {
-          console.error("記事AI画像生成エラー:", error);
-          imageError =
-            "記事AI画像の生成に失敗しました";
         }
       }
 
