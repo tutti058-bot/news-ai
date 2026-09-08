@@ -418,6 +418,7 @@ const [xPostMode, setXPostMode] =
         },
         body: JSON.stringify({
           newsId,
+          mode: xPostMode,
         }),
       });
 
@@ -445,8 +446,14 @@ const [xPostMode, setXPostMode] =
       const tweet =
         `${tweetWithoutUrl}\n\n追加情報は👇`;
 
+      const legacyHook =
+        String(postData.hook ?? "")
+          .replace(/^【+/, "")
+          .replace(/】+$/, "")
+          .trim();
+
       const legacyTweet =
-        `${tweetWithoutUrl}\n\n${articleUrl}`;
+        `${legacyHook}${articleUrl}`;
 
       let image: string | null = null;
       let imageError = "";
@@ -501,9 +508,17 @@ const [xPostMode, setXPostMode] =
         }
       }
 
+      const finalImageTweet =
+        xPostMode === "ai-image"
+          ? tweet.replace(
+              /(?:\n\s*追加情報は👇)+\s*$/g,
+              "\n\n追加情報は👇"
+            )
+          : tweet;
+
       setXPostDraft({
         newsId,
-        tweet,
+        tweet: finalImageTweet,
         legacyTweet,
         image,
         imageError:

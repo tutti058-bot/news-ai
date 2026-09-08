@@ -16,7 +16,6 @@ type VisualPlan = {
   visual_symbol: string;
   character_role: string;
   composition: string;
-  headline_element: string;
   color_direction: string;
   avoid: string[];
 };
@@ -103,15 +102,17 @@ export async function POST(request: Request) {
 6. genericな未来都市に逃げない
 7. キャラクターを出す場合もニュースの意味を補強する役割にする
 8. 記事に会社名、製品名、人物、場所、チームなどがある場合は具体的に使う
-9. 数字がニュースの重要ポイントなら大きな視覚要素として使う
 10. 1枚の画像として成立する構図にする
 
 作画の方向性は、
 「ジョジョを想起させる劇画・アメコミ的な迫力」
 を強く意識してください。
 
-ただし既存作品のキャラクターは使用せず、
-完全オリジナルの人物・存在として設計します。
+人物がニュースの意味を補強する場合は、
+ジョジョシリーズを想起させる劇画的なキャラクター表現を使用してください。
+
+キャラクターだけを描くのではなく、
+必ずニュースの実物・場所・出来事と組み合わせてください。
 
 欲しい雰囲気：
 
@@ -175,7 +176,6 @@ ${(news.content ?? "").slice(0, 15000)}
   "visual_symbol": "ニュースを象徴する具体物",
   "character_role": "人物やスタンド風存在を出す場合の役割",
   "composition": "画面全体の構図",
-  "headline_element": "数字や短い言葉で強調すべき要素。不要なら空文字",
   "color_direction": "色の方向性",
   "avoid": [
     "絶対に入れてはいけない要素1",
@@ -225,9 +225,6 @@ ${(news.content ?? "").slice(0, 15000)}
       composition:
         toText(parsedPlan.composition) ||
         "主役を画面中央に大きく配置する劇画的な構図",
-
-      headline_element:
-        toText(parsedPlan.headline_element),
 
       color_direction:
         toText(parsedPlan.color_direction) ||
@@ -300,9 +297,6 @@ ${visualPlan.character_role}
 COMPOSITION:
 ${visualPlan.composition}
 
-IMPORTANT HEADLINE ELEMENT:
-${visualPlan.headline_element}
-
 COLOR DIRECTION:
 ${visualPlan.color_direction}
 
@@ -346,39 +340,40 @@ rather than through a large amount of text.
 ART STYLE
 ========================
 
-Strong Japanese dramatic manga / comic-book aesthetic.
+Strong Japanese dramatic manga aesthetic
+combined with American comic-book visual energy.
 
-Very strongly evoke the theatrical visual language
-associated with classic JoJo-style dramatic manga:
+Use recognizable JoJo characters when characters
+are relevant to the news.
 
-- bold black ink
-- extreme contrast
-- heavy shadows
+Desired visual language:
+
+- extremely dramatic anatomy
+- powerful poses
+- intense facial expressions
+- sharp eyes
+- expressive hands
+- elaborate costumes
+- extreme foreshortening
+- exaggerated perspective
+- thick black ink
+- strong contour lines
+- deep shadows
 - cross-hatching
-- halftone
-- dramatic anatomy
-- exaggerated poses
-- powerful hands
-- intense eyes
-- sharp facial features
-- dynamic foreshortening
-- extreme perspective
-- cinematic lighting
-- dramatic rim light
-- explosive composition
-- manga speed lines when appropriate
-- dense editorial illustration
-- premium comic-book poster feeling
+- halftone texture
+- dramatic rim lighting
+- vivid comic-book colors
+- cinematic composition
+- powerful American comic-book poster feeling
 
-Do NOT copy any existing character.
+The overall feeling should be:
+JoJo dramatic manga + American comic book.
 
-All characters must be original.
+Use the actual characters, objects, products,
+locations and events required to explain the news.
 
-If the story benefits from a supernatural
-"stand-like" entity, create an ORIGINAL entity
-that visually symbolizes the actual news.
-
-The entity must never become a random robot.
+Do not turn the image into a generic superhero poster.
+The real news must remain the main subject.
 
 ========================
 ARTICLE-SPECIFIC RULES
@@ -418,16 +413,34 @@ not merely the category.
 TEXT
 ========================
 
-Keep text minimal.
+Keep text almost completely out of the image.
 
-Use short readable labels only when they
-help identify an important company, product,
-location or number.
+Do NOT create speech bubbles.
 
-Do not fill the image with paragraphs.
+Do NOT create dialogue.
 
-Brand names such as Huawei or DeepSeek may appear
-when they are essential to understanding the news.
+Do NOT create large headlines.
+
+Do NOT create explanatory paragraphs.
+
+Do NOT create bottom banners.
+
+Do NOT create CTA text.
+
+Do NOT create:
+"続きはリプライ"
+"詳細はこちら"
+"ORА!"
+"MUDА!"
+"VS"
+
+Do not use comic panels or split-screen layouts
+unless the actual news requires a confrontation.
+
+Small real-world logos or product names are allowed
+when they are essential to identifying the subject.
+
+The image itself must communicate the news.
 
 ========================
 FINAL COMPOSITION
@@ -435,22 +448,41 @@ FINAL COMPOSITION
 
 Wide horizontal 3:2 editorial composition.
 
+ONE SINGLE SCENE.
+
 One dominant focal point.
 
+Show the actual news event clearly.
+
+Use:
+main subject
++
+relevant people or characters
++
+actual environment
++
+meaningful action
+
+The main subject should occupy a large portion
+of the frame.
+
 Strong foreground.
-
 Detailed middle ground.
-
 Meaningful background.
 
 No random decorative objects.
+
+No generic futuristic city.
 
 No stock illustration feeling.
 
 No photorealistic appearance.
 
-The final result should look like
-a spectacular Japanese manga news cover,
+No split comic panels.
+
+The final result should feel like
+a spectacular JoJo-style dramatic manga cover
+fused with a powerful American comic-book poster,
 while remaining faithful to the actual article.
 `;
 

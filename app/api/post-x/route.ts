@@ -144,6 +144,194 @@ export async function POST(request: Request) {
     const url = `https://tutti-news-ai-bay.vercel.app/news/${news.id}`;
     const score = news.score ?? 60;
 
+    // AI画像版だけ専用フォーマットで生成
+    if (body.mode === "ai-image") {
+      const imageResponse =
+        await openai.chat.completions.create({
+          model: "gpt-4.1-mini",
+          messages: [
+            {
+              role: "system",
+              content: `
+AI NEWSジャパンのAI画像付きX投稿を作成してください。
+
+必ず以下の構成にする。
+
+hook
+content
+
+最終投稿はシステム側で、
+
+hook
+
+content
+
+追加情報は👇
+
+の形にする。
+
+【hook】
+短いフック＋タイトル。
+
+基本形：
+新展開【タイトル】
+
+例：
+速報【政府が新制度を発表】
+衝撃【人気サービスが終了へ】
+新展開【日本初スターバックス専用自販機が全国展開へ】
+話題【○○が新サービスを発表】
+
+フックはニュース内容に合うものを選ぶ。
+毎回同じフックにしない。
+不要ならタイトルだけでもよい。
+
+重要：
+「【速報】タイトル」の形でもよいが、
+hook全体をさらに【】で囲まない。
+「【【速報】タイトル】」は禁止。
+最終的には、
+フック【タイトル】
+の形を優先する。
+
+タイトルは元記事の意味を変えない。
+
+【content】
+ニュースで実際に起きたことを、35〜70文字程度で簡潔に書く。
+基本は1文〜2文。
+情報を詰め込みすぎず、最も重要な事実だけを書く。
+
+記事にない事実、数字、人物情報、推測は禁止。
+です・ますは禁止。
+でやんす禁止。
+自然な常体にする。
+URLは禁止。
+「追加情報は👇」は禁止。これはシステム側で最後に1回だけ付ける。
+
+JSONのみ返す。
+
+{
+  "hook": "新展開【タイトル】",
+  "content": "ニュースの内容"
+}
+`,
+            },
+            {
+              role: "user",
+              content: `
+タイトル：
+${news.title}
+
+要約：
+${news.summary ?? ""}
+
+カテゴリ：
+${news.category ?? "国内"}
+`,
+            },
+          ],
+          temperature: 0.8,
+          max_tokens: 220,
+          response_format: {
+            type: "json_schema",
+            json_schema: {
+              name: "x_image_post",
+              strict: true,
+              schema: {
+                type: "object",
+                properties: {
+                  hook: {
+                    type: "string",
+                  },
+                  content: {
+                    type: "string",
+                  },
+                },
+                required: ["hook", "content"],
+                additionalProperties: false,
+              },
+            },
+          },
+        });
+
+      const rawImageContent =
+        imageResponse.choices[0]?.message?.content?.trim() ?? "";
+
+      let imagePost: {
+        hook: string;
+        content: string;
+      };
+
+      try {
+        imagePost = JSON.parse(rawImageContent);
+      } catch {
+        throw new Error(
+          "AI画像版X投稿の解析に失敗しました"
+        );
+      }
+
+      let imageHook = cleanText(imagePost.hook)
+        .replace(/追加情報は👇/g, "")
+        .replace(/^「|」$/g, "")
+        .trim();
+
+      let imageContent = cleanText(imagePost.content)
+        .replace(/追加情報は👇/g, "")
+        .replace(/でやんす[。！!]?$/gi, "")
+        .trim();
+
+      // さらに長すぎる場合は画像投稿向けに短くする
+      if (imageContent.length > 80) {
+        imageContent = imageContent.slice(0, 80).replace(/[、。]$/, "") + "。";
+      }
+
+      // hookを「フック【タイトル】」に正規化
+      const bracketMatch = imageHook.match(
+        /^【([^】]+)】(.+)$/
+      );
+
+      if (bracketMatch) {
+        imageHook =
+          `${bracketMatch[1].trim()}【${bracketMatch[2]
+            .replace(/^【+/, "")
+            .replace(/】+$/, "")
+            .trim()}】`;
+      } else {
+        const normalMatch = imageHook.match(
+          /^(.+?)【(.+?)】$/
+        );
+
+        if (normalMatch) {
+          imageHook =
+            `${normalMatch[1].replace(/[【】]/g, "").trim()}【${normalMatch[2].trim()}】`;
+        }
+      }
+
+      if (!imageHook || !imageContent) {
+        throw new Error(
+          "AI画像版X投稿の生成結果が空です"
+        );
+      }
+
+      const tweet = `${imageHook}
+
+${imageContent}`
+        .replace(/(?:\n\s*)*追加情報は👇/g, "")
+        .trim() + `
+
+追加情報は👇`;
+
+      return NextResponse.json({
+        tweet,
+        score,
+        hook: imageHook,
+        description: imageContent,
+        intentUrl:
+          "https://x.com/intent/post?text=" +
+          encodeURIComponent(tweet),
+      });
+    }
+
     const response = await openai.chat.completions.create({
       model: "gpt-4.1-mini",
       messages: [
