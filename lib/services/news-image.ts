@@ -57,11 +57,11 @@ export async function generateNewsImage(newsId: number) {
 
   /*
    * STEP 1
-   * 記事を理解して画像の絵コンテを作る
+   * 記事から「事実として存在する視覚素材」だけを抽出する
    */
   const planner = await openai.chat.completions.create({
     model: "gpt-4.1-mini",
-    temperature: 0.2,
+    temperature: 0,
     response_format: {
       type: "json_object",
     },
@@ -70,48 +70,30 @@ export async function generateNewsImage(newsId: number) {
         role: "system",
         content: `
 あなたはAI NEWSジャパン専属の
-ニュース漫画ビジュアルディレクターです。
+ニュース漫画用「事実抽出ディレクター」です。
 
-記事を完全に理解し、
-「画像だけを見ても何のニュースか分かる」
-1枚のニュース漫画を設計してください。
+あなたの仕事はニュースを創作することではありません。
+記事本文に実際に書かれている情報だけを抽出してください。
 
-最重要：
+最重要ルール：
 
-・主役を1つ決める
-・補助要素は2〜4個
-・記事の具体的な出来事を描く
-・会社、製品、人物、場所、チームなどを具体的に使う
-・重要な数字は視覚的に強調する
-・記事にない出来事を作らない
-・意味のないAIロボットを出さない
-・genericな未来都市にしない
+1. 記事に書かれていない情報を絶対に追加しない。
+2. 推測・想像・一般常識による補完をしない。
+3. 数字、金額、年月日、人数、製品名、企業名、人物名、
+   地名などは記事に存在するものだけ使用する。
+4. 記事にない人物を作らない。
+5. 記事にない企業・製品・サービスを作らない。
+6. 記事にない出来事を作らない。
+7. 記事にない数字を作らない。
+8. 見出しを勝手に作り変えない。
+9. 「それっぽい」情報を追加しない。
+10. 分からない項目は空文字または空配列にする。
 
-作画方向：
+画像生成AIが勝手に情報を追加しないよう、
+できるだけ記事中の実際の表現をそのまま使用してください。
 
-・日本の劇画漫画を思わせる強烈な表現
-・ジョジョを想起させる大胆で theatrical なポージング
-・太いインク線
-・濃い陰影
-・ハーフトーン
-・大胆なパース
-・強烈な表情
-・アメコミポスターのような迫力
-・「ゴゴゴゴ…」のような漫画的な効果音演出
-・高密度だが主役は明確
-
-人間キャラクターだけでなく、
-人間の背後に立つ「スタンドを思わせる」
-完全オリジナルの人型存在を使ってよい。
-
-その存在は人間とは別の存在として、
-ニュース内容を象徴する役割を持たせる。
-
-ただし毎回必ず出すのではなく、
-ニュースに合う場合だけ使用する。
-
-既存作品のキャラクターは使用しない。
-完全オリジナルのキャラクターとして設計する。
+ただし「どういう漫画構図にするか」はここでは決めません。
+この段階では事実の抽出だけを行います。
 
 JSONのみ返してください。
 `,
@@ -134,23 +116,25 @@ ${(news.content ?? "").slice(0, 15000)}
 以下のJSONを返してください。
 
 {
-  "core_news": "ニュースの核心を1文",
-  "main_subject": "画像の主役",
+  "core_news": "記事本文に基づくニュースの核心。新しい情報を追加しない。",
+  "main_subject": "記事に実際に登場する最重要の人物・企業・製品・出来事など",
   "secondary_subjects": [
-    "補助要素1",
-    "補助要素2",
-    "補助要素3"
+    "記事に実際に登場する具体的要素だけ",
+    "記事に実際に登場する具体的要素だけ"
   ],
-  "location": "場所",
-  "event": "実際に起きた出来事",
-  "visual_symbol": "ニュースを象徴する具体物",
-  "character_role": "人間キャラクターとスタンド風存在の役割",
-  "composition": "具体的な画面構成",
-  "headline_element": "強調する数字や短い言葉",
-  "color_direction": "色",
+  "location": "記事に明記されている場所。なければ空文字",
+  "event": "記事に実際に書かれている出来事。推測禁止",
+  "visual_symbol": "記事に実際に登場する、ニュースを象徴できる具体物。なければ空文字",
+  "character_role": "記事に登場する人物を描く場合の役割。記事に人物がいなければ空文字",
+  "headline_element": "記事タイトルまたは記事本文から、そのまま抜き出せる短い重要語句。創作禁止",
+  "color_direction": "記事内容に合う基本色。ここだけは演出として指定してよい",
   "avoid": [
-    "避けるもの1",
-    "避けるもの2"
+    "記事に存在しない情報",
+    "架空の数字",
+    "架空の人物",
+    "架空の企業・製品",
+    "架空の出来事",
+    "不要な説明パネル"
   ]
 }
 `,
@@ -193,15 +177,14 @@ ${(news.content ?? "").slice(0, 15000)}
       toText(plan.character_role),
 
     composition:
-      toText(plan.composition) ||
-      "主役を大きく配置した劇画的構図",
+      "中央にニュースの主役を巨大に配置し、その背後にニュース内容を象徴する完全オリジナルの人型スタンド風存在を配置する。左右または上下に記事中の具体的要素を配置し、バトル漫画の表紙のような強烈な一枚絵にする。",
 
     headline_element:
       toText(plan.headline_element),
 
     color_direction:
       toText(plan.color_direction) ||
-      "強いコントラスト",
+      "赤・青・紫・金・黒を基調にした強烈な高コントラスト",
 
     avoid:
       toList(plan.avoid),
@@ -212,16 +195,42 @@ ${(news.content ?? "").slice(0, 15000)}
    * 絵コンテを画像生成AIへ渡す
    */
   const imagePrompt = `
-Create a spectacular wide editorial manga illustration
-for AI NEWSジャパン.
+AI NEWSジャパンのニュース記事を、
+完全オリジナルの劇画・バトル漫画ポスターとして描く。
 
-The image MUST communicate the actual news event.
+====================
+【絶対ルール】
+====================
 
-NEWS:
-${news.title}
+この画像で描いてよいニュース情報は、
+以下のVISUAL PLANに書かれている内容だけ。
 
-SUMMARY:
-${news.summary ?? ""}
+VISUAL PLANに存在しない情報を追加してはいけない。
+
+禁止：
+- 記事にない数字
+- 記事にない金額
+- 記事にない年月日
+- 記事にない人物
+- 記事にない企業
+- 記事にない製品
+- 記事にない場所
+- 記事にない出来事
+- AIが勝手に作ったニュース見出し
+- AIが勝手に作った説明文
+- AIが勝手に作ったインフォグラフィック
+- AIが勝手に作った料金表
+- AIが勝手に作ったデータパネル
+- genericな未来都市
+- genericなAIロボット
+- ニュースと無関係な小物
+
+情報を追加するくらいなら、
+その要素を描かないこと。
+
+====================
+【VISUAL PLAN】
+====================
 
 CORE NEWS:
 ${visualPlan.core_news}
@@ -244,157 +253,137 @@ ${visualPlan.visual_symbol}
 CHARACTER ROLE:
 ${visualPlan.character_role}
 
-COMPOSITION:
-${visualPlan.composition}
-
-IMPORTANT HEADLINE:
+HEADLINE ELEMENT:
 ${visualPlan.headline_element}
 
-COLOR:
-${visualPlan.color_direction}
+====================
+【構図】
+====================
 
-AVOID:
-${visualPlan.avoid.join(", ")}
+ニュースの主役を画面中央〜前景に巨大に配置。
 
-STYLE:
+主役は非常に強いポーズを取り、
+読者の視線を一瞬で集める。
 
-Create an original, extremely dramatic Japanese
-manga/comic editorial illustration.
+主役の背後には、
+ニュース内容を象徴する完全オリジナルの
+人型スタンド風存在を配置する。
 
-Use the visual language of intense classic Japanese
-battle manga and theatrical comic-book posters:
+この存在は人間とは明確に別の存在。
 
-- bold black ink
-- heavy shadows
-- cross-hatching
-- halftone
-- dramatic anatomy
-- exaggerated poses
-- powerful hands
-- intense eyes
-- extreme foreshortening
-- cinematic lighting
-- sharp highlights
-- explosive perspective
-- dynamic speed lines
-- dramatic clouds
-- high contrast
-- rich gold, purple, blue, red and black tones
-- dense manga panel-like composition
+主役とスタンド風存在を重ねず、
+それぞれのシルエットが明確に分かるようにする。
 
-MANDATORY SOUND EFFECT:
+背景にはVISUAL PLANに記載された
+場所・出来事・具体物だけを配置する。
 
-Always include a large, highly visible Japanese manga sound effect:
+全体は映画ポスターではなく、
+「日本の劇画バトル漫画の表紙」のような構図。
 
+====================
+【画風】
+====================
+
+EXTREME DRAMATIC BATTLE MANGA
+×
+AMERICAN COMIC BOOK POSTER
+
+強烈な劇画表現。
+
+- 極太の黒インク線
+- 鋭い輪郭
+- 濃い黒ベタ
+- 強烈なハーフトーン
+- クロスハッチング
+- 粗いインクブラシ
+- 彫刻のような筋肉表現
+- 極端な遠近法
+- 強烈なパース
+- 大胆なポージング
+- 大きく突き出した手
+- 鋭い目
+- 強烈な表情
+- ドラマチックな陰影
+- 集中線
+- スピード線
+- 爆発的なエフェクト
+- コミックのインパクトバースト
+- 高コントラスト
+- 赤・青・紫・金・黒
+- ハーフトーンによる印刷漫画の質感
+
+普通のアニメイラストにはしない。
+
+かわいいキャラクターにはしない。
+
+ソフトなAIイラストにはしない。
+
+写実的な写真にはしない。
+
+説明資料・広告・インフォグラフィックにはしない。
+
+====================
+【ゴゴゴ演出】
+====================
+
+「ゴゴゴゴゴ……」を必ず画面内に入れる。
+
+非常に大きく、
+背景または主役の周囲に配置する。
+
+単なる文字ではなく、
+漫画の効果音としてデザインする。
+
+太い黒線、
+強い影、
+ハーフトーン、
+歪んだパース、
+巨大な文字サイズ。
+
+「ゴゴゴゴゴ……」は
+画面全体の迫力を作る重要なグラフィック要素。
+
+====================
+【文字】
+====================
+
+画像内のニュース関連文字は、
+VISUAL PLANに存在する情報だけを使用する。
+
+存在しない数字・固有名詞・説明文を生成しない。
+
+文字を無理に大量に入れない。
+
+大きなニュースタイトルを作る必要がある場合も、
+HEADLINE ELEMENTに記載された文字だけを使用する。
+
+====================
+【最終目的】
+====================
+
+画像を見た瞬間、
+
+「これは何のニュースなのか」
+
+が分かること。
+
+ただし、
+ニュース情報は勝手に増やさない。
+
+「記事内容は正確」
+＋
+「画面は極端に派手」
+＋
+「劇画バトル漫画」
+＋
+「アメコミポスター」
+＋
 「ゴゴゴゴゴ……」
 
-The sound effect MUST appear in every generated image.
-Do NOT omit it.
-Place it dramatically in the background or around the main subject.
-Use oversized lettering, warped perspective, thick black ink,
-strong shadow, halftone texture and comic-book impact styling.
+この5つを同時に成立させる。
 
-The overall image MUST strongly resemble a premium Japanese
-battle-manga / American comic-book news poster.
-
-MANDATORY VISUAL STYLE:
-- extremely thick black ink outlines
-- aggressive brush-ink texture
-- hard cel shading
-- dense cross-hatching
-- strong halftone dots
-- extreme perspective
-- dramatic foreshortening
-- exaggerated anatomy and poses
-- intense facial expressions
-- powerful hands
-- explosive speed lines
-- radial impact lines
-- comic-book burst shapes
-- deep black shadows
-- vivid red, blue, gold and black
-- large graphic typography
-- theatrical comic-book cover composition
-- visually dense background
-- strong foreground/background separation
-
-Do NOT make the image look like a soft anime illustration,
-generic AI art, realistic photography, or a simple character portrait.
-
-CHARACTER DESIGN:
-
-If a human character is useful,
-create an original charismatic manga character.
-
-Behind or beside that character,
-a separate ORIGINAL humanoid supernatural entity
-may appear.
-
-The entity must clearly look like a separate being:
-
-- humanoid silhouette
-- powerful athletic anatomy
-- distinctive armor or costume
-- supernatural presence
-- dramatic eyes
-- unusual mechanical/organic details
-- theatrical pose
-- strong visual identity
-
-It must NOT look like a normal human.
-It must NOT look like a generic robot.
-
-The human and the supernatural entity
-must have different silhouettes.
-
-The entity should visually symbolize the news.
-
-NEWS SPECIFICITY:
-
-Technology:
-show the actual chip, hardware, servers,
-data center and infrastructure.
-
-Business:
-show the actual company, product,
-facility or transaction.
-
-Sports:
-show actual teams, players, uniforms,
-stadium and competitive action.
-
-Entertainment:
-show the performer, work, stage or event.
-
-Politics:
-show the political setting, person,
-institution or event.
-
-Accident:
-show the actual location, vehicles,
-damage and emergency situation.
-
-Food/consumer:
-show the actual product, food,
-restaurant or incident.
-
-The actual event is more important than decoration.
-
-Do not create random robots.
-
-Do not create a generic futuristic city.
-
-Do not make the human character
-the subject unless the article is about that person.
-
-Do not overload the image with text.
-
-Use short readable labels only when they
-help identify the actual company, product,
-place or important number.
-
-Wide horizontal 3:2 composition.
-Premium manga-news-cover quality.
+AI NEWSジャパン独自の
+ニュース漫画ビジュアルとして完成させる。
 `;
 
   const result = await openai.images.generate({
