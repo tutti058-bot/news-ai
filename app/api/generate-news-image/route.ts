@@ -109,10 +109,24 @@ export async function POST(request: Request) {
 を強く意識してください。
 
 人物がニュースの意味を補強する場合は、
-ジョジョシリーズを想起させる劇画的なキャラクター表現を使用してください。
+ジョジョシリーズのような劇画的で個性的なキャラクター表現を使用してください。
 
-キャラクターだけを描くのではなく、
-必ずニュースの実物・場所・出来事と組み合わせてください。
+さらに、ニュース内容を視覚的に象徴できる場合は、
+スタンドを思わせる超常的な存在を登場させてください。
+
+スタンド風の存在はニュースごとにデザインを変え、
+実際のニュース内容を象徴するものにしてください。
+
+例：
+AI・半導体 → チップ、回路、データを象徴する存在
+スポーツ → ボール、選手、競技を象徴する存在
+企業・商品 → 製品やサービスを象徴する存在
+事故・災害 → 現場や原因を象徴する存在
+
+ただし、スタンド風の存在がニュースを分かりにくくする場合は使用しないでください。
+
+キャラクターやスタンドだけで画面を埋めず、
+必ずニュースの実物・場所・出来事を主役として見せてください。
 
 欲しい雰囲気：
 
@@ -415,32 +429,153 @@ TEXT
 
 Keep text almost completely out of the image.
 
+Use a SMALL AMOUNT of readable Japanese text
+to make the news understandable from the image alone.
+
+Include 1 to 2 short editorial text elements
+when they materially improve comprehension.
+
+Examples:
+「日本初」
+「全国展開」
+「新型チップ発表」
+「○○を発表」
+「9月中旬から導入」
+
+The text must summarize the actual news.
+Do not invent information.
+
+Text should be short, bold and integrated into
+the composition like a premium manga news cover.
+
 Do NOT create speech bubbles.
 
 Do NOT create dialogue.
 
-Do NOT create large headlines.
+Do NOT create long explanatory paragraphs.
 
-Do NOT create explanatory paragraphs.
-
-Do NOT create bottom banners.
-
-Do NOT create CTA text.
+Do NOT create bottom CTA banners.
 
 Do NOT create:
 "続きはリプライ"
 "詳細はこちら"
-"ORА!"
-"MUDА!"
-"VS"
+"コメントして"
+"フォローして"
 
-Do not use comic panels or split-screen layouts
-unless the actual news requires a confrontation.
+Do NOT fill the image with text.
 
-Small real-world logos or product names are allowed
-when they are essential to identifying the subject.
+Do NOT create comic panels unless the actual news
+requires multiple locations or a confrontation.
 
-The image itself must communicate the news.
+Small real-world logos and product names are allowed
+when essential to identifying the subject.
+
+MANGA SOUND EFFECTS:
+
+When they enhance the scene, use dramatic Japanese
+manga sound effects such as:
+
+「ゴゴゴゴゴ…」
+「ドドドドド…」
+「ドン！」
+「ズズズ…」
+「バァーン！」
+
+Choose the sound effect according to the mood and action.
+
+Heavy, ominous or powerful news:
+「ゴゴゴゴゴ…」
+
+Sudden movement, escalation or energetic scenes:
+「ドドドドド…」
+
+Major reveal or impactful moment:
+「ドン！」
+「バァーン！」
+
+These sound effects should be integrated naturally
+into the artwork as stylized manga lettering.
+
+Do not use them mechanically in every image.
+Do not let sound effects cover the main subject
+or important news-identifying text.
+
+The image itself must communicate the news event,
+with short editorial text and manga sound effects
+acting only as visual support.
+
+========================
+JOJO / STAND / NEWS EXPLANATION
+========================
+
+When the news benefits from a powerful supernatural
+visual metaphor, include a dramatic Stand-like entity
+in the style of JoJo battle manga.
+
+The Stand should be directly connected to the actual news.
+
+Examples:
+
+AI / technology:
+A powerful humanoid entity formed from circuits,
+chips, data, servers or electronic structures.
+
+Business:
+An imposing entity symbolizing the company,
+product, transaction or major business change.
+
+Sports:
+A dynamic entity connected to the ball,
+stadium, team or competitive action.
+
+Food / consumer:
+A stylish entity connected to the actual product
+or consumer experience.
+
+Major announcements:
+A powerful Stand emerging behind the real subject
+to amplify the importance of the event.
+
+Do not use a Stand when it makes the actual news
+harder to understand.
+
+The real product, person, place or event must remain
+the main subject.
+
+========================
+NEWS EXPLANATION TEXT
+========================
+
+The image should be understandable even without
+reading the X post.
+
+Add 1 to 2 short Japanese news-identifying text elements
+when they improve comprehension.
+
+Examples:
+「日本初」
+「全国展開」
+「9月中旬から導入」
+「新型チップ発表」
+「○○が発表」
+
+Keep each text element very short.
+
+Use only information that actually appears in the article.
+
+Do not create long sentences.
+
+Do not create speech bubbles.
+
+Do not create dialogue.
+
+Do not create paragraphs.
+
+Integrate the short text naturally into the artwork
+as dramatic manga editorial lettering.
+
+The text should support the image,
+not become the main visual.
 
 ========================
 FINAL COMPOSITION
@@ -469,6 +604,12 @@ of the frame.
 Strong foreground.
 Detailed middle ground.
 Meaningful background.
+
+Place short news-identifying text naturally
+into the composition without turning the image
+into an infographic.
+
+The main subject and event must remain dominant.
 
 No random decorative objects.
 
