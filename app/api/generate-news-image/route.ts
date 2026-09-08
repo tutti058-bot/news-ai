@@ -390,6 +390,50 @@ Do not turn the image into a generic superhero poster.
 The real news must remain the main subject.
 
 ========================
+CHARACTER PRIORITY
+========================
+
+If the article is about a real identifiable person,
+and reliable visual information about that person is
+available in the article context or source material,
+make that person the primary human subject.
+
+Preserve recognizable characteristics such as:
+- face shape
+- hairstyle
+- hair color
+- approximate age
+- clothing
+- expression
+- distinctive visual features
+
+Do not replace a clearly identifiable person with
+a generic fictional-looking person.
+
+Transform the presentation into an extremely dramatic
+Japanese battle-manga aesthetic with strong JoJo-like
+visual characteristics:
+
+- theatrical poses
+- exaggerated anatomy
+- powerful hands
+- intense facial expression
+- sharp eyes
+- dramatic head angles
+- extreme foreshortening
+- striking silhouettes
+- elaborate fashion
+- hard directional lighting
+- deep shadows
+- heavy ink
+- cross-hatching
+- halftone
+- explosive perspective
+
+The person should still be recognizable while the
+overall presentation becomes highly stylized.
+
+========================
 ARTICLE-SPECIFIC RULES
 ========================
 
