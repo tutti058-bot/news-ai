@@ -612,83 +612,260 @@ but ヤニねこ itself should retain a cute anime appearance.
 REACTION DIRECTION
 ========================
 
-The emotional reaction must be selected according to
-the actual news.
+FIRST determine the emotional tone of the ACTUAL NEWS.
 
-Do NOT make her surprised in every image.
+Then choose ヤニねこ's facial expression, eyes, mouth,
+body language and pose to match that emotional tone.
 
-Choose the most natural emotional reaction for the article.
+IMPORTANT:
+Do NOT automatically make ヤニねこ surprised.
 
-Possible reactions include:
+Do NOT use the same expression repeatedly.
 
-- surprise
-- excitement
-- curiosity
-- confusion
-- disbelief
-- happiness
-- smug satisfaction
-- anger
-- irritation
-- disappointment
-- sadness
-- anxiety
-- fear
-- boredom
-- exhaustion
-- sleepiness
-- relief
-- admiration
-- embarrassment
-- amusement
+The character's appearance is FIXED,
+but her emotion must change from article to article.
 
-The reaction should feel like a funny, relatable reaction
-from the reader's point of view.
+The reaction should feel like a natural,
+funny and relatable reader reaction to the specific news.
 
-Her expressions can become extremely exaggerated,
-inspired by dramatic Japanese gambling manga and seinen manga,
-but the underlying character design must remain cute and anime-like.
+========================
+EMOTION MATCHING
+========================
+
+POSITIVE / EXCITING NEWS:
 
 Examples:
+- new product launches
+- major technological breakthroughs
+- successful achievements
+- exciting new features
+- record-breaking results
 
-SURPRISE:
-large sparkling or widened eyes, raised ears, open mouth,
-dramatic pose and sweat.
+Use:
+- bright sparkling eyes
+- happy smile
+- excited expression
+- energetic pose
+- leaning forward
+- raised hands when appropriate
 
-ANGER:
-furrowed eyebrows, puffed cheeks or angry face,
-tense pose and dramatic manga effects.
+The reaction should feel genuinely happy or excited,
+not shocked.
 
-JOY:
-bright sparkling eyes, huge smile, energetic pose.
+========================
 
-DESPAIR:
-drooping ears, watery eyes, collapsed posture.
+INTERESTING / CURIOUS NEWS:
 
-BOREDOM:
-half-lidded eyes, slouched posture, cigarette,
-completely unimpressed expression.
+Examples:
+- new technology
+- unusual discoveries
+- interesting services
+- unexpected developments
 
-CURIOSITY:
-leaning toward the news, focused eyes,
-interested and slightly silly expression.
+Use:
+- curious eyes
+- slightly tilted head
+- leaning toward the subject
+- interested expression
+- small smile
+- thoughtful pose
 
-CONFUSION:
-tilted head, uneven eyes, sweat,
-awkward expression.
+The reaction should communicate:
+"へぇ、なにこれ？"
+rather than extreme surprise.
 
-SMUG:
-small confident smile, relaxed eyes,
-slightly ridiculous proud pose.
+========================
 
-EXHAUSTION:
-messy posture, sleepy eyes, cigarette hanging loosely,
-coffee nearby.
+NEGATIVE / CONCERNING NEWS:
 
-The reaction should match the emotional meaning of the news.
+Examples:
+- security vulnerabilities
+- accidents
+- system failures
+- scandals
+- serious problems
+- damage or danger
 
-Do NOT force a dramatic reaction when the article
-does not justify one.
+Use:
+- worried expression
+- nervous eyes
+- sweat
+- slightly pale face
+- tense posture
+- concerned or uneasy body language
+
+Do NOT make serious news look funny.
+
+========================
+
+ANGER / FRUSTRATION:
+
+Examples:
+- unreasonable price increases
+- controversial decisions
+- unfair treatment
+- frustrating failures
+- outrageous behavior
+
+Use:
+- angry eyebrows
+- annoyed expression
+- clenched fists
+- irritated eyes
+- exaggerated frustrated pose
+- dramatic manga anger effects
+
+The emotion should communicate:
+"なんでだよ！"
+or
+"ふざけんな！"
+
+without adding dialogue text.
+
+========================
+
+SADNESS / DISAPPOINTMENT:
+
+Examples:
+- cancellations
+- losses
+- failures
+- disappointing announcements
+- unfortunate outcomes
+
+Use:
+- drooping ears
+- watery eyes
+- disappointed expression
+- slumped shoulders
+- lowered head
+- tired or dejected posture
+
+Keep the character cute even when sad.
+
+========================
+
+SHOCK / DISBELIEF:
+
+Use only when the news is genuinely surprising,
+unexpected or extraordinary.
+
+Use:
+- very large eyes
+- open mouth
+- raised ears
+- dramatic pose
+- sweat
+- explosive manga reaction effects
+
+This should be an occasional high-impact reaction,
+not the default expression.
+
+========================
+
+FUNNY / ABSURD NEWS:
+
+Examples:
+- bizarre incidents
+- strange products
+- ridiculous situations
+- unusual human behavior
+
+Use:
+- exaggerated comedic face
+- confused eyes
+- ridiculous pose
+- laughing or amused expression
+- deadpan reaction when appropriate
+
+The character may become extremely silly,
+but must remain cute.
+
+========================
+
+BORING / ROUTINE NEWS:
+
+Examples:
+- routine updates
+- minor system changes
+- ordinary business announcements
+- technical maintenance
+
+Use:
+- half-lidded eyes
+- sleepy expression
+- relaxed posture
+- slouching
+- cigarette
+- coffee
+- mildly uninterested expression
+
+Do NOT force excitement into ordinary news.
+
+========================
+
+POSITIVE BUT SERIOUS NEWS:
+
+Examples:
+- medical or scientific breakthroughs
+- important safety improvements
+- major infrastructure improvements
+
+Use:
+- calm relief
+- gentle smile
+- interested expression
+- thoughtful eyes
+
+Avoid excessive comedy when the subject is serious.
+
+========================
+
+SERIOUS TRAGEDY / DISASTER:
+
+Examples:
+- deaths
+- natural disasters
+- major accidents
+- serious injuries
+- large-scale damage
+
+Use:
+- concerned expression
+- sadness
+- fear or shock when appropriate
+- subdued body language
+
+Do NOT use goofy expressions,
+celebratory poses,
+or comedic reactions.
+
+The actual event must be treated respectfully.
+
+========================
+REACTION VARIATION
+========================
+
+Vary the emotional intensity according to the importance
+and emotional weight of the news.
+
+Do not make every article look like a climax.
+
+Some images should have:
+- subtle expressions
+- relaxed poses
+- curious looks
+- deadpan reactions
+
+Other images may have:
+- extreme facial expressions
+- dramatic poses
+- explosive manga effects
+
+The variation should make the character feel alive
+rather than mechanically repeated.
+
+The character design must NEVER change while the emotion changes.
 
 ========================
 REACTION SCALE
@@ -856,11 +1033,27 @@ No split comic panels.
 The final result should feel like a spectacular,
 high-impact Japanese dramatic manga news cover fused with
 a powerful American comic-book poster.
-Keep the news world dramatic and visually powerful,
-while keeping ヤニねこ consistently cute, anime-like,
-and recognizable from article to article.
-The emotional reaction may be extremely exaggerated,
-but the character design must remain cute and consistent.
+
+Keep the NEWS WORLD dramatic and visually powerful.
+
+Keep ヤニねこ consistently cute, anime-like,
+and immediately recognizable from article to article.
+
+FIXED CHARACTER DESIGN:
+same face, same hairstyle, same ash-gray hair,
+same golden/amber eyes, same cat ears, same cat tail,
+same petite adult body, same oversized worn NEKO T-shirt,
+same loose blue-gray sweatpants and barefoot appearance.
+
+ONLY the following should change according to the article:
+emotion, facial expression, eye shape, mouth shape,
+body language, pose, reaction intensity and placement.
+
+The emotional reaction must be selected from the actual
+meaning and tone of the news.
+
+Do NOT default to surprise.
+
 Always remain faithful to the actual article.
 `;
 
