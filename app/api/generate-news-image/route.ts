@@ -393,126 +393,44 @@ IMPORTANT:
 
 ヤニねこ is a CLEARLY ADULT WOMAN.
 
-She should visually read as a young adult woman
-in her 20s, NOT as a teenager and NOT as a child.
+She should read as a petite young adult woman
+in her 20s.
 
-She is petite and youthful-looking,
-but her face, body proportions and overall presence
-must clearly communicate adulthood.
+She is youthful and童顔,
+but never a child or teenager.
 
-Her personality may be childish, lazy,
-silly or mischievous.
+Her personality can be silly, lazy,
+mischievous, playful or childish.
 
-Her PHYSICAL APPEARANCE must remain adult.
+Her PHYSICAL APPEARANCE remains adult.
 
 ========================
-ADULT CHARACTER DIRECTION
+CHARACTER AGE AND BODY
 ========================
 
-IMPORTANT:
+Use:
 
-Do NOT make her look like:
-
-- a child
-- a little girl
-- a kid
-- a schoolgirl
-- a teenager
-- a chibi character
-- an elementary-school character
-- a childish fantasy mascot
-
-Instead use:
-
-- young adult woman
+- petite young adult woman
 - adult facial structure
 - adult body proportions
 - mature shoulders
 - mature hands
-- mature legs
-- natural young-adult anatomy
-- subtle feminine facial structure
-- youthful but unmistakably adult appearance
+- natural adult legs
+- proportional adult torso
+- subtle feminine silhouette
+- petite overall frame
 
-She may have a soft, cute, round face,
-but her proportions must clearly belong
-to an adult woman.
+Do NOT use:
 
-Do NOT make her body disproportionately tiny.
+- child proportions
+- toddler proportions
+- schoolgirl proportions
+- teenage body
+- oversized head
+- chibi proportions
+- little-girl appearance
 
-Do NOT make her head excessively large.
-
-Do NOT use childlike body proportions.
-
-Her body should remain petite,
-but proportionally adult.
-
-========================
-FIXED APPEARANCE
-========================
-
-- petite young adult woman
-- youthful but adult anime face
-- soft rounded face
-- large golden / amber cat-like eyes
-- pale ash-gray hair with a subtle blue tint
-- fluffy permed bob haircut
-- triangular cat ears
-- fluffy cat tail
-- small cute nose and mouth
-- adult facial proportions
-- adult body proportions
-- natural feminine silhouette
-
-She should remain cute and slightly youthful,
-but clearly read as an adult woman.
-
-========================
-FIXED CLOTHING
-========================
-
-- oversized stretched slightly worn white T-shirt
-- simple black cat illustration on the shirt
-- "NEKO" may appear on the shirt
-- loose dark blue-gray sweatpants
-- barefoot
-
-Keep the same basic outfit.
-
-========================
-CHARACTER CONSISTENCY
-========================
-
-Keep this character visually consistent
-from article to article.
-
-Do NOT redesign her.
-
-Do NOT change her hairstyle.
-
-Do NOT change her hair color.
-
-Do NOT change her eye color.
-
-Do NOT remove her cat ears.
-
-Do NOT remove her cat tail.
-
-Do NOT change her basic clothing.
-
-Do NOT make her glamorous.
-
-Do NOT make her muscular.
-
-Do NOT make her photorealistic.
-
-Do NOT make her look like a child.
-
-Do NOT make her look like a teenager.
-
-Do NOT use chibi proportions.
-
-The ideal appearance is:
+The ideal balance is:
 
 PETITE
 +
@@ -520,7 +438,354 @@ CUTE
 +
 YOUTHFUL
 +
-UNMISTAKABLY ADULT
+童顔
++
+CLEARLY ADULT
+
+========================
+FIXED CHARACTER APPEARANCE
+========================
+
+The character design must remain consistent
+from article to article.
+
+Appearance:
+
+- petite adult woman
+- soft rounded youthful face
+- large golden / amber cat-like eyes
+- pale ash-gray hair
+- subtle cool blue tint in the hair
+- fluffy permed bob haircut
+- soft fluffy bangs
+- triangular cat ears
+- fluffy cat tail
+- small cute nose
+- small cute mouth
+- adult facial proportions
+- adult body proportions
+
+========================
+FIXED CLOTHING
+========================
+
+Keep the same basic clothing:
+
+- oversized stretched slightly worn white T-shirt
+- simple black cat illustration on the shirt
+- "NEKO" may appear on the shirt
+- loose dark blue-gray sweatpants
+- barefoot
+
+Do NOT redesign the outfit
+from article to article.
+
+========================
+YANI NEKO ART STYLE
+========================
+
+THIS IS CRITICAL.
+
+Yani Neko must use a SOFT, CUTE,
+POLISHED JAPANESE ANIME ILLUSTRATION STYLE.
+
+The character should feel:
+
+- soft
+- fluffy
+- clean
+- cute
+- expressive
+- warm
+- approachable
+- slightly silly
+- visually charming
+
+Use:
+
+- clean anime linework
+- moderately bold but soft black outlines
+- smooth line quality
+- gentle cel shading
+- soft color transitions
+- soft hair rendering
+- fluffy hair strands
+- large expressive golden eyes
+- simple readable facial features
+- subtle blush when appropriate
+- clean simplified hands
+- clean anime anatomy
+
+The character should remain attractive and cute
+even during exaggerated reactions.
+
+========================
+IMPORTANT STYLE RESTRICTIONS
+========================
+
+Do NOT draw Yani Neko with:
+
+- gritty manga rendering
+- realistic skin texture
+- photorealistic skin
+- heavy cross-hatching
+- dense ink shading
+- rough sketch lines
+- hyper-detailed wrinkles
+- realistic pores
+- gritty realism
+- dark realistic anatomy
+- excessive black shadows
+- thick comic-book ink
+- American comic-book rendering
+- superhero comic style
+- JoJo-style anatomy
+- JoJo-style facial design
+- Stand-like visual design
+- horror manga facial rendering
+- grotesque realistic anatomy
+
+Do NOT make her look like
+a realistic human illustration.
+
+Do NOT make her look like
+a gritty manga character.
+
+========================
+SOFT ANIME FACE
+========================
+
+Her face should remain soft and cute.
+
+Use:
+
+- rounded cheeks
+- gentle jawline
+- large expressive eyes
+- small nose
+- small mouth
+- soft eyebrows
+- smooth anime facial structure
+
+Even when she becomes angry,
+panicked or exhausted,
+the basic face should remain recognizable
+as the same cute character.
+
+========================
+EYES
+========================
+
+Her eyes are a major character identifier.
+
+Keep:
+
+- large golden / amber irises
+- clear anime-style highlights
+- expressive pupils
+- soft eyelashes
+- readable eye direction
+
+The eyes may change expression dramatically.
+
+Examples:
+
+happy:
+bright sparkling eyes
+
+sleepy:
+half-closed eyes
+
+annoyed:
+narrowed eyes
+
+curious:
+focused wide eyes
+
+smug:
+half-lidded eyes with a small grin
+
+sad:
+watery eyes
+
+confused:
+uneven eye direction
+
+genuinely shocked:
+large eyes with small pupils
+
+========================
+HAIR
+========================
+
+Her hair should look soft and fluffy.
+
+Use:
+
+- pale ash-gray
+- subtle blue tint
+- fluffy permed bob
+- soft layered strands
+- gentle highlights
+- slightly messy natural volume
+
+Avoid highly realistic individual hair rendering.
+
+Avoid metallic hair.
+
+Avoid hard plastic-looking hair.
+
+The hair should feel soft,
+light and fluffy.
+
+========================
+EXPRESSION STYLE
+========================
+
+Expressions must remain highly varied.
+
+Do NOT repeatedly use a shocked face.
+
+Surprise is only one possible emotion.
+
+Use:
+
+- smile
+- gentle smile
+- big grin
+- smug grin
+- mischievous grin
+- sleepy
+- bored
+- deadpan
+- confused
+- curious
+- interested
+- excited
+- happy
+- proud
+- annoyed
+- irritated
+- angry
+- disappointed
+- sad
+- worried
+- embarrassed
+- awkward
+- exhausted
+- relieved
+- amused
+- laughing
+- crying
+- genuinely shocked
+
+The expression should be determined
+by the actual article.
+
+========================
+COMEDIC EXPRESSION
+========================
+
+Yani Neko may use exaggerated manga expressions,
+but the drawing style stays cute and soft.
+
+Allowed:
+
+- enlarged eyes
+- tiny pupils
+- puffed cheeks
+- sweat drops
+- blush
+- trembling mouth
+- raised ears
+- flattened ears
+- tears
+- silly smile
+- awkward face
+- lazy face
+- deadpan face
+
+Extreme expressions should still look
+cute rather than grotesque.
+
+========================
+REAL WORLD CONTRAST
+========================
+
+The realistic world remains highly photographic.
+
+Yani Neko should remain clearly anime.
+
+The contrast is intentional:
+
+REALISTIC NEWS WORLD
++
+SOFT CUTE ANIME YANI NEKO
+
+Do NOT blend her into photorealism.
+
+Do NOT make the realistic world anime-styled.
+
+Yani Neko is the clear fictional visual element.
+
+========================
+INTEGRATION
+========================
+
+Although she is anime-styled,
+she must physically exist in the realistic scene.
+
+Use realistic:
+
+- perspective
+- scale
+- contact with surfaces
+- lighting direction
+- cast shadows
+- object interaction
+- environmental placement
+
+She should look like
+an anime character naturally occupying
+a real photographic environment.
+
+Do NOT paste her into a corner.
+
+Do NOT make her look like a sticker.
+
+Do NOT give her a glowing outline
+unless specifically needed.
+
+Do NOT use artificial portal or fantasy effects.
+
+========================
+CONSISTENCY RULE
+========================
+
+The same character must appear
+recognizably identical across articles.
+
+Keep consistent:
+
+- face
+- eye color
+- hair color
+- hairstyle
+- cat ears
+- cat tail
+- clothing
+- overall body proportions
+- soft anime art style
+
+Only these may change:
+
+- expression
+- pose
+- action
+- emotion
+- interaction
+- scale
+- camera angle
 
 ========================
 YANI NEKO MUST BE PART OF THE SCENE
