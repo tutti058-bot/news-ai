@@ -357,9 +357,6 @@ ART STYLE
 Strong Japanese dramatic manga aesthetic
 combined with American comic-book visual energy.
 
-Use recognizable JoJo characters when characters
-are relevant to the news.
-
 Desired visual language:
 
 - extremely dramatic anatomy
@@ -381,7 +378,7 @@ Desired visual language:
 - powerful American comic-book poster feeling
 
 The overall feeling should be:
-JoJo dramatic manga + American comic book.
+dramatic Japanese manga + gritty gambling-manga intensity + American comic-book poster energy.
 
 Use the actual characters, objects, products,
 locations and events required to explain the news.
@@ -411,24 +408,24 @@ Do not replace a clearly identifiable person with
 a generic fictional-looking person.
 
 Transform the presentation into an extremely dramatic
-Japanese battle-manga aesthetic with strong JoJo-like
-visual characteristics:
+Japanese manga aesthetic with gritty seinen and gambling-manga
+intensity.
 
+Use:
 - theatrical poses
-- exaggerated anatomy
+- exaggerated but believable anatomy
 - powerful hands
-- intense facial expression
-- sharp eyes
+- extreme facial expressions
 - dramatic head angles
 - extreme foreshortening
 - striking silhouettes
-- elaborate fashion
 - hard directional lighting
 - deep shadows
 - heavy ink
 - cross-hatching
 - halftone
 - explosive perspective
+- intense reaction effects
 
 The person should still be recognizable while the
 overall presentation becomes highly stylized.
@@ -549,44 +546,97 @@ with short editorial text and manga sound effects
 acting only as visual support.
 
 ========================
-JOJO / STAND / NEWS EXPLANATION
+YANI NEKO / REACTION CHARACTER
 ========================
 
-When the news benefits from a powerful supernatural
-visual metaphor, include a dramatic Stand-like entity
-in the style of JoJo battle manga.
+Add the recurring AI NEWSジャパン mascot character,
+a small adult cat-eared woman called ヤニねこ.
 
-The Stand should be directly connected to the actual news.
+IMPORTANT:
+The character name "ヤニねこ" must NEVER appear as visible text
+inside the generated image.
 
-Examples:
+The mascot itself should be visually consistent across articles:
 
-AI / technology:
-A powerful humanoid entity formed from circuits,
-chips, data, servers or electronic structures.
+- small adult woman
+- youthful, childish-looking face while clearly adult
+- blue-toned ash-colored permed bob haircut
+- cat ears
+- cat tail
+- oversized stretched and slightly worn white NEKO T-shirt
+- loose sweatpants
+- barefoot
+- often holding or smoking a cigarette
+- expressive, slightly foolish and chaotic personality
 
-Business:
-An imposing entity symbolizing the company,
-product, transaction or major business change.
+The mascot is NOT the main subject of the news.
 
-Sports:
-A dynamic entity connected to the ball,
-stadium, team or competitive action.
+The ACTUAL NEWS must remain the dominant visual.
 
-Food / consumer:
-A stylish entity connected to the actual product
-or consumer experience.
+ヤニねこ exists to visually represent the reader's emotional
+reaction to the news.
 
-Major announcements:
-A powerful Stand emerging behind the real subject
-to amplify the importance of the event.
+Use extremely exaggerated reactions inspired by gritty
+Japanese gambling manga and dramatic seinen manga:
 
-Do not use a Stand when it makes the actual news
-harder to understand.
+- shock: huge eyes, white eyes, sweat, mouth wide open
+- panic: trembling, sweating, chaotic pose
+- anger: furious face, veins, explosive gesture
+- excitement: intense grin, eyes wide open, leaning forward
+- joy: arms raised, ecstatic expression
+- despair: pale face, collapsed posture
+- confusion: blank or crossed eyes, sweat
+- disbelief: frozen expression, exaggerated shock
+- smugness: ridiculous confident grin
+- exhaustion: slumped posture, cigarette hanging from mouth
 
-The real product, person, place or event must remain
-the main subject.
+The reaction should be LARGE and visually memorable.
+
+Use dramatic manga effects when appropriate:
+speed lines, impact lines, sweat drops, shaking effects,
+heavy shadows, extreme close-ups, dramatic perspective,
+and large expressive gestures.
+
+Do NOT use the same pose or facial expression in every image.
+
+Choose the reaction based on the actual news.
+
+The mascot may be:
+- large in the foreground
+- beside the main subject
+- reacting in the background
+- partially visible
+- small in a corner
+
+Choose the placement that best preserves news comprehension.
+
+The mascot must never replace the actual product,
+person, team, company, location, event or technology
+that the article is about.
 
 ========================
+AI NEWSジャパン BRANDING
+========================
+
+Include the brand name:
+
+「AI NEWSジャパン」
+
+Use it as a small, clean editorial brand mark or title element.
+
+Do NOT write:
+「ヤニねこ」
+"YANI NEKO"
+or any other mascot name.
+
+Do not make the branding larger than the main news subject.
+
+The brand should feel naturally integrated into a premium
+manga news cover.
+
+========================
+NEWS EXPLANATION TEXT
+===============================================
 NEWS EXPLANATION TEXT
 ========================
 
@@ -665,10 +715,11 @@ No photorealistic appearance.
 
 No split comic panels.
 
-The final result should feel like
-a spectacular JoJo-style dramatic manga cover
-fused with a powerful American comic-book poster,
-while remaining faithful to the actual article.
+The final result should feel like a spectacular,
+high-impact Japanese dramatic manga cover fused with
+a powerful American comic-book poster and exaggerated
+gambling-manga reactions, while remaining faithful to
+the actual article.
 `;
 
     const result = await openai.images.generate({
