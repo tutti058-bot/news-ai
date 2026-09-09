@@ -542,37 +542,249 @@ EMOTION
 
 First understand the actual article.
 
-Then choose the most natural emotional response.
+Then choose the MOST NATURAL emotional reaction
+for this specific story.
 
-Do NOT make her surprised every time.
+IMPORTANT:
 
-Her emotion should change according to the news.
+Do NOT default to surprise.
 
-Possible reactions:
+Surprised expressions should be used RARELY,
+only when the actual news genuinely deserves shock.
+
+The character must have a wide emotional range
+across different articles.
+
+Act like a real recurring character with
+different moods, personalities and reactions.
+
+========================
+EMOTIONAL RANGE
+========================
+
+Possible emotions include:
 
 - excitement
+- genuine happiness
+- joy
 - curiosity
-- happiness
 - admiration
-- confusion
-- disbelief
-- irritation
-- anger
-- disappointment
-- sadness
-- fear
-- anxiety
+- fascination
 - amusement
-- laughter
-- boredom
-- exhaustion
-- relief
-- smugness
-- calm indifference
-- genuine surprise
+- laughing
+- smug satisfaction
+- proud / triumphant
+- playful teasing
+- mischievous grin
+- relaxed
+- sleepy
+- bored
+- lazy
+- indifferent
+- deadpan
+- confused
+- puzzled
+- skeptical
+- doubtful
+- annoyed
+- irritated
+- angry
+- frustrated
+- disappointed
+- sad
+- worried
+- nervous
+- anxious
+- embarrassed
+- awkward
+- impressed
+- relieved
+- exhausted
+- crying
+- laughing while crying
+- calm concentration
+- serious focus
+- shocked
 
-The expression should match
-the emotional meaning of the article.
+========================
+EMOTION DISTRIBUTION
+========================
+
+Do NOT repeatedly use:
+
+wide eyes + open mouth + raised hands.
+
+That reaction must NOT become the default.
+
+The emotional distribution should feel varied.
+
+Across different articles,
+deliberately rotate between:
+
+CALM:
+- sleepy
+- relaxed
+- neutral
+- deadpan
+- mildly interested
+
+POSITIVE:
+- smiling
+- excited
+- proud
+- fascinated
+- playful
+- smug
+
+NEGATIVE:
+- annoyed
+- frustrated
+- disappointed
+- sad
+- worried
+- angry
+
+COMEDIC:
+- confused
+- awkward
+- blank stare
+- mischievous grin
+- embarrassed
+- lazy reaction
+
+INTENSE:
+- panic
+- genuine shock
+- crying
+- screaming
+
+Use intense reactions selectively.
+
+========================
+NEWS-SPECIFIC EMOTION
+========================
+
+Choose the emotion from the meaning of the article.
+
+Examples:
+
+Good news:
+smile, excitement, pride, relief, curiosity.
+
+Interesting technology:
+curious eyes, focused expression, impressed face.
+
+Cheap / useful product:
+delighted, excited, satisfied.
+
+Expensive product / price increase:
+annoyed, devastated, frustrated, deadpan.
+
+Security incident:
+worried, tense, nervous.
+
+Sports victory:
+joy, pride, excitement, celebration.
+
+Sports defeat:
+disappointed, exhausted, depressed, blank stare.
+
+Controversy:
+annoyed, skeptical, deadpan, suspicious.
+
+Ridiculous news:
+confused, amused, laughing, baffled.
+
+Sad news:
+quiet sadness, concern, sympathy.
+
+Ordinary news:
+small natural reaction, sleepy face,
+coffee, cigarette, mild curiosity.
+
+========================
+FACIAL ACTING
+========================
+
+Make the facial expression clearly communicate
+the emotion.
+
+The face should vary through:
+
+- eyebrow shape
+- eyelid shape
+- pupil size
+- eye direction
+- mouth shape
+- cheek tension
+- blush
+- tears
+- sweat
+- ear position
+
+Do not rely on only large eyes and an open mouth.
+
+Examples:
+
+SMUG:
+slightly narrowed eyes,
+small crooked smile,
+relaxed posture.
+
+SLEEPY:
+half-closed eyes,
+small yawn,
+drooping ears.
+
+ANNOYED:
+narrowed eyes,
+tight mouth,
+furrowed brows.
+
+CURIOUS:
+slightly raised brows,
+focused eyes,
+leaning toward the subject.
+
+HAPPY:
+soft smile or broad grin,
+bright eyes,
+relaxed ears.
+
+CONFUSED:
+tilted head,
+uneven eyes,
+slightly open mouth.
+
+ANGRY:
+furrowed brows,
+sharp eyes,
+tense mouth,
+strong body language.
+
+SAD:
+drooping eyes,
+small mouth,
+lowered ears,
+quiet body language.
+
+EMBARRASSED:
+blushing,
+averted eyes,
+awkward smile.
+
+DEADPAN:
+flat expression,
+half-lidded eyes,
+minimal movement.
+
+GENUINELY SHOCKED:
+large eyes,
+open mouth,
+raised ears,
+dramatic posture.
+
+Use genuine shock only when appropriate.
 
 ========================
 ACTION
@@ -1005,50 +1217,182 @@ with unrelated decoration.
 VISUAL STYLE
 ========================
 
-Use a polished Japanese manga / anime editorial style.
+CORE VISUAL CONCEPT:
 
-Desired qualities:
+REALISTIC NEWS WORLD
++
+ANIME YANI NEKO
++
+MANGA REACTION
 
-- expressive
-- colorful
-- dynamic
-- cute
-- clean linework
-- strong composition
-- visually rich
-- cinematic
-- humorous when appropriate
-- dramatic when appropriate
+The world around Yani Neko should feel
+like a realistic editorial photograph or
+cinematic live-action news scene.
 
-The artwork should feel intentionally illustrated.
+Yani Neko is the ONLY strongly anime-styled
+character element.
+
+This contrast is intentional.
+
+========================
+REALISTIC NEWS WORLD
+========================
+
+Use realistic or highly photorealistic rendering for:
+
+- locations
+- buildings
+- laboratories
+- offices
+- streets
+- stadiums
+- stores
+- airports
+- vehicles
+- products
+- smartphones
+- computers
+- machinery
+- furniture
+- documents
+- realistic human figures when relevant
+- environmental details
+
+Real-world people should generally appear
+photorealistic or cinematic.
+
+Do NOT turn every person into an anime character.
+
+The news environment should feel believable
+and grounded in reality.
+
+Use realistic:
+
+- materials
+- lighting
+- reflections
+- textures
+- depth
+- perspective
+- shadows
+- environmental details
+
+The result should initially resemble
+a high-quality editorial photograph or
+cinematic news still.
+
+========================
+YANI NEKO CONTRAST
+========================
+
+Yani Neko remains fully anime-styled.
+
+She should stand out naturally against
+the realistic environment.
+
+Do NOT convert the entire image into anime
+just because Yani Neko is present.
+
+Do NOT convert Yani Neko into photorealism.
+
+The visual identity is:
+
+REAL WORLD
++
+ANIME CHARACTER
+
+This contrast is one of the main creative features
+of AI NEWSジャパン.
+
+========================
+MANGA REACTION LAYER
+========================
+
+Manga elements may appear around Yani Neko
+when useful:
+
+- expressive speech bubbles
+- sweat drops
+- motion lines
+- small impact marks
+- blush
+- stylized reaction symbols
+- selective manga sound effects
+
+Keep these effects restrained.
+
+The background should remain realistic.
+
+Do NOT cover the realistic environment
+with large manga textures.
+
+Do NOT turn the whole image into a manga page.
+
+========================
+VISUAL BALANCE
+========================
+
+Target overall feeling:
+
+approximately 70-85% realistic news world
++
+15-30% anime / manga character expression.
+
+This is a visual guideline,
+not a rigid mathematical requirement.
+
+The news subject remains visually credible.
+
+Yani Neko provides personality,
+humor and emotional contrast.
+
+========================
+STYLE AVOIDANCE
+========================
 
 Avoid:
 
-- photorealism
-- realistic human faces
-- generic 3D rendering
+- full anime backgrounds
+- fully cartoonized real-world objects
+- generic 3D CGI
 - stock illustration appearance
-- corporate infographic design
-- superhero poster design
+- corporate infographic layouts
+- superhero poster aesthetics
 - excessive American comic-book styling
-- gritty realistic anatomy
+- gritty realistic anatomy for Yani Neko
 - JoJo-style character design
 - Stand-like supernatural characters
-- generic superhero characters
+- generic fantasy characters
 
-The drama should come from:
+Do NOT make the realistic people
+look like manga characters.
 
-composition
-+
-expression
-+
-action
-+
-perspective
-+
-environment
-+
-manga effects
+Do NOT make Yani Neko look photorealistic.
+
+Do NOT blend the two styles into an
+unclear middle ground.
+
+The contrast should remain intentional
+and visually obvious.
+
+========================
+CAMERA / PHOTOGRAPHY FEEL
+========================
+
+Use photographic principles for the realistic world:
+
+- cinematic framing
+- realistic depth of field
+- natural perspective
+- believable lens perspective
+- realistic reflections
+- natural light
+- environmental depth
+
+The image should resemble
+a professionally photographed news scene
+with an anime character inserted naturally
+into that world.
 
 ========================
 AI NEWSジャパン BRANDING
