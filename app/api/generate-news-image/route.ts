@@ -259,18 +259,16 @@ ${(news.content ?? "").slice(0, 15000)}
 Create a high-quality editorial manga illustration for
 AI NEWSジャパン.
 
-The image must turn the ACTUAL NEWS into a visually memorable
-single-scene manga illustration.
+The goal is NOT to create a news poster.
 
-The core concept is:
+The goal is:
 
-"An actual news story experienced and reacted to by
-a cute recurring character."
+"A memorable manga scene in which the actual news
+is happening around a recurring cute character,
+and the character naturally reacts to it."
 
-The image must NOT feel like a corporate infographic
-with a mascot added afterward.
-
-It must feel like one coherent manga scene.
+The viewer should feel like they are looking at
+a scene from a manga rather than an infographic.
 
 ========================
 ACTUAL NEWS
@@ -320,41 +318,75 @@ AVOID:
 ${visualPlan.avoid.join(", ")}
 
 ========================
+MOST IMPORTANT VISUAL PRIORITY
+========================
+
+The image must visually communicate the ACTUAL NEWS.
+
+Do not make the character the only subject.
+
+Do not make the news itself disappear behind the character.
+
+Instead create a strong visual relationship:
+
+ACTUAL NEWS
++
+YANI NEKO
++
+REACTION
++
+ENVIRONMENT
+=
+ONE COHERENT MANGA SCENE
+
+The news and Yani Neko must feel like they belong
+in the same physical world.
+
+Do not paste the character onto a finished news poster.
+
+Do not create a corporate infographic.
+
+Do not create a poster with a mascot standing in a corner.
+
+========================
 NEWS ACCURACY
 ========================
 
-The actual news is the foundation of the illustration.
+The actual article is the foundation.
 
-Clearly show the real subject of the article:
+Clearly depict the real subject whenever possible:
+
 - actual product
 - actual technology
 - actual company
 - actual person when relevant
-- actual team
+- actual sports team or athlete when relevant
 - actual location
 - actual vehicle
-- actual event
 - actual device
 - actual service
-- actual visual symbols
+- actual event
 
-Do not replace the real subject with a generic version.
-
-Do not invent important facts.
-
-Do not create unrelated objects.
-
-If the article concerns a recognizable product,
-device, company or service, make it visually recognizable.
+Use the strongest visual symbol of the story.
 
 The viewer should understand the basic news
-from the image without reading the article.
+from the illustration itself.
+
+Do not invent major facts.
+
+Do not add unrelated technology.
+
+Do not replace the actual subject
+with a generic unrelated object.
+
+When a real-world object is central to the article,
+make it visually recognizable.
 
 ========================
-YANI NEKO - FIXED CHARACTER DESIGN
+YANI NEKO - FIXED CHARACTER
 ========================
 
-Add the recurring AI NEWSジャパン mascot character,
+Add the recurring AI NEWSジャパン mascot,
 ヤニねこ.
 
 IMPORTANT:
@@ -362,41 +394,43 @@ IMPORTANT:
 ヤニねこ is an ADULT WOMAN.
 
 She is:
+
+- clearly adult
 - petite
-- cute
 - youthful-looking
+- cute
 - slightly childish in personality
-- clearly adult in appearance and body proportions
+- expressive
+- comedic when appropriate
 
 She must NEVER look like a child.
 
-Her cuteness comes from her face, personality,
-expressions and behavior.
+Her youthful appearance is facial and stylistic,
+NOT childlike body proportions.
 
 FIXED APPEARANCE:
 
-- small petite adult woman
+- petite adult woman
 - cute youthful anime face
 - soft rounded face
 - large golden / amber cat-like eyes
-- blue-tinted pale ash-gray hair
+- pale ash-gray hair with a subtle blue tint
 - fluffy permed bob haircut
 - triangular cat ears
 - fluffy cat tail
 - small cute nose and mouth
-- cute anime proportions
 - adult body proportions
 
 FIXED CLOTHING:
 
 - oversized stretched slightly worn white T-shirt
 - simple black cat illustration on the shirt
-- the word "NEKO" may appear on the shirt
+- "NEKO" may appear on the shirt
 - loose dark blue-gray sweatpants
 - barefoot
 
-The character must look like the SAME CHARACTER
-in every article.
+Keep this character visually consistent
+from article to article.
 
 Do NOT redesign her.
 
@@ -406,55 +440,115 @@ Do NOT change her hair color.
 
 Do NOT change her eye color.
 
-Do NOT change her cat ears.
+Do NOT remove her cat ears.
 
 Do NOT remove her cat tail.
 
 Do NOT change her basic clothing.
 
-Do NOT make her photorealistic.
-
-Do NOT make her look like a real human model.
-
 Do NOT make her glamorous.
 
 Do NOT make her muscular.
 
+Do NOT make her photorealistic.
+
+Do NOT make her look like a real human model.
+
 Do NOT make her look like a child.
 
-Do NOT use realistic human facial proportions.
-
-Keep her cute anime appearance even during
-extreme comedic reactions.
-
 ========================
-YANI NEKO EMOTIONAL DIRECTION
+YANI NEKO MUST BE PART OF THE SCENE
 ========================
 
-FIRST understand the actual news.
+This is one of the most important rules.
 
-Then determine the natural emotional reaction
-a reader would have.
+Do NOT automatically place Yani Neko
+in the bottom-right corner.
 
-Then choose:
+Do NOT automatically place her beside the main subject.
 
-- facial expression
-- eye expression
-- mouth expression
-- pose
-- body language
-- action
-- interaction
-- reaction intensity
-- optional prop
+Do NOT make her look pasted onto the artwork.
 
-The emotion MUST come from the actual article.
+Instead, decide where she naturally belongs
+inside the actual news scene.
+
+She may:
+
+- stand in front of the subject
+- sit beside the subject
+- hold the subject
+- examine the subject
+- point toward the subject
+- use the subject
+- react directly to the subject
+- hide from the subject
+- run toward the subject
+- run away from the subject
+- celebrate near the subject
+- collapse because of the news
+- sit in the foreground while the news happens behind her
+- appear in the middle of the action
+- partially overlap the main subject
+- interact with another relevant character
+
+The environment must physically connect
+the character and the news.
+
+Use:
+
+- overlap
+- perspective
+- shared lighting
+- shared shadows
+- environmental objects
+- natural scale
+- direct interaction
+
+to make the character feel truly embedded
+in the scene.
+
+========================
+CHARACTER SCALE
+========================
+
+Do NOT keep Yani Neko tiny by default.
+
+Her scale should depend on the story.
+
+She may be:
+
+- large foreground
+- medium foreground
+- medium background
+- partially visible
+- sitting
+- crouching
+- lying down
+- leaning into the scene
+
+When her reaction is especially entertaining,
+she may occupy a large portion of the image.
+
+When the news itself is visually dominant,
+she may be smaller.
+
+The composition should decide.
+
+There is NO fixed corner position.
+
+========================
+EMOTION
+========================
+
+First understand the actual article.
+
+Then choose the most natural emotional response.
 
 Do NOT make her surprised every time.
 
-Do NOT repeat the same expression in every image.
+Her emotion should change according to the news.
 
-Possible emotions:
+Possible reactions:
 
 - excitement
 - curiosity
@@ -466,161 +560,168 @@ Possible emotions:
 - anger
 - disappointment
 - sadness
-- anxiety
 - fear
+- anxiety
 - amusement
 - laughter
 - boredom
 - exhaustion
 - relief
 - smugness
-- surprise when genuinely appropriate
+- calm indifference
+- genuine surprise
+
+The expression should match
+the emotional meaning of the article.
 
 ========================
-EMOTION EXAMPLES
+ACTION
 ========================
 
-NEW PRODUCT / EXCITING ANNOUNCEMENT:
+The reaction should be expressed through ACTION,
+not only facial expression.
 
-Use:
-sparkling eyes,
-big smile,
-leaning forward,
-holding or examining the product,
-excited body language.
+Whenever appropriate, show her:
 
-Do not automatically use shock.
+- grabbing her head
+- pointing
+- holding a smartphone
+- staring at a screen
+- holding a product
+- touching a device
+- counting money
+- holding an empty wallet
+- jumping
+- cheering
+- clapping
+- collapsing
+- hiding
+- running
+- smoking
+- drinking coffee
+- sitting lazily
+- sleeping
+- laughing
+- crying
+- trembling
+- staring blankly
+
+The action should tell part of the story.
+
+Do not use the same generic standing pose repeatedly.
 
 ========================
-
-NEW AI / TECHNOLOGY:
-
-Use:
-curious eyes,
-leaning toward a screen,
-holding a smartphone,
-typing,
-examining a device,
-interested expression,
-coffee nearby when appropriate.
-
+NEWS-SPECIFIC REACTION EXAMPLES
 ========================
+
+NEW PRODUCT:
+
+Show genuine curiosity or excitement.
+
+Yani Neko may grab the product,
+inspect it closely,
+hold it up,
+or react with sparkling eyes.
 
 PRICE INCREASE:
 
-Use:
-empty wallet,
-receipt,
-price tag,
-counting coins,
-holding her head,
-collapsed posture,
-angry or devastated expression.
+Show the financial impact.
 
-========================
+Examples:
 
-SECURITY PROBLEM / VULNERABILITY:
+- empty wallet
+- receipt
+- counting coins
+- staring at the price
+- collapsed posture
+- irritated expression
 
-Use:
-worried eyes,
-nervous expression,
-looking at a warning screen,
-backing away,
-holding her head,
-concerned posture.
+SECURITY PROBLEM:
 
-Do not make this celebratory.
+Show concern or nervousness.
 
-========================
+Examples:
+
+- warning screen
+- worried face
+- looking over her shoulder
+- holding her head
+- backing away
 
 SPORTS VICTORY:
 
-Use:
-jumping,
-raising both arms,
-cheering,
-clapping,
-fist pump,
-huge happy expression.
+Show movement and celebration.
 
-========================
+Examples:
+
+- jumping
+- cheering
+- raised arms
+- fist pump
+- huge smile
 
 SPORTS DEFEAT:
 
-Use:
-slumped posture,
-staring blankly at the scoreboard,
-drooping ears,
-holding her head,
-sad or disappointed expression.
+Show disappointment.
 
-========================
+Examples:
 
-ACCIDENT / DISASTER:
+- slumped posture
+- blank stare
+- drooping ears
+- sitting silently
+- holding her head
 
-Use:
-concern,
-fear,
-sadness,
-subdued shock,
-watching from an appropriate safe position.
+STRANGE OR FUNNY NEWS:
 
-Keep the event respectful.
+Allow strong comedic acting.
 
-Do NOT turn tragedy into comedy.
+Examples:
 
-========================
+- ridiculous expression
+- confused face
+- falling over
+- pointing
+- deadpan stare
+- exaggerated panic
 
-SCANDAL / CONTROVERSY:
-
-Use:
-deadpan expression,
-annoyed eyes,
-crossed arms,
-smoking while staring at the news,
-rubbing her forehead,
-disbelief.
-
-========================
-
-FUNNY / STRANGE NEWS:
+SERIOUS NEWS / ACCIDENT / DISASTER:
 
 Use:
-ridiculous facial expression,
-confused eyes,
-laughing,
-falling over,
-pointing,
-deadpan reaction,
-or exaggerated comedic behavior.
 
-========================
+- concern
+- fear
+- sadness
+- restrained shock
+
+Keep serious events respectful.
+
+Do NOT make tragedies into comedy.
 
 ORDINARY NEWS:
 
-Use:
-small natural reaction.
+Use a small natural reaction.
 
 Examples:
-- drinking coffee
-- smoking
-- looking at a phone
-- sitting lazily
-- sleepy expression
-- mildly curious expression
 
-Do NOT force a huge reaction into ordinary news.
+- coffee
+- smartphone
+- cigarette
+- sleepy face
+- mild curiosity
+
+Do not force a giant reaction into ordinary news.
 
 ========================
-CUTE FACE + EXTREME REACTION
+EXTREME FACIAL EXPRESSIONS
 ========================
 
-The BASE CHARACTER must remain cute.
+The base character remains cute.
 
-When the emotion becomes intense,
-the expression may become extremely exaggerated.
+When the emotion is intense,
+the expression can become wildly exaggerated.
 
-Possible exaggerated manga expressions:
+Allowed:
 
 - huge eyes
 - tiny pupils
@@ -628,209 +729,277 @@ Possible exaggerated manga expressions:
 - watery eyes
 - huge open mouth
 - trembling mouth
-- puffed cheeks
 - sweat drops
+- puffed cheeks
 - blushing
 - flattened ears
 - raised ears
-- crossed eyes
 - uneven eyes
-- shocked face
+- crossed eyes
+- deadpan face
 - exhausted face
+- panic face
 
-The face may become ridiculous,
-but it must remain recognizable as the same cute
-anime adult woman.
+The expression can become ridiculous.
 
-The visual principle is:
+But she must remain recognizable
+as the same cute adult character.
 
-CUTE
+Core formula:
+
+CUTE CHARACTER
 +
-EXTREME EMOTIONAL REACTION
-=
-YANI NEKO
-
-========================
-ACTION AND INTERACTION
-========================
-
-ヤニねこ should interact with the actual news.
-
-Do NOT simply place her standing beside the subject.
-
-Whenever possible:
-
-- hold the product
-- look at the product
-- touch the device
-- stare at a monitor
-- react to a price
-- hold a wallet
-- hold a smartphone
-- point at the news
-- hide behind something
-- grab her head
-- celebrate
-- collapse
-- run
-- sit
-- lie down
-- drink coffee
-- smoke
-- stare blankly
-- laugh
-- react directly to another character
-
-The action should explain her emotional relationship
-to the news.
-
-========================
-CHARACTER SCALE
-========================
-
-Do NOT automatically make ヤニねこ tiny.
-
-Choose the scale according to the story.
-
-She may be:
-
-- large foreground character
-- medium character
-- small background character
-- partially visible
-- sitting in the foreground
-- interacting with the main subject
-
-When the reaction is the visual hook,
-ヤニねこ may occupy a large portion of the image.
-
-The actual news must still remain clearly understandable.
-
-========================
-MULTIPLE YANI NEKO
-========================
-
-When it improves the manga storytelling,
-two or more versions of the SAME ヤニねこ may appear.
-
-For example:
-
-Large ヤニねこ:
-extreme reaction.
-
-Small ヤニねこ:
-calmly drinking coffee.
-
-Or:
-
-Large ヤニねこ:
-excited about a new product.
-
-Small ヤニねこ:
-sleeping because she is exhausted.
-
-Use this selectively.
-
-Do NOT create multiple unrelated character designs.
-
-Every version must clearly be the same character.
+STRONG PERSONALITY
++
+NEWS-SPECIFIC REACTION
 
 ========================
 SPEECH BUBBLES
 ========================
 
-Speech bubbles ARE allowed.
+Speech bubbles are allowed,
+but they are secondary to the artwork.
 
-Use them when they improve the manga storytelling.
+Use at most one or two short speech bubbles
+unless the scene genuinely requires more.
 
-Character speech should be short and natural.
+Keep dialogue short.
 
 Examples:
 
 「え!?」
 「マジかよ!?」
-「これ便利じゃん!!」
-「またかよ…」
 「高っ!!」
+「またかよ…」
+「これ欲しい」
 「なんで!?」
 「やば…」
-「これは欲しい」
-「ちょっと待って!?」
+「ちょっと待って」
 「ふーん」
-「なるほど…」
+「なるほど」
 「まずはコーヒー…」
 
-Keep dialogue approximately 2 to 12 Japanese characters
-when possible.
+Prefer approximately 2 to 12 Japanese characters.
 
-The dialogue must represent ヤニねこ's reaction
-to the actual news.
+The dialogue should be a reaction,
+NOT a summary of the article.
 
-Do NOT use dialogue to explain the whole article.
+Do NOT explain the whole news story
+inside speech bubbles.
 
 Do NOT invent facts.
 
-Do NOT create long paragraphs.
+Do NOT display the character name.
 
-Do NOT create promotional CTAs.
+Do NOT use promotional text.
 
-Do NOT write:
+Never use:
+
 「続きはサイトへ」
 「詳細はこちら」
 「フォローして」
 「コメントして」
 
-Do NOT display the character name.
-
 ========================
-EDITORIAL NEWS TEXT
+TEXT MINIMIZATION
 ========================
 
-Short factual editorial text is allowed.
+This image should NOT be text-heavy.
 
-Use only facts contained in the article.
+Do NOT fill the image with headlines,
+captions, boxes, charts, statistics,
+or multiple explanatory labels.
 
-Keep it short.
+Use only the minimum amount of text
+needed for visual storytelling.
+
+Priority:
+
+1. Real visual subject
+2. Yani Neko's action
+3. Emotional reaction
+4. Environment
+5. Optional short speech bubble
+6. Small AI NEWSジャパン brand mark
+
+A critical statistic may appear once
+when it is visually important.
+
+Do NOT repeat the same fact in multiple places.
+
+Do NOT turn the image into an infographic.
+
+========================
+EDITORIAL TEXT
+========================
+
+Very short factual editorial text is allowed
+only when it materially improves understanding.
 
 Examples:
 
-「日本初」
-「新型AI発表」
-「全国展開」
-「9月から導入」
+「75%」
+「新型AI」
 「大幅値上げ」
+「新モデル」
+「9月開始」
 
-Do not turn the image into an infographic.
+Use no more than a small amount.
 
-Character speech and editorial news text
-should be visually distinct.
+Never create large blocks of text.
+
+The image should remain primarily visual.
 
 ========================
 MANGA EFFECTS
 ========================
 
-Use manga visual effects when appropriate:
+Use manga effects according to the scene:
 
 - speed lines
+- motion lines
 - impact lines
 - sweat
-- trembling lines
+- trembling
 - dramatic shadows
-- expressive motion
-- stylized Japanese sound effects
+- expressive marks
+- stylized sound effects
 - dynamic perspective
-- exaggerated reaction marks
 
-Possible sound effects:
+Sound effects may include:
 
 「ドン！」
 「ゴゴゴゴ…」
 「ドドドド…」
 「バァーン！」
 
-Do NOT use sound effects mechanically.
+Use them selectively.
 
-Do NOT let effects cover important news information.
+Do not cover important news elements.
+
+Do not use effects simply because
+the image is a manga.
+
+========================
+MULTIPLE YANI NEKO
+========================
+
+Two or more versions of the same character
+may appear ONLY when they improve storytelling.
+
+Examples:
+
+Large Yani Neko:
+extreme reaction.
+
+Small Yani Neko:
+calmly drinking coffee.
+
+Or:
+
+Large Yani Neko:
+excited.
+
+Small Yani Neko:
+sleeping.
+
+This is optional.
+
+Do not use multiple characters
+without a storytelling reason.
+
+Every version must be the SAME character.
+
+========================
+COMPOSITION
+========================
+
+Create ONE coherent manga scene.
+
+Do NOT create a poster layout.
+
+Do NOT create separate unrelated panels.
+
+Do NOT create an infographic.
+
+Do NOT automatically center the main object
+like a product advertisement.
+
+Do NOT automatically put Yani Neko in the corner.
+
+Instead create a natural scene
+with foreground, middle ground and background.
+
+Think like a manga artist composing
+a memorable single page illustration.
+
+Possible structure:
+
+FOREGROUND:
+Yani Neko reaction or action
+
+MIDDLE:
+actual news subject / event
+
+BACKGROUND:
+location and environmental context
+
+But this is NOT mandatory.
+
+Reverse the hierarchy when the story requires it.
+
+The viewer should immediately understand:
+
+WHAT HAPPENED
++
+WHAT THIS STORY IS ABOUT
++
+HOW YANI NEKO FEELS
+
+The composition should have:
+
+- strong focal point
+- clear visual hierarchy
+- depth
+- movement
+- environmental storytelling
+- character interaction
+
+========================
+NEWS WORLD + CHARACTER WORLD
+========================
+
+The environment should help tell the story.
+
+For example:
+
+technology news:
+office, laboratory, smartphone, computer
+
+sports:
+stadium, field, scoreboard, crowd
+
+automotive:
+street, parking area, vehicle environment
+
+business:
+office, store, money, documents
+
+entertainment:
+stage, theater, audience, production environment
+
+travel:
+airport, train station, city, luggage
+
+social controversy:
+street, press area, smartphone screens,
+crowd reaction
+
+Use contextual objects
+that actually belong to the article.
+
+Do not clutter the image
+with unrelated decoration.
 
 ========================
 VISUAL STYLE
@@ -838,94 +1007,48 @@ VISUAL STYLE
 
 Use a polished Japanese manga / anime editorial style.
 
-The image should be:
+Desired qualities:
 
-- highly expressive
+- expressive
 - colorful
 - dynamic
-- cleanly illustrated
+- cute
+- clean linework
+- strong composition
 - visually rich
+- cinematic
 - humorous when appropriate
 - dramatic when appropriate
-- cute
-- energetic
-- cinematic
 
-Use bold manga linework and strong visual composition.
+The artwork should feel intentionally illustrated.
 
-Avoid overly realistic rendering.
+Avoid:
 
-Avoid photorealism.
-
-Avoid realistic human faces.
-
-Avoid gritty realistic human anatomy.
-
-Avoid excessive American comic-book styling.
-
-Avoid superhero-poster aesthetics.
-
-Avoid JoJo-style character design.
-
-Do NOT use Stand-like supernatural characters.
-
-Do NOT create a generic superhero.
+- photorealism
+- realistic human faces
+- generic 3D rendering
+- stock illustration appearance
+- corporate infographic design
+- superhero poster design
+- excessive American comic-book styling
+- gritty realistic anatomy
+- JoJo-style character design
+- Stand-like supernatural characters
+- generic superhero characters
 
 The drama should come from:
-composition,
-facial expressions,
-poses,
-objects,
-perspective,
-manga effects,
-and the actual news.
 
-========================
-COMPOSITION
-========================
-
-Create ONE coherent scene.
-
-Do NOT create unrelated panels.
-
-The image may have the visual density
-of a manga page while remaining one unified scene.
-
-Create strong visual hierarchy:
-
-ACTUAL NEWS
+composition
 +
-YANI NEKO REACTION
+expression
 +
-OPTIONAL SPEECH BUBBLE
+action
 +
-MANGA EFFECTS
+perspective
 +
-OPTIONAL SECONDARY COMEDIC BEAT
-
-The viewer should understand:
-
-1. What happened.
-2. What the news is about.
-3. How ヤニねこ feels about it.
-
-The composition should have visual rhythm.
-
-Avoid sterile corporate infographic layouts.
-
-Avoid placing ヤニねこ automatically in one corner.
-
-Avoid making her look pasted onto the artwork.
-
-Integrate her into the environment using:
-
-- perspective
-- overlap
-- lighting
-- shadows
-- interaction
-- scale
-- environmental details
+environment
++
+manga effects
 
 ========================
 AI NEWSジャパン BRANDING
@@ -937,7 +1060,9 @@ Include:
 
 as a small clean editorial brand mark.
 
-The brand should be visible but secondary.
+It should be visible but subtle.
+
+Do NOT make the logo huge.
 
 IMPORTANT:
 
@@ -946,39 +1071,56 @@ Never write:
 「ヤニねこ」
 "YANI NEKO"
 
-or any other mascot name.
+or any mascot name.
 
-The character is identified only by her consistent appearance.
+Only the appearance of the recurring character
+identifies her.
 
 ========================
-FINAL QUALITY
+FINAL DIRECTIVE
 ========================
 
-The final image should feel like:
+Before rendering, mentally check:
 
-A funny, dramatic, highly polished Japanese manga
-created specifically for AI NEWSジャパン.
+Is this a NEWS MANGA SCENE?
 
-It should NOT feel like:
+Or does it look like a NEWS POSTER?
 
-- a stock illustration
-- a generic AI image
-- a corporate infographic
-- a mascot pasted onto a news image
-- a superhero poster
-- a realistic movie still
+Choose the NEWS MANGA SCENE.
 
-The actual news must remain accurate.
+Is Yani Neko actually participating
+in the scene?
 
-ヤニねこ must remain cute, adult, recognizable,
-and visually consistent.
+Or does she look pasted onto the corner?
 
-Her emotional reaction should change naturally
-from article to article.
+Choose PARTICIPATING IN THE SCENE.
 
-Make the image visually surprising,
-memorable and entertaining while preserving
-the meaning of the news.
+Is the image overloaded with text?
+
+If yes, REMOVE unnecessary text.
+
+Is the emotional reaction specific
+to this article?
+
+If not, change the expression and action.
+
+Is the character clearly an adult?
+
+Yes.
+
+Is she still cute and recognizable?
+
+Yes.
+
+The final result should feel like:
+
+"A funny, expressive, highly polished manga scene
+created specifically to visualize this actual news story
+for AI NEWSジャパン."
+
+It should be memorable enough
+that the character and the news
+are both recognizable after one glance.
 `;
 
     const result = await openai.images.generate({
