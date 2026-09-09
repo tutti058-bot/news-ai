@@ -550,69 +550,201 @@ YANI NEKO / REACTION CHARACTER
 ========================
 
 Add the recurring AI NEWSジャパン mascot character,
-a small adult cat-eared woman called ヤニねこ.
+a cute anime-style adult cat-eared woman called ヤニねこ.
 
-IMPORTANT:
-The character name "ヤニねこ" must NEVER appear as visible text
-inside the generated image.
+IMPORTANT CHARACTER CONSISTENCY:
 
-The mascot itself should be visually consistent across articles:
+The appearance of ヤニねこ must remain extremely consistent
+across every article.
 
-- small adult woman
+Use the following character design as a FIXED CHARACTER MODEL:
+
+- clearly adult woman
+- short, petite body
 - youthful, childish-looking face while clearly adult
-- blue-toned ash-colored permed bob haircut
-- cat ears
-- cat tail
-- oversized stretched and slightly worn white NEKO T-shirt
-- loose sweatpants
+- cute anime facial proportions
+- soft, rounded face
+- large golden / amber cat-like eyes
+- blue-tinted pale ash-gray hair
+- fluffy permed bob haircut
+- distinctive triangular cat ears matching the hair
+- soft fluffy cat tail
+- small, cute nose and mouth
+- slender but natural adult body
+- expressive anime-style face
+
+CLOTHING MUST REMAIN CONSISTENT:
+
+- oversized stretched, slightly worn white T-shirt
+- simple black cat illustration on the shirt
+- the word "NEKO" may appear on the shirt
+- loose dark blue-gray sweatpants
 - barefoot
-- often holding or smoking a cigarette
-- expressive, slightly foolish and chaotic personality
 
-The mascot is NOT the main subject of the news.
+The character should look like the SAME CHARACTER
+from article to article.
 
-The ACTUAL NEWS must remain the dominant visual.
+Do NOT redesign the character.
 
-ヤニねこ exists to visually represent the reader's emotional
-reaction to the news.
+Do NOT change the hairstyle.
 
-Use extremely exaggerated reactions inspired by gritty
-Japanese gambling manga and dramatic seinen manga:
+Do NOT change the hair color.
 
-- shock: huge eyes, white eyes, sweat, mouth wide open
-- panic: trembling, sweating, chaotic pose
-- anger: furious face, veins, explosive gesture
-- excitement: intense grin, eyes wide open, leaning forward
-- joy: arms raised, ecstatic expression
-- despair: pale face, collapsed posture
-- confusion: blank or crossed eyes, sweat
-- disbelief: frozen expression, exaggerated shock
-- smugness: ridiculous confident grin
-- exhaustion: slumped posture, cigarette hanging from mouth
+Do NOT change the eye color.
 
-The reaction should be LARGE and visually memorable.
+Do NOT make the character realistic.
 
-Use dramatic manga effects when appropriate:
-speed lines, impact lines, sweat drops, shaking effects,
-heavy shadows, extreme close-ups, dramatic perspective,
-and large expressive gestures.
+Do NOT make the character photorealistic.
 
-Do NOT use the same pose or facial expression in every image.
+Do NOT make the character look like a real human model.
 
-Choose the reaction based on the actual news.
+Do NOT give the character a mature glamorous fashion-model appearance.
 
-The mascot may be:
+Do NOT turn the character into a gritty realistic manga woman.
+
+The mascot must remain a cute anime character even when
+her emotional reaction is extremely exaggerated.
+
+The NEWS WORLD may use dramatic gritty manga rendering,
+but ヤニねこ itself should retain a cute anime appearance.
+
+========================
+REACTION DIRECTION
+========================
+
+The emotional reaction must be selected according to
+the actual news.
+
+Do NOT make her surprised in every image.
+
+Choose the most natural emotional reaction for the article.
+
+Possible reactions include:
+
+- surprise
+- excitement
+- curiosity
+- confusion
+- disbelief
+- happiness
+- smug satisfaction
+- anger
+- irritation
+- disappointment
+- sadness
+- anxiety
+- fear
+- boredom
+- exhaustion
+- sleepiness
+- relief
+- admiration
+- embarrassment
+- amusement
+
+The reaction should feel like a funny, relatable reaction
+from the reader's point of view.
+
+Her expressions can become extremely exaggerated,
+inspired by dramatic Japanese gambling manga and seinen manga,
+but the underlying character design must remain cute and anime-like.
+
+Examples:
+
+SURPRISE:
+large sparkling or widened eyes, raised ears, open mouth,
+dramatic pose and sweat.
+
+ANGER:
+furrowed eyebrows, puffed cheeks or angry face,
+tense pose and dramatic manga effects.
+
+JOY:
+bright sparkling eyes, huge smile, energetic pose.
+
+DESPAIR:
+drooping ears, watery eyes, collapsed posture.
+
+BOREDOM:
+half-lidded eyes, slouched posture, cigarette,
+completely unimpressed expression.
+
+CURIOSITY:
+leaning toward the news, focused eyes,
+interested and slightly silly expression.
+
+CONFUSION:
+tilted head, uneven eyes, sweat,
+awkward expression.
+
+SMUG:
+small confident smile, relaxed eyes,
+slightly ridiculous proud pose.
+
+EXHAUSTION:
+messy posture, sleepy eyes, cigarette hanging loosely,
+coffee nearby.
+
+The reaction should match the emotional meaning of the news.
+
+Do NOT force a dramatic reaction when the article
+does not justify one.
+
+========================
+REACTION SCALE
+========================
+
+The reaction may be subtle or extremely exaggerated
+depending on the article.
+
+For major shocking news:
+use a large, explosive reaction.
+
+For ordinary news:
+use a smaller, understated reaction.
+
+For funny or strange news:
+use an exaggerated comedic reaction.
+
+For serious accidents, disasters or tragedies:
+use an appropriately concerned or shocked expression,
+without making the event itself comedic.
+
+The mascot can appear:
 - large in the foreground
-- beside the main subject
-- reacting in the background
-- partially visible
+- medium beside the main subject
 - small in a corner
+- sitting in the background
+- partially visible
+- reacting alongside the main subject
 
-Choose the placement that best preserves news comprehension.
+Choose the composition that best serves the article.
+
+The actual news event must remain the primary subject.
 
 The mascot must never replace the actual product,
-person, team, company, location, event or technology
-that the article is about.
+person, team, company, location or event.
+
+========================
+MANGA REACTION EFFECTS
+========================
+
+Use dramatic manga effects when they fit the emotion:
+
+- speed lines
+- impact lines
+- sweat
+- trembling lines
+- dramatic shadows
+- explosive background effects
+- exaggerated eyes
+- expressive hands
+- dynamic perspective
+- stylized Japanese sound effects
+
+Use these effects selectively.
+
+Do not make every image look identical.
 
 ========================
 AI NEWSジャパン BRANDING
@@ -622,18 +754,24 @@ Include the brand name:
 
 「AI NEWSジャパン」
 
-Use it as a small, clean editorial brand mark or title element.
+Use it as a clean editorial brand mark.
+
+IMPORTANT:
+
+Never display the mascot's name in the image.
 
 Do NOT write:
 「ヤニねこ」
 "YANI NEKO"
 or any other mascot name.
 
-Do not make the branding larger than the main news subject.
+The only mascot identification should come
+from the character's consistent appearance.
 
-The brand should feel naturally integrated into a premium
-manga news cover.
+The AI NEWSジャパン branding should remain secondary
+to the actual news.
 
+========================
 ========================
 NEWS EXPLANATION TEXT
 ===============================================
@@ -716,10 +854,14 @@ No photorealistic appearance.
 No split comic panels.
 
 The final result should feel like a spectacular,
-high-impact Japanese dramatic manga cover fused with
-a powerful American comic-book poster and exaggerated
-gambling-manga reactions, while remaining faithful to
-the actual article.
+high-impact Japanese dramatic manga news cover fused with
+a powerful American comic-book poster.
+Keep the news world dramatic and visually powerful,
+while keeping ヤニねこ consistently cute, anime-like,
+and recognizable from article to article.
+The emotional reaction may be extremely exaggerated,
+but the character design must remain cute and consistent.
+Always remain faithful to the actual article.
 `;
 
     const result = await openai.images.generate({
