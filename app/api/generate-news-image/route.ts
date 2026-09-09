@@ -612,260 +612,320 @@ but ヤニねこ itself should retain a cute anime appearance.
 REACTION DIRECTION
 ========================
 
-FIRST determine the emotional tone of the ACTUAL NEWS.
+FIRST understand the actual news and determine:
 
-Then choose ヤニねこ's facial expression, eyes, mouth,
-body language and pose to match that emotional tone.
+1. What happened?
+2. How important is it?
+3. What emotional feeling would a reader naturally have?
+4. What would ヤニねこ physically DO when reacting to it?
+
+Then create ヤニねこ's:
+- facial expression
+- eye expression
+- mouth expression
+- body language
+- pose
+- action
+- interaction with the news
+- optional props or small objects
+
+The reaction must be specifically connected to the article.
 
 IMPORTANT:
 Do NOT automatically make ヤニねこ surprised.
 
-Do NOT use the same expression repeatedly.
+Do NOT use the same pose, emotion or action repeatedly.
 
-The character's appearance is FIXED,
-but her emotion must change from article to article.
-
-The reaction should feel like a natural,
-funny and relatable reader reaction to the specific news.
+The character design remains FIXED.
+Her emotion, pose, action and situation change according
+to the actual news.
 
 ========================
-EMOTION MATCHING
+EMOTION + ACTION MATCHING
 ========================
 
 POSITIVE / EXCITING NEWS:
 
-Examples:
-- new product launches
-- major technological breakthroughs
-- successful achievements
-- exciting new features
-- record-breaking results
+Possible actions:
+- leaning toward the new product
+- holding the product excitedly
+- looking at a screen with sparkling eyes
+- raising both hands
+- jumping slightly
+- clapping
+- hugging a pillow or object in excitement
 
-Use:
-- bright sparkling eyes
-- happy smile
-- excited expression
-- energetic pose
-- leaning forward
-- raised hands when appropriate
-
-The reaction should feel genuinely happy or excited,
-not shocked.
+Expression:
+bright eyes, happy smile, excitement.
 
 ========================
 
-INTERESTING / CURIOUS NEWS:
+NEW TECHNOLOGY / AI:
 
-Examples:
-- new technology
-- unusual discoveries
-- interesting services
-- unexpected developments
+Possible actions:
+- staring closely at a monitor
+- holding a smartphone
+- typing rapidly
+- leaning forward with curiosity
+- comparing two screens
+- coffee beside the keyboard
 
-Use:
-- curious eyes
-- slightly tilted head
-- leaning toward the subject
-- interested expression
-- small smile
-- thoughtful pose
-
-The reaction should communicate:
-"へぇ、なにこれ？"
-rather than extreme surprise.
+Expression:
+curious, fascinated, impressed, slightly overwhelmed.
 
 ========================
 
-NEGATIVE / CONCERNING NEWS:
+PRICE INCREASE / BAD DEAL:
 
-Examples:
-- security vulnerabilities
-- accidents
-- system failures
-- scandals
-- serious problems
-- damage or danger
+Possible actions:
+- staring at an empty wallet
+- counting coins
+- holding a receipt
+- clutching her head
+- collapsing onto a desk
+- angrily pointing at a price tag
 
-Use:
-- worried expression
-- nervous eyes
-- sweat
-- slightly pale face
-- tense posture
-- concerned or uneasy body language
-
-Do NOT make serious news look funny.
+Expression:
+shock, anger, despair or disbelief.
 
 ========================
 
-ANGER / FRUSTRATION:
+SECURITY / CYBER / VULNERABILITY:
 
-Examples:
-- unreasonable price increases
-- controversial decisions
-- unfair treatment
-- frustrating failures
-- outrageous behavior
+Possible actions:
+- staring nervously at a computer
+- backing away from a warning screen
+- covering her mouth
+- holding her head
+- cautiously touching a keyboard
+- looking worriedly at a security alert
 
-Use:
-- angry eyebrows
-- annoyed expression
-- clenched fists
-- irritated eyes
-- exaggerated frustrated pose
-- dramatic manga anger effects
+Expression:
+anxiety, concern, fear or confusion.
 
-The emotion should communicate:
-"なんでだよ！"
-or
-"ふざけんな！"
-
-without adding dialogue text.
+Do NOT make this type of news look celebratory.
 
 ========================
 
-SADNESS / DISAPPOINTMENT:
+SPORTS / VICTORY:
 
-Examples:
-- cancellations
-- losses
-- failures
-- disappointing announcements
-- unfortunate outcomes
+Possible actions:
+- jumping in celebration
+- raising both arms
+- waving a towel
+- cheering toward the stadium
+- clenching fists in excitement
 
-Use:
-- drooping ears
-- watery eyes
-- disappointed expression
-- slumped shoulders
-- lowered head
-- tired or dejected posture
-
-Keep the character cute even when sad.
+Expression:
+joy, excitement, amazement.
 
 ========================
 
-SHOCK / DISBELIEF:
+SPORTS / DEFEAT:
 
-Use only when the news is genuinely surprising,
-unexpected or extraordinary.
+Possible actions:
+- lying face-down
+- staring blankly at the scoreboard
+- holding her head
+- sitting with drooping ears
 
-Use:
-- very large eyes
-- open mouth
-- raised ears
-- dramatic pose
-- sweat
-- explosive manga reaction effects
-
-This should be an occasional high-impact reaction,
-not the default expression.
+Expression:
+disappointment, sadness or disbelief.
 
 ========================
 
-FUNNY / ABSURD NEWS:
+ACCIDENT / DISASTER:
 
-Examples:
-- bizarre incidents
-- strange products
-- ridiculous situations
-- unusual human behavior
+Possible actions:
+- looking toward the incident from a safe distance
+- covering her mouth
+- holding her chest
+- standing frozen
+- anxiously watching emergency vehicles
 
-Use:
-- exaggerated comedic face
-- confused eyes
-- ridiculous pose
-- laughing or amused expression
-- deadpan reaction when appropriate
+Expression:
+concern, fear, sadness or shock.
 
-The character may become extremely silly,
-but must remain cute.
+Keep the reaction respectful.
+Do NOT make tragedy comedic.
 
 ========================
 
-BORING / ROUTINE NEWS:
+SCANDAL / CONTROVERSY / OUTRAGE:
 
-Examples:
-- routine updates
-- minor system changes
-- ordinary business announcements
-- technical maintenance
+Possible actions:
+- smoking while giving a deadpan stare
+- crossing her arms
+- pointing accusingly
+- looking at her phone with disbelief
+- rubbing her forehead
 
-Use:
-- half-lidded eyes
-- sleepy expression
-- relaxed posture
-- slouching
-- cigarette
-- coffee
-- mildly uninterested expression
+Expression:
+irritation, disbelief, anger or exhausted sarcasm.
 
-Do NOT force excitement into ordinary news.
+========================
+
+FUNNY / STRANGE / ABSURD NEWS:
+
+Possible actions:
+- laughing uncontrollably
+- falling over
+- pointing at the strange event
+- holding her stomach
+- staring blankly in disbelief
+
+Expression:
+comedic confusion, amusement, laughter or deadpan disbelief.
+
+Keep the character cute even when the reaction is ridiculous.
+
+========================
+
+BUSINESS / PRODUCT ANNOUNCEMENT:
+
+Possible actions:
+- examining the product
+- comparing products
+- holding a smartphone
+- looking at a price tag
+- drinking coffee while watching the announcement
+- reacting to a presentation screen
+
+Choose the action based on whether the announcement
+is positive, negative, surprising or ordinary.
+
+========================
+
+ORDINARY / ROUTINE NEWS:
+
+Possible actions:
+- drinking coffee
+- scrolling on her phone
+- sitting lazily
+- smoking while looking at the news
+- lying down
+- giving a small uninterested glance
+
+Expression:
+relaxed, sleepy, mildly curious or deadpan.
+
+Do NOT force an exaggerated reaction.
 
 ========================
 
 POSITIVE BUT SERIOUS NEWS:
 
-Examples:
-- medical or scientific breakthroughs
-- important safety improvements
-- major infrastructure improvements
+Possible actions:
+- quietly watching the announcement
+- holding her hands together
+- looking relieved
+- gently smiling
+- thoughtfully examining the information
+
+Use restrained emotion.
+
+========================
+
+SERIOUS NEWS:
+
+The reaction must respect the seriousness of the subject.
 
 Use:
-- calm relief
-- gentle smile
-- interested expression
-- thoughtful eyes
+- concerned posture
+- subdued expression
+- worried eyes
+- quiet sadness
+- restrained shock
 
-Avoid excessive comedy when the subject is serious.
+Avoid silly props and exaggerated comedy.
 
 ========================
+CONTEXTUAL PROP RULE
+========================
 
-SERIOUS TRAGEDY / DISASTER:
+Optional props may be used when they naturally connect
+to the article.
 
 Examples:
-- deaths
-- natural disasters
-- major accidents
-- serious injuries
-- large-scale damage
 
-Use:
-- concerned expression
-- sadness
-- fear or shock when appropriate
-- subdued body language
+technology:
+smartphone, laptop, monitor, keyboard, server display
 
-Do NOT use goofy expressions,
-celebratory poses,
-or comedic reactions.
+money:
+wallet, coins, receipt, price tag, calculator
 
-The actual event must be treated respectfully.
+sports:
+ball, jersey, scoreboard, stadium item
+
+food:
+plate, drink, menu, shopping bag
+
+travel:
+suitcase, ticket, map, vehicle
+
+business:
+document, product package, smartphone, presentation screen
+
+security:
+warning screen, laptop, security alert
+
+Use only props that make sense for the actual article.
+
+Do NOT add random decorative objects.
 
 ========================
-REACTION VARIATION
+CHARACTER INTERACTION
 ========================
 
-Vary the emotional intensity according to the importance
-and emotional weight of the news.
+Whenever possible, make ヤニねこ interact with the news
+rather than simply standing beside it.
 
-Do not make every article look like a climax.
+Examples:
 
-Some images should have:
-- subtle expressions
-- relaxed poses
-- curious looks
-- deadpan reactions
+Instead of:
+ヤニねこ standing next to a smartphone.
 
-Other images may have:
-- extreme facial expressions
-- dramatic poses
-- explosive manga effects
+Prefer:
+ヤニねこ staring at the smartphone in disbelief.
 
-The variation should make the character feel alive
-rather than mechanically repeated.
+Instead of:
+ヤニねこ standing next to a price tag.
 
-The character design must NEVER change while the emotion changes.
+Prefer:
+ヤニねこ clutching her wallet while staring at the price.
+
+Instead of:
+ヤニねこ standing next to a computer.
+
+Prefer:
+ヤニねこ leaning toward the screen while nervously
+watching a security warning.
+
+The action should visually explain the emotional relationship
+between the mascot and the news.
+
+========================
+REACTION VARIETY
+========================
+
+Avoid repetitive compositions.
+
+Across different articles, vary:
+- facial expression
+- eye shape
+- mouth shape
+- head angle
+- body posture
+- hand gestures
+- sitting / standing / lying position
+- camera distance
+- foreground / background placement
+- interaction with objects
+- reaction intensity
+
+The same character should feel alive and spontaneous.
+
+Do NOT change the character's fundamental appearance.
 
 ========================
 REACTION SCALE
