@@ -1219,132 +1219,323 @@ VISUAL STYLE
 
 CORE VISUAL CONCEPT:
 
-REALISTIC NEWS WORLD
+PHOTOREALISTIC NEWS WORLD
 +
 ANIME YANI NEKO
 +
-MANGA REACTION
+SUBTLE MANGA REACTION
 
-The world around Yani Neko should feel
-like a realistic editorial photograph or
-cinematic live-action news scene.
+The contrast between the realistic world
+and the anime character is intentional.
 
-Yani Neko is the ONLY strongly anime-styled
-character element.
+The REAL-WORLD portion must look as close
+to an actual photograph as possible.
 
-This contrast is intentional.
+Yani Neko remains fully anime-styled.
 
 ========================
-REALISTIC NEWS WORLD
+REALISM PRIORITY
 ========================
 
-Use realistic or highly photorealistic rendering for:
+IMPORTANT:
 
-- locations
-- buildings
-- laboratories
-- offices
-- streets
-- stadiums
-- stores
-- airports
-- vehicles
-- products
-- smartphones
-- computers
-- machinery
-- furniture
-- documents
-- realistic human figures when relevant
-- environmental details
+Everything except Yani Neko should be
+as realistic and photographic as possible.
 
-Real-world people should generally appear
-photorealistic or cinematic.
+Target:
 
-Do NOT turn every person into an anime character.
+approximately 90-95% realistic
++
+5-10% anime / manga elements.
 
-The news environment should feel believable
-and grounded in reality.
+This is a visual target,
+not a mathematical requirement.
+
+The image should initially read
+as a real photograph or cinematic
+editorial news photograph.
+
+Only after noticing Yani Neko should
+the viewer realize that an anime character
+has entered the real world.
+
+========================
+REALISTIC PEOPLE
+========================
+
+Real-world people must look like
+real human beings photographed
+in a real location.
+
+Use:
+
+- realistic skin texture
+- realistic hair
+- realistic facial structure
+- realistic clothing
+- realistic hands
+- realistic body proportions
+- natural posture
+- natural lighting
+- natural shadows
+- realistic depth of field
+
+Do NOT make unrelated people anime-styled.
+
+Do NOT give background people
+cartoon eyes or exaggerated expressions.
+
+Do NOT use illustrated faces for realistic
+news subjects.
+
+Do NOT use generic fantasy faces.
+
+The real-world people should look
+like documentary / editorial photography.
+
+========================
+REALISTIC ENVIRONMENT
+========================
+
+Buildings, streets, offices, laboratories,
+stadiums, stores, airports and other locations
+must look photographic.
 
 Use realistic:
 
+- architecture
 - materials
-- lighting
+- surfaces
+- glass
+- metal
+- concrete
+- wood
+- fabric
 - reflections
-- textures
-- depth
-- perspective
 - shadows
-- environmental details
+- weather
+- atmospheric perspective
+- environmental depth
+- natural imperfections
 
-The result should initially resemble
-a high-quality editorial photograph or
-cinematic news still.
+Avoid simplified illustration backgrounds.
+
+Avoid painted backgrounds.
+
+Avoid cartoon backgrounds.
+
+Avoid cel-shaded backgrounds.
+
+Avoid anime-style scenery.
+
+The environment should look like
+a real place photographed with a professional camera.
+
+========================
+REALISTIC PRODUCTS AND OBJECTS
+========================
+
+Important real-world objects should look
+like actual physical objects.
+
+Examples:
+
+- smartphones
+- computers
+- cars
+- aircraft
+- robots
+- machinery
+- cameras
+- medical equipment
+- consumer electronics
+- documents
+- storefronts
+- sports equipment
+
+Use realistic:
+
+- proportions
+- materials
+- reflections
+- surface texture
+- buttons
+- screens
+- mechanical details
+
+The object should feel physically present
+in the real world.
+
+Do NOT turn products into cartoon props.
+
+========================
+PHOTOGRAPHIC LIGHTING
+========================
+
+Use realistic photographic lighting.
+
+Prefer:
+
+- natural daylight
+- realistic indoor lighting
+- practical lights
+- believable highlights
+- believable shadows
+- physically plausible reflections
+- cinematic but realistic exposure
+- natural contrast
+- realistic ambient light
+
+Avoid artificial fantasy glow
+unless the actual news requires it.
+
+Avoid excessive neon effects.
+
+Avoid exaggerated colored lighting.
+
+Avoid illustration-style lighting.
+
+========================
+CAMERA FEEL
+========================
+
+The realistic world should feel photographed
+with a professional camera.
+
+Use:
+
+- realistic lens perspective
+- natural depth of field
+- realistic focus falloff
+- believable foreground/background separation
+- realistic motion blur when appropriate
+- documentary framing
+- editorial photography composition
+- cinematic realism
+
+Do NOT make the image look like
+a 3D render.
+
+Do NOT make it look like
+a video game screenshot.
+
+Do NOT make it look like
+an AI stock illustration.
 
 ========================
 YANI NEKO CONTRAST
 ========================
 
-Yani Neko remains fully anime-styled.
+Yani Neko remains fully anime.
 
-She should stand out naturally against
-the realistic environment.
+She should clearly contrast against
+the realistic world.
 
-Do NOT convert the entire image into anime
-just because Yani Neko is present.
+Do NOT make Yani Neko photorealistic.
 
-Do NOT convert Yani Neko into photorealism.
+Do NOT add realistic skin texture
+to Yani Neko.
 
-The visual identity is:
+Do NOT give her realistic human facial proportions.
 
-REAL WORLD
-+
-ANIME CHARACTER
+Do NOT turn her into a CGI character.
 
-This contrast is one of the main creative features
-of AI NEWSジャパン.
+Keep:
+
+- anime face
+- anime eyes
+- anime hair
+- anime cat ears
+- anime tail
+- cute stylized proportions
+
+Her appearance is intentionally different
+from everyone and everything else.
 
 ========================
-MANGA REACTION LAYER
+INTEGRATION WITHOUT LOSING THE CONTRAST
 ========================
 
-Manga elements may appear around Yani Neko
-when useful:
+Yani Neko must still physically belong
+inside the real scene.
 
-- expressive speech bubbles
+Use:
+
+- realistic shadows falling on her
+- realistic contact with surfaces
+- believable placement
+- correct scale
+- perspective
+- overlap
+- interaction with real objects
+- environmental reflections when appropriate
+- realistic lighting direction
+
+However, do NOT blur the distinction
+between her anime style and the real world.
+
+The ideal result is:
+
+REAL PHOTOGRAPH
+with
+ONE ANIME CHARACTER
+naturally existing inside it.
+
+========================
+MANGA EFFECTS
+========================
+
+Manga effects should be limited mainly
+to Yani Neko and her immediate reaction.
+
+Allowed:
+
+- speech bubbles
+- tiny impact marks
 - sweat drops
-- motion lines
-- small impact marks
 - blush
-- stylized reaction symbols
-- selective manga sound effects
+- expressive reaction marks
+- selective motion lines
 
-Keep these effects restrained.
+Use them sparingly.
 
-The background should remain realistic.
+The realistic background should remain realistic.
 
-Do NOT cover the realistic environment
-with large manga textures.
+Do NOT put manga speed lines
+across the entire image.
 
-Do NOT turn the whole image into a manga page.
+Do NOT add comic textures
+to the whole scene.
+
+Do NOT add halftone textures
+to the realistic world.
+
+Do NOT turn the background
+into a manga illustration.
 
 ========================
-VISUAL BALANCE
+STYLE HIERARCHY
 ========================
 
-Target overall feeling:
+PRIORITY 1:
+Realistic news environment.
 
-approximately 70-85% realistic news world
-+
-15-30% anime / manga character expression.
+PRIORITY 2:
+Realistic news subjects and objects.
 
-This is a visual guideline,
-not a rigid mathematical requirement.
+PRIORITY 3:
+Yani Neko's anime appearance.
 
-The news subject remains visually credible.
+PRIORITY 4:
+Yani Neko's expressive reaction.
 
-Yani Neko provides personality,
-humor and emotional contrast.
+PRIORITY 5:
+Small manga reaction effects.
+
+Do not reverse this hierarchy.
+
+The realistic news world must occupy
+the visual majority.
 
 ========================
 STYLE AVOIDANCE
@@ -1353,46 +1544,55 @@ STYLE AVOIDANCE
 Avoid:
 
 - full anime backgrounds
-- fully cartoonized real-world objects
+- anime buildings
+- anime streets
+- anime laboratories
+- cartoon vehicles
+- cartoon machinery
+- cartoon human characters
 - generic 3D CGI
+- game-render appearance
+- plastic-looking objects
+- painted backgrounds
 - stock illustration appearance
 - corporate infographic layouts
 - superhero poster aesthetics
-- excessive American comic-book styling
-- gritty realistic anatomy for Yani Neko
+- excessive comic-book rendering
 - JoJo-style character design
 - Stand-like supernatural characters
-- generic fantasy characters
+- fantasy environments
 
-Do NOT make the realistic people
-look like manga characters.
+Do NOT make the entire image look animated.
 
-Do NOT make Yani Neko look photorealistic.
+Do NOT make the entire image look illustrated.
 
-Do NOT blend the two styles into an
-unclear middle ground.
-
-The contrast should remain intentional
-and visually obvious.
+Only Yani Neko should retain the strong anime identity.
 
 ========================
-CAMERA / PHOTOGRAPHY FEEL
+EDITORIAL PHOTOGRAPHY FEEL
 ========================
 
-Use photographic principles for the realistic world:
+The final image should resemble
+a professionally produced editorial photograph
+created for a major news publication.
 
-- cinematic framing
-- realistic depth of field
-- natural perspective
-- believable lens perspective
-- realistic reflections
-- natural light
-- environmental depth
+Think:
 
-The image should resemble
-a professionally photographed news scene
-with an anime character inserted naturally
-into that world.
+real location
++
+real people
++
+real objects
++
+real lighting
++
+real camera
++
+one expressive anime character.
+
+The viewer should be able to believe
+the news scene itself is real,
+even though Yani Neko is obviously fictional.
 
 ========================
 AI NEWSジャパン BRANDING
