@@ -877,33 +877,232 @@ Do NOT add random decorative objects.
 CHARACTER INTERACTION
 ========================
 
-Whenever possible, make ヤニねこ interact with the news
-rather than simply standing beside it.
+ヤニねこ should feel like a real character
+living inside the news illustration.
+
+Do NOT simply place the character beside the news.
+
+Whenever possible, make ヤニねこ physically interact
+with the situation.
+
+Possible interactions include:
+
+- looking directly at the important object
+- holding the product
+- touching a device
+- staring at a monitor
+- holding a phone showing the news
+- reacting to a price tag
+- holding a wallet
+- running away from something
+- hiding behind an object
+- pointing at something
+- grabbing her head
+- celebrating
+- falling over
+- sitting on the floor
+- lying down
+- drinking coffee
+- smoking while watching the event
+- sleeping while the news happens around her
+- being surrounded by the consequences of the news
+
+The interaction should make the viewer immediately understand
+HOW ヤニねこ feels about the news.
+
+========================
+CHARACTER SCALE
+========================
+
+The size of ヤニねこ should be decided by the composition.
+
+Possible compositions:
+
+1. LARGE FOREGROUND REACTION
+
+Use when the emotional reaction is important.
+
+ヤニねこ may occupy 25% to 45% of the image.
+
+Use:
+- huge facial expression
+- dynamic pose
+- extreme perspective
+- expressive hands
+- strong foreground placement
+
+The news remains clearly visible behind or around her.
+
+2. MEDIUM CHARACTER
+
+Use for normal news.
+
+ヤニねこ appears naturally beside or within
+the main event while interacting with it.
+
+3. SMALL COMEDIC CHARACTER
+
+Use when a small reaction creates better comedy.
+
+For example:
+- sleeping in the corner
+- drinking coffee
+- staring blankly
+- lying on a desk
+
+Small does NOT mean insignificant.
+The character should still have a clear narrative purpose.
+
+4. MULTIPLE YANI NEKO REACTIONS
+
+When it improves the storytelling, use two or more
+versions of the SAME character at different scales.
+
+Example:
+
+Large ヤニねこ:
+extreme emotional reaction to the headline.
+
+Small ヤニねこ:
+calmly drinking coffee or sleeping.
+
+Another possible combination:
+
+Large ヤニねこ:
+holding the new product excitedly.
+
+Small ヤニねこ:
+looking exhausted by the number of new products.
+
+This technique should be used selectively.
+
+Do NOT create multiple unrelated character designs.
+
+Every ヤニねこ must clearly be the same character.
+
+========================
+COMPOSITION RELATIONSHIP
+========================
+
+Think of the image as a SINGLE NEWS MANGA SCENE.
+
+Do NOT think:
+
+"Draw the news, then add a mascot."
+
+Instead think:
+
+"Create a dramatic news manga scene in which
+ヤニねこ is naturally reacting to the event."
+
+The news environment and ヤニねこ should visually
+belong to the same scene.
 
 Examples:
 
-Instead of:
-ヤニねこ standing next to a smartphone.
+TECHNOLOGY:
 
-Prefer:
-ヤニねこ staring at the smartphone in disbelief.
+A giant monitor or device dominates the environment.
+ヤニねこ leans toward it, touches it, examines it,
+or reacts dramatically to what appears on the screen.
 
-Instead of:
-ヤニねこ standing next to a price tag.
+PRICE INCREASE:
 
-Prefer:
-ヤニねこ clutching her wallet while staring at the price.
+A huge price tag dominates the scene.
+ヤニねこ holds an empty wallet or receipt,
+looking devastated.
 
-Instead of:
-ヤニねこ standing next to a computer.
+SPORTS:
 
-Prefer:
-ヤニねこ leaning toward the screen while nervously
-watching a security warning.
+The stadium, player and scoreboard create the main scene.
+ヤニねこ reacts from the foreground, cheering,
+crying, jumping or collapsing depending on the result.
 
-The action should visually explain the emotional relationship
-between the mascot and the news.
+ACCIDENT:
 
+The actual location, vehicles and emergency context
+remain visible.
+ヤニねこ watches from an appropriate position,
+looking worried or shocked.
+
+FUNNY NEWS:
+
+The event itself remains recognizable,
+while ヤニねこ may have an absurdly exaggerated reaction.
+
+BUSINESS:
+
+The actual product, company environment or announcement
+remains visible.
+ヤニねこ interacts with the product or watches
+the announcement.
+
+========================
+VISUAL STORYTELLING
+========================
+
+The viewer should be able to understand two things
+at the same time:
+
+1. What happened in the news.
+2. How ヤニねこ feels about it.
+
+The image should work as a miniature manga scene.
+
+Use:
+- foreground reaction
+- middle-ground news subject
+- background environment
+- meaningful props
+- dynamic perspective
+- expressive body language
+- dramatic visual effects
+
+Do NOT make the character look pasted onto the image.
+
+Do NOT make the character look like a sticker.
+
+Do NOT isolate the character from the environment.
+
+Integrate her naturally through:
+- overlapping objects
+- perspective
+- lighting
+- shadows
+- environmental effects
+- interaction with props
+- appropriate scale
+
+========================
+COMEDIC CHARACTER STORYTELLING
+========================
+
+When appropriate, use visual contrast.
+
+Examples:
+
+A huge dramatic news event
++
+small ヤニねこ casually drinking coffee.
+
+A minor problem
++
+massively exaggerated ヤニねこ reaction.
+
+Exciting announcement
++
+ヤニねこ staring at the screen with sparkling eyes.
+
+Huge price increase
++
+ヤニねこ collapsing beside an empty wallet.
+
+This contrast creates the distinctive
+AI NEWSジャパン manga personality.
+
+Do not force comedy into serious tragedies.
+
+========================
 ========================
 REACTION VARIETY
 ========================
@@ -957,10 +1156,28 @@ The mascot can appear:
 
 Choose the composition that best serves the article.
 
-The actual news event must remain the primary subject.
+The actual news must always remain clearly understandable.
 
-The mascot must never replace the actual product,
-person, team, company, location or event.
+However, ヤニねこ is NOT merely a decorative mascot
+placed in the corner of the image.
+
+ヤニねこ is an ACTIVE CHARACTER inside the news scene.
+
+The composition should make it feel as if ヤニねこ is
+actually experiencing, witnessing, interacting with,
+or reacting to the news.
+
+The actual product, person, team, company, location
+or event must remain recognizable and important,
+but ヤニねこ may occupy a large and visually prominent
+part of the composition when that creates a stronger
+editorial manga image.
+
+Do NOT automatically shrink ヤニねこ into a small corner.
+
+Do NOT automatically place ヤニねこ in the bottom-right.
+
+Do NOT use the same mascot placement in every image.
 
 ========================
 MANGA REACTION EFFECTS
@@ -1054,9 +1271,15 @@ Wide horizontal 3:2 editorial composition.
 
 ONE SINGLE SCENE.
 
-One dominant focal point.
+One strong visual story.
 
-Show the actual news event clearly.
+The actual news event must be immediately understandable.
+
+ヤニねこ's reaction should form a second emotional focal point
+when appropriate.
+
+The relationship between the news and the character
+should create the visual hook.
 
 Use:
 main subject
@@ -1067,8 +1290,14 @@ actual environment
 +
 meaningful action
 
-The main subject should occupy a large portion
-of the frame.
+The main news subject should occupy a strong,
+recognizable portion of the frame.
+
+ヤニねこ may also occupy a large portion of the frame
+when her reaction is an important part of the storytelling.
+
+Balance the two visually rather than automatically
+making the mascot small.
 
 Strong foreground.
 Detailed middle ground.
@@ -1081,6 +1310,13 @@ into an infographic.
 The main subject and event must remain dominant.
 
 No random decorative objects.
+
+Do NOT make ヤニねこ a tiny generic mascot
+added after the main illustration is finished.
+
+Do NOT automatically put her in the bottom-right corner.
+
+Do NOT use the same pose and placement for every article.
 
 No generic futuristic city.
 
