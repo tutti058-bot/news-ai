@@ -391,27 +391,68 @@ Add the recurring AI NEWSジャパン mascot,
 
 IMPORTANT:
 
-ヤニねこ is an ADULT WOMAN.
+ヤニねこ is a CLEARLY ADULT WOMAN.
 
-She is:
+She should visually read as a young adult woman
+in her 20s, NOT as a teenager and NOT as a child.
 
-- clearly adult
-- petite
-- youthful-looking
-- cute
-- slightly childish in personality
-- expressive
-- comedic when appropriate
+She is petite and youthful-looking,
+but her face, body proportions and overall presence
+must clearly communicate adulthood.
 
-She must NEVER look like a child.
+Her personality may be childish, lazy,
+silly or mischievous.
 
-Her youthful appearance is facial and stylistic,
-NOT childlike body proportions.
+Her PHYSICAL APPEARANCE must remain adult.
 
-FIXED APPEARANCE:
+========================
+ADULT CHARACTER DIRECTION
+========================
 
-- petite adult woman
-- cute youthful anime face
+IMPORTANT:
+
+Do NOT make her look like:
+
+- a child
+- a little girl
+- a kid
+- a schoolgirl
+- a teenager
+- a chibi character
+- an elementary-school character
+- a childish fantasy mascot
+
+Instead use:
+
+- young adult woman
+- adult facial structure
+- adult body proportions
+- mature shoulders
+- mature hands
+- mature legs
+- natural young-adult anatomy
+- subtle feminine facial structure
+- youthful but unmistakably adult appearance
+
+She may have a soft, cute, round face,
+but her proportions must clearly belong
+to an adult woman.
+
+Do NOT make her body disproportionately tiny.
+
+Do NOT make her head excessively large.
+
+Do NOT use childlike body proportions.
+
+Her body should remain petite,
+but proportionally adult.
+
+========================
+FIXED APPEARANCE
+========================
+
+- petite young adult woman
+- youthful but adult anime face
 - soft rounded face
 - large golden / amber cat-like eyes
 - pale ash-gray hair with a subtle blue tint
@@ -419,15 +460,28 @@ FIXED APPEARANCE:
 - triangular cat ears
 - fluffy cat tail
 - small cute nose and mouth
+- adult facial proportions
 - adult body proportions
+- natural feminine silhouette
 
-FIXED CLOTHING:
+She should remain cute and slightly youthful,
+but clearly read as an adult woman.
+
+========================
+FIXED CLOTHING
+========================
 
 - oversized stretched slightly worn white T-shirt
 - simple black cat illustration on the shirt
 - "NEKO" may appear on the shirt
 - loose dark blue-gray sweatpants
 - barefoot
+
+Keep the same basic outfit.
+
+========================
+CHARACTER CONSISTENCY
+========================
 
 Keep this character visually consistent
 from article to article.
@@ -452,9 +506,21 @@ Do NOT make her muscular.
 
 Do NOT make her photorealistic.
 
-Do NOT make her look like a real human model.
-
 Do NOT make her look like a child.
+
+Do NOT make her look like a teenager.
+
+Do NOT use chibi proportions.
+
+The ideal appearance is:
+
+PETITE
++
+CUTE
++
+YOUTHFUL
++
+UNMISTAKABLY ADULT
 
 ========================
 YANI NEKO MUST BE PART OF THE SCENE
@@ -1239,25 +1305,26 @@ REALISM PRIORITY
 
 IMPORTANT:
 
-Everything except Yani Neko should be
-as realistic and photographic as possible.
+Everything except Yani Neko should look
+as close to REAL PHOTOGRAPHY as possible.
 
-Target:
+Target visual balance:
 
-approximately 90-95% realistic
+approximately 95-98% realistic photographic world
 +
-5-10% anime / manga elements.
+2-5% anime / manga elements around Yani Neko.
 
-This is a visual target,
-not a mathematical requirement.
+The image should initially look like
+a genuine editorial photograph.
 
-The image should initially read
-as a real photograph or cinematic
-editorial news photograph.
+The realistic world must NOT look illustrated.
 
-Only after noticing Yani Neko should
-the viewer realize that an anime character
-has entered the real world.
+The viewer should believe that the location,
+people, products and objects were photographed
+with a real professional camera.
+
+Only Yani Neko should clearly reveal
+the anime nature of the image.
 
 ========================
 REALISTIC PEOPLE
@@ -1297,15 +1364,18 @@ like documentary / editorial photography.
 REALISTIC ENVIRONMENT
 ========================
 
-Buildings, streets, offices, laboratories,
-stadiums, stores, airports and other locations
-must look photographic.
+The environment must look photographic,
+not illustrated.
 
-Use realistic:
+Buildings, streets, offices, laboratories,
+stadiums, airports, stores and other locations
+should resemble real photographs.
+
+Use highly realistic:
 
 - architecture
-- materials
 - surfaces
+- materials
 - glass
 - metal
 - concrete
@@ -1315,21 +1385,24 @@ Use realistic:
 - shadows
 - weather
 - atmospheric perspective
-- environmental depth
 - natural imperfections
+- environmental clutter
+- realistic wear
+- realistic scale
 
-Avoid simplified illustration backgrounds.
+Use subtle imperfections found in real photography.
 
-Avoid painted backgrounds.
+Avoid:
 
-Avoid cartoon backgrounds.
+- painted backgrounds
+- digital painting
+- anime scenery
+- cel shading
+- cartoon backgrounds
+- simplified textures
+- perfectly clean CGI environments
 
-Avoid cel-shaded backgrounds.
-
-Avoid anime-style scenery.
-
-The environment should look like
-a real place photographed with a professional camera.
+The environment should feel physically real.
 
 ========================
 REALISTIC PRODUCTS AND OBJECTS
