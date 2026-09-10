@@ -1118,6 +1118,34 @@ dramatic posture.
 Use genuine shock only when appropriate.
 
 ========================
+CIGARETTE / SMOKING
+========================
+
+A cigarette is an optional recurring personality detail
+of Yani Neko.
+
+When appropriate, she may:
+
+- hold a cigarette
+- casually smoke
+- smoke while using a smartphone
+- smoke while drinking coffee
+- smoke while watching the news
+- hold an unlit cigarette
+
+The cigarette should look natural and understated.
+
+Do NOT force a cigarette into every image.
+
+Do NOT make the cigarette the main subject.
+
+Do NOT use smoking when it would clearly conflict
+with the context of the news scene.
+
+The cigarette is a character detail,
+not a visual centerpiece.
+
+========================
 ACTION
 ========================
 
@@ -1759,6 +1787,24 @@ a video game screenshot.
 
 Do NOT make it look like
 an AI stock illustration.
+
+========================
+YANI NEKO CHARACTER SCALE
+========================
+
+Yani Neko may be somewhat larger than a typical
+background character when her reaction is important.
+
+A medium-to-large foreground presence is allowed.
+
+Do NOT shrink her unnecessarily.
+
+However, she must NOT cover or hide the actual
+news subject, important products, important people,
+or essential visual information.
+
+Her size should be chosen naturally according
+to the scene and her emotional importance.
 
 ========================
 YANI NEKO CONTRAST
