@@ -1,5 +1,67 @@
 "use client";
 
+const downloadXImageWithoutMetadata = async (
+  imageUrl: string,
+  fileName: string
+) => {
+  try {
+    const response = await fetch(imageUrl);
+
+    if (!response.ok) {
+      throw new Error("画像の取得に失敗しました");
+    }
+
+    const blob = await response.blob();
+    const bitmap = await createImageBitmap(blob);
+
+    const canvas = document.createElement("canvas");
+    canvas.width = bitmap.width;
+    canvas.height = bitmap.height;
+
+    const ctx = canvas.getContext("2d");
+
+    if (!ctx) {
+      throw new Error("画像処理に失敗しました");
+    }
+
+    ctx.drawImage(bitmap, 0, 0);
+
+    const jpegBlob = await new Promise<Blob>((resolve, reject) => {
+      canvas.toBlob(
+        (result) => {
+          if (result) {
+            resolve(result);
+          } else {
+            reject(new Error("JPEG変換に失敗しました"));
+          }
+        },
+        "image/jpeg",
+        0.95
+      );
+    });
+
+    const url = URL.createObjectURL(jpegBlob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = fileName.replace(/\.[^.]+$/, "") + ".jpg";
+
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    setTimeout(() => {
+      URL.revokeObjectURL(url);
+    }, 1000);
+
+    bitmap.close();
+  } catch (error) {
+    console.error("X投稿用画像の保存に失敗:", error);
+    alert("X投稿用画像の保存に失敗しました");
+  }
+};
+
+
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
@@ -2215,13 +2277,19 @@ const [xPostMode, setXPostMode] =
                                 className="w-full rounded-xl border border-slate-200 bg-white object-cover"
                               />
 
-                              <a
-                                href={xPostDraft.image}
-                                download={`ai-news-x-${news.id}.png`}
-                                className="mt-3 flex min-h-11 items-center justify-center rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-800 shadow-sm ring-1 ring-slate-200 transition hover:bg-slate-100"
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  xPostDraft.image &&
+                                  downloadXImageWithoutMetadata(
+                                    xPostDraft.image,
+                                    `ai-news-x-${news.id}.jpg`
+                                  )
+                                }
+                                className="mt-3 flex min-h-11 w-full items-center justify-center rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-800 shadow-sm ring-1 ring-slate-200 transition hover:bg-slate-100"
                               >
-                                🖼️ 画像を保存
-                              </a>
+                                🖼️ X投稿用画像を保存
+                              </button>
                             </>
                           ) : xPostMode === "ai-image" ? (
                             <div className="flex min-h-[220px] items-center justify-center rounded-xl border border-dashed border-amber-300 bg-amber-50 p-6 text-center">
