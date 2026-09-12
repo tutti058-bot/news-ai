@@ -105,49 +105,55 @@ export default function JLeagueDayPage() {
   const today = getTodayString();
   const nextDay = getNextJLeagueDay(today);
 
-  if (!nextDay) {
-    return (
-      <main className="jleague-page">
-        <section className="jleague-hero">
-          <div className="jleague-badge">
-            ⚽ J.LEAGUE DAY
-          </div>
+  let isToday = false;
+  let days = 0;
+  let hours = 0;
+  let minutes = 0;
+  let seconds = 0;
 
-          <h1>次回のJリーグDAYは準備中です</h1>
-        </section>
-      </main>
+  if (nextDay) {
+    const [year, month, day] =
+      nextDay.date.split("-").map(Number);
+
+    const eventDate =
+      new Date(year, month - 1, day);
+
+    isToday =
+      now.getFullYear() === eventDate.getFullYear() &&
+      now.getMonth() === eventDate.getMonth() &&
+      now.getDate() === eventDate.getDate();
+
+    const diff =
+      eventDate.getTime() - now.getTime();
+
+    days = Math.max(
+      0,
+      Math.ceil(
+        diff / (1000 * 60 * 60 * 24)
+      )
+    );
+
+    hours = Math.max(
+      0,
+      Math.floor(
+        (diff / (1000 * 60 * 60)) % 24
+      )
+    );
+
+    minutes = Math.max(
+      0,
+      Math.floor(
+        (diff / (1000 * 60)) % 60
+      )
+    );
+
+    seconds = Math.max(
+      0,
+      Math.floor(
+        (diff / 1000) % 60
+      )
     );
   }
-
-  const [year, month, day] = nextDay.date.split("-").map(Number);
-  const eventDate = new Date(year, month - 1, day);
-
-  const isToday =
-    now.getFullYear() === eventDate.getFullYear() &&
-    now.getMonth() === eventDate.getMonth() &&
-    now.getDate() === eventDate.getDate();
-
-  const diff = eventDate.getTime() - now.getTime();
-
-  const days = Math.max(
-    0,
-    Math.ceil(diff / (1000 * 60 * 60 * 24))
-  );
-
-  const hours = Math.max(
-    0,
-    Math.floor((diff / (1000 * 60 * 60)) % 24)
-  );
-
-  const minutes = Math.max(
-    0,
-    Math.floor((diff / (1000 * 60)) % 60)
-  );
-
-  const seconds = Math.max(
-    0,
-    Math.floor((diff / 1000) % 60)
-  );
 
   const filteredNews =
     selectedCategory === "すべて"
@@ -184,7 +190,21 @@ export default function JLeagueDayPage() {
           ⚽ J.LEAGUE DAY
         </div>
 
-        {isToday ? (
+        {!nextDay ? (
+          <>
+            <p className="small-title">
+              J.LEAGUE DAY
+            </p>
+
+            <h1>次回のJリーグDAYは準備中です</h1>
+
+            <p className="lead">
+              Jリーグ・サッカー関連ニュースは
+              <br />
+              下からチェックできます。
+            </p>
+          </>
+        ) : isToday ? (
           <>
             <h1>本日はJリーグDAY！</h1>
 
