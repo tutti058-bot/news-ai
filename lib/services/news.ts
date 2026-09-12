@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { fetchNews } from "@/lib/fetchNews";
-import { analyzeArticle } from "@/lib/ai";
+import { analyzeArticle, generateIndependentAnalysis } from "@/lib/ai";
 import { getImage } from "@/lib/getImage";
 import { getArticle } from "@/lib/getArticle";
 import { isJLeagueDay } from "@/lib/jLeagueDays";
@@ -1098,6 +1098,40 @@ if (ai.score < MIN_SCORE) {
 
     /*
      * =========================
+     * AI NEWSジャパン独自分析
+     * =========================
+     */
+
+    let independentAnalysis;
+
+    try {
+      console.log(">>> 独自分析生成開始");
+
+      independentAnalysis =
+        await generateIndependentAnalysis(
+          title,
+          article
+        );
+
+      console.log("<<< 独自分析生成終了");
+      console.log(
+        "独自分析見出し:",
+        independentAnalysis.analysisLabel
+      );
+    } catch (error) {
+      console.error(
+        "独自分析生成エラー:",
+        title,
+        error
+      );
+
+      skipped++;
+      skippedAI++;
+      continue;
+    }
+
+    /*
+     * =========================
      * DB保存
      * =========================
      */
@@ -1115,6 +1149,12 @@ if (ai.score < MIN_SCORE) {
 
           supplement:
             ai.supplement,
+
+          analysisLabel:
+            independentAnalysis.analysisLabel,
+
+          analysis:
+            independentAnalysis.analysis,
 
           category:
             ai.category,

@@ -13,6 +13,8 @@ model News {
   summary         String?
   supplement      String?
   content         String?
+  analysisLabel   String?
+  analysis        String?
   image           String?
   category        String?
   score           Int         @default(50)

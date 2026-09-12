@@ -680,3 +680,116 @@ ${summary}
     return "このニュース、ちょっと気になるでやんす！";
   }
 }
+// AI NEWSジャパン独自分析
+export async function generateIndependentAnalysis(
+  title: string,
+  article: string
+): Promise<{
+  analysisLabel: string;
+  analysis: string;
+}> {
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4.1-mini",
+      response_format: {
+        type: "json_object",
+      },
+      messages: [
+        {
+          role: "system",
+          content: `
+あなたはAI NEWSジャパンの独自分析担当です。
+
+ニュース本文の要約ではなく、
+「この記事によって、今後誰の何の行動・判断が変わるのか」
+を具体的に整理してください。
+
+【出力形式】
+JSONのみで返してください。
+
+{
+  "analysisLabel": "記事から起こる変化を表す短い見出し",
+  "analysis": "120〜160文字程度の独自分析"
+}
+
+【analysisLabel】
+・15〜30文字程度
+・タイトルの言い換えは禁止
+・ニュースの結果ではなく「変化」に焦点を当てる
+・抽象表現は禁止
+
+【analysis】
+・120〜160文字程度
+・2文を基本とする
+・記事本文にある事実を根拠にする
+・単なる要約は禁止
+・「誰が」「何を選ぶ／使う／変える」のかを具体的に書く
+・記事から合理的に導ける範囲だけを書く
+・本文にない売上、シェア、市場拡大などを勝手に断定しない
+・根拠のない未来予測は禁止
+・「注目される」「期待される」「影響が大きい」だけで終わらない
+・具体的な利用、購入、視聴、開発、業務、移動、判断などの行動変化まで書く
+・ニュースそのものの説明で終わらず、読者にとって「だから何が変わるか」を示す
+・「→」は禁止
+・箇条書きは禁止
+・JSON以外は禁止
+`,
+        },
+        {
+          role: "user",
+          content: `
+タイトル：
+${title}
+
+記事本文：
+${article.slice(0, 5000)}
+
+この記事について、AI NEWSジャパン独自の分析を作成してください。
+`,
+        },
+      ],
+      temperature: 0.25,
+      max_tokens: 300,
+    });
+
+    const raw =
+      response.choices[0]?.message?.content?.trim() ?? "";
+
+    if (!raw) {
+      throw new Error("独自分析のAI応答が空です");
+    }
+
+    const parsed = JSON.parse(raw);
+
+    const analysisLabel =
+      String(parsed?.analysisLabel ?? "")
+        .replace(/\s+/g, " ")
+        .trim();
+
+    const analysis =
+      String(parsed?.analysis ?? "")
+        .replace(/\s+/g, " ")
+        .replace(/→/g, "")
+        .trim();
+
+    if (!analysisLabel || !analysis) {
+      throw new Error("独自分析の内容が不完全です");
+    }
+
+    return {
+      analysisLabel,
+      analysis,
+    };
+  } catch (error) {
+    console.error(
+      "AI NEWSジャパン独自分析生成エラー:",
+      error
+    );
+
+    return {
+      analysisLabel: "この記事から読み取れる変化",
+      analysis:
+        "この記事で示された事実をもとに、利用者や企業の行動に生じる具体的な変化を整理しています。",
+    };
+  }
+}

@@ -541,12 +541,18 @@ ${url}
         </p>
 
         <h2 className="mt-2 text-xl font-black text-slate-900 sm:text-2xl">
-          AI NEWSジャパン独自の分析
+          {news.analysisLabel ?? "AI NEWSジャパン独自の分析"}
         </h2>
 
-        <p className="mt-3 text-sm leading-7 text-slate-600 sm:text-base">
-          元記事の内容をもとに、ニュースの重要度・話題性・影響範囲・新規性・今後の注目度をAIが分析しています。
-        </p>
+        {news.analysis ? (
+          <p className="mt-4 whitespace-pre-wrap text-sm leading-7 text-slate-700 sm:text-base">
+            {news.analysis}
+          </p>
+        ) : (
+          <p className="mt-4 text-sm leading-7 text-slate-600 sm:text-base">
+            この記事の独自分析は準備中です。
+          </p>
+        )}
       </section>
 
       {/* AI評価詳細 */}
