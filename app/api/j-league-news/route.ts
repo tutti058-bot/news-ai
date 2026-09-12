@@ -67,6 +67,19 @@ function getSoccerCategory(
   return "その他";
 }
 
+function isYouthOrUniversitySoccer(
+  title: string,
+  summary: string,
+  source: string
+) {
+  const text = `${title} ${summary} ${source}`;
+
+  const pattern =
+    /高校生|高校サッカー|高校|大学生|大学サッカー|大学リーグ|大学選手権|u-18|u18|u-17|u17|ユース|前橋育英|流通経済大|立正大/iu;
+
+  return pattern.test(text);
+}
+
 function isJLeagueRelated(
   title: string,
   summary: string,
@@ -179,10 +192,30 @@ export async function GET() {
       )
     );
 
+    // 高校・大学・育成年代の記事を除外
+    const filteredSoccerNews = soccerNews.filter(
+      (item) =>
+        !isYouthOrUniversitySoccer(
+          item.title ?? "",
+          item.summary ?? "",
+          item.source ?? ""
+        )
+    );
+
+    const filteredJLeagueRelatedNews =
+      jLeagueRelatedNews.filter(
+        (item) =>
+          !isYouthOrUniversitySoccer(
+            item.title ?? "",
+            item.summary ?? "",
+            item.source ?? ""
+          )
+      );
+
     // 重複なしで結合
     const allNews = [
-      ...soccerNews,
-      ...jLeagueRelatedNews,
+      ...filteredSoccerNews,
+      ...filteredJLeagueRelatedNews,
     ];
 
     const uniqueNews = Array.from(
