@@ -471,54 +471,178 @@ export async function GET(
         resultMap.values()
       );
 
-    // 影響力の高いアカウントを優先
-    // ただし、大手ニュース媒体だけに限定しない
-    formattedResults.sort(
-      (a, b) => {
-        const a100k =
-          a.author.followers >= 100000;
-        const b100k =
-          b.author.followers >= 100000;
+    // =========================
+    // フォロワー獲得向け総合スコア
+    // =========================
 
-        if (a100k !== b100k) {
-          return b100k ? 1 : -1;
-        }
+    const normalizedKeywords =
+      searchKeywords.map((keyword) =>
+        normalize(keyword)
+      ).filter(Boolean);
 
-        if (
-          b.author.followers !==
-          a.author.followers
-        ) {
-          return (
-            b.author.followers -
-            a.author.followers
-          );
-        }
+    const getRelevanceScore = (
+      tweet: (typeof formattedResults)[number]
+    ) => {
+      const tweetText = normalize(tweet.text);
 
-        const aEngagement =
-          a.metrics.likes +
-          a.metrics.reposts * 2 +
-          a.metrics.replies +
-          a.metrics.quotes * 2;
+      const matchedKeywords =
+        normalizedKeywords.filter(
+          (keyword) =>
+            tweetText.includes(keyword)
+        ).length;
 
-        const bEngagement =
-          b.metrics.likes +
-          b.metrics.reposts * 2 +
-          b.metrics.replies +
-          b.metrics.quotes * 2;
+      const ratio =
+        normalizedKeywords.length > 0
+          ? matchedKeywords /
+            normalizedKeywords.length
+          : 0;
 
-        return (
-          bEngagement -
-          aEngagement
-        );
+      // 最大40点
+      return Math.min(
+        40,
+        ratio * 40
+      );
+    };
+
+    const getRecencyScore = (
+      createdAt: string | null
+    ) => {
+      if (!createdAt) return 0;
+
+      const createdTime =
+        new Date(createdAt).getTime();
+
+      if (!Number.isFinite(createdTime)) {
+        return 0;
       }
+
+      const hoursAgo =
+        (Date.now() - createdTime) /
+        (1000 * 60 * 60);
+
+      if (hoursAgo <= 6) return 15;
+      if (hoursAgo <= 24) return 12;
+      if (hoursAgo <= 72) return 8;
+      if (hoursAgo <= 168) return 4;
+      return 0;
+    };
+
+    const getFollowerScore = (
+      followers: number
+    ) => {
+      if (followers <= 0) return 0;
+
+      // 極端な大手だけが常に勝たないよう対数化
+      return Math.min(
+        25,
+        Math.log10(followers + 1) * 8
+      );
+    };
+
+    const getEngagementScore = (
+      tweet: (typeof formattedResults)[number]
+    ) => {
+      const engagement =
+        tweet.metrics.likes +
+        tweet.metrics.reposts * 3 +
+        tweet.metrics.replies * 2 +
+        tweet.metrics.quotes * 2;
+
+      return Math.min(
+        20,
+        Math.log10(engagement + 1) * 6
+      );
+    };
+
+    const getCandidateScore = (
+      tweet: (typeof formattedResults)[number]
+    ) => {
+      const followers =
+        tweet.author.followers;
+
+      const scaleBonus =
+        followers >= 100000
+          ? 5
+          : followers >= 50000
+            ? 3
+            : followers >= 10000
+              ? 1
+              : 0;
+
+      const majorNewsBonus =
+        tweet.isMajorNews ? 2 : 0;
+
+      return (
+        getRelevanceScore(tweet) +
+        getFollowerScore(followers) +
+        getEngagementScore(tweet) +
+        getRecencyScore(tweet.createdAt) +
+        scaleBonus +
+        majorNewsBonus
+      );
+    };
+
+    const getCandidateGrade = (
+      score: number,
+      relevance: number
+    ) => {
+      if (
+        score >= 55 &&
+        relevance >= 24
+      ) {
+        return "S";
+      }
+
+      if (
+        score >= 42 &&
+        relevance >= 16
+      ) {
+        return "A";
+      }
+
+      return "B";
+    };
+
+    // フォロワー1万人未満は獲得候補から除外
+    const candidatePool =
+      formattedResults
+        .filter(
+          (item) =>
+            item.author.followers >= 10000
+        )
+        .map((item) => {
+          const relevance =
+            getRelevanceScore(item);
+
+          const score =
+            getCandidateScore(item);
+
+          return {
+            ...item,
+            relevanceScore:
+              Math.round(relevance),
+            candidateScore:
+              Math.round(score),
+            grade:
+              getCandidateGrade(
+                score,
+                relevance
+              ),
+          };
+        });
+
+    candidatePool.sort(
+      (a, b) =>
+        b.candidateScore -
+        a.candidateScore
     );
 
     // 同じアカウントは1件だけ、最大3件
-    const selected: typeof formattedResults = [];
+    const selected: typeof candidatePool = [];
     const usedAccounts =
       new Set<string>();
 
-    for (const item of formattedResults) {
+    for (const item of candidatePool) {
       const username =
         item.author.username.toLowerCase();
 
