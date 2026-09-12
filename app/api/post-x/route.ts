@@ -144,7 +144,7 @@ export async function POST(request: Request) {
     const url = `https://tutti-news-ai-bay.vercel.app/news/${news.id}`;
     const score = news.score ?? 60;
 
-    // AI画像版だけ専用フォーマットで生成
+    // AI画像版は同じ画像で「通常版」と「独自分析版」の2種類を生成
     if (body.mode === "ai-image") {
       const imageResponse =
         await openai.chat.completions.create({
@@ -155,34 +155,27 @@ export async function POST(request: Request) {
               content: `
 AI NEWSジャパンのAI画像付きX投稿を作成してください。
 
-必ず以下の構成にする。
+今回は「通常版」と「AI NEWSジャパン独自分析版」の2種類を作成します。
 
-hook
-content
+JSONのみ返してください。
 
-最終投稿はシステム側で、
-
-hook
-
-content
-
-追加情報は👇
-
-の形にする。
+{
+  "hook": "新展開【タイトル】",
+  "content": "ニュースの内容",
+  "analysisLabel": "今後の予想",
+  "analysis": "独自分析"
+}
 
 【hook】
 短いフック＋タイトル。
 
 基本形：
 新展開【タイトル】
+速報【タイトル】
+話題【タイトル】
+注目【タイトル】
 
-例：
-速報【政府が新制度を発表】
-衝撃【人気サービスが終了へ】
-新展開【日本初スターバックス専用自販機が全国展開へ】
-話題【○○が新サービスを発表】
-
-フックはニュース内容に合うものを選ぶ。
+ニュース内容に合うフックを選ぶ。
 毎回同じフックにしない。
 不要ならタイトルだけでもよい。
 
@@ -190,30 +183,236 @@ content
 「【速報】タイトル」の形でもよいが、
 hook全体をさらに【】で囲まない。
 「【【速報】タイトル】」は禁止。
-最終的には、
+
+できるだけ
 フック【タイトル】
-の形を優先する。
+の形にする。
 
 タイトルは元記事の意味を変えない。
 
 【content】
-ニュースで実際に起きたことを、35〜70文字程度で簡潔に書く。
-基本は1文〜2文。
-情報を詰め込みすぎず、最も重要な事実だけを書く。
+タイトルの内容をそのまま繰り返すのではなく、
+タイトルだけでは分からない具体的な情報を補足する。
 
+優先する情報：
+・料金
+・対応機能
+・サービスの仕組み
+・利用方法
+・対象者
+・具体的な数字
+・今回の記事で特に重要な特徴
+
+タイトルにすでに含まれている情報を、
+別の言葉に言い換えて繰り返すだけの文章は禁止。
+
+例えば、
+
+タイトル：
+「大阪駅に仕事もメイクもできる新駅ナカ空間 15分200円から」
+
+悪い例：
+「JR大阪駅に仕事やメイクができる空間が開業する。」
+
+これはタイトルとほぼ同じなので禁止。
+
+良い例：
+「ninareruは仕事やメイク、ヘアセットに対応し、15分200円から短時間で利用できる。」
+
+このように、タイトルを見ただけでは分からない具体情報を補足する。
+
+35〜80文字程度。
 記事にない事実、数字、人物情報、推測は禁止。
 です・ますは禁止。
 でやんす禁止。
 自然な常体にする。
 URLは禁止。
-「追加情報は👇」は禁止。これはシステム側で最後に1回だけ付ける。
 
-JSONのみ返す。
+【analysisLabel】
+独自分析の内容に合った短い見出しを1つ選ぶ。
 
-{
-  "hook": "新展開【タイトル】",
-  "content": "ニュースの内容"
-}
+例：
+・今後の予想
+・この先の流れ
+・結果・その後
+・AI NEWSジャパンの見方
+・業界への影響
+・次に起きそうなこと
+・今後の焦点
+・クリエイターへの影響
+・企業への影響
+
+ニュースによって最も自然な見出しを自分で判断する。
+毎回同じ見出しにしない。
+5〜15文字程度。
+「▼」は付けない。
+
+【analysis】
+ここがAI NEWSジャパン独自版の核心。
+
+この文章では、ニュースの内容を説明してはいけない。
+ニュースによって「この先、何が変わるのか」を具体的に書く。
+
+まずニュースを見て、次の「変化の型」の中から最も自然なものを1つ選ぶ。
+
+・試すだけ → 実際の仕事や制作で使う
+・専門家中心 → 一般ユーザーにも実用化する
+・高コスト → 低コストになり利用方法が変わる
+・時間がかかる → 短時間で実現できる
+・専門知識が必要 → 少ない知識でも使える
+・補助的に使う → 制作や業務の工程に組み込まれる
+・選択肢が少ない → 複数から比較して選ぶようになる
+・既存の方法中心 → 新しい方法が現実的な選択肢になる
+・サービスの進化 → 利用者の行動が変わる
+・企業の新サービス → 競争条件や選ばれ方が変わる
+
+そのうえで必ず、
+
+「今まで○○だった」
+→「このニュースによって△△が現実的になる」
+→「その結果、□□する人や企業が増える可能性がある」
+
+という順番で考える。
+
+【最重要】
+
+「無料になる」
+「性能が上がる」
+「便利になる」
+「普及しそう」
+だけで終わってはいけない。
+
+それによって、
+「何をする人が増えるのか」
+「何をしなくてよくなるのか」
+「どういう使い方が現実的になるのか」
+「何を選ぶ基準が変わるのか」
+まで一段踏み込む。
+
+特に分析の最後は、
+「多様な表現が増える」
+「利用者が増える」
+「市場が広がる」
+のような抽象的な効果で締めない。
+
+最後まで、
+「誰が、何を、どう使うようになるのか」
+という具体的な変化を書く。
+
+例えば音楽生成AIなら、
+
+弱い：
+「音楽制作の敷居が下がり、多様な表現が増えそう。」
+
+強い：
+「個人でも試作だけでなく、実際の楽曲制作にAIを組み込みやすくなる。」
+
+このように、結果ではなく「使い方の変化」を優先する。
+
+例えば無料の高性能な音楽生成AIなら、
+
+禁止：
+「無料で高品質な音楽制作環境が手に入る。」
+
+禁止：
+「音楽生成AIの利用が広がりそう。」
+
+推奨：
+「無料でここまでの性能が出てくると、音楽生成AIは『試してみるもの』から『制作現場で使うもの』へ一気に変わりそう。日本語ボーカル対応も含め、個人クリエイターとプロの制作環境の差を縮める可能性がある。」
+
+このように「サービスがすごい」ではなく、
+「使われ方が変わる」
+ところまで書く。
+
+【文章構造】
+
+第1文：
+「今まで」と比べて何が変わるのかを書く。
+
+第2文：
+その変化によって、誰の行動・制作・仕事・選択肢がどう変わるのかを書く。
+
+必要なら第3文：
+その変化が周辺にどう波及するかを書く。
+
+【禁止】
+
+・タイトルの言い換え
+・contentの言い換え
+・ニュースの事実だけを書く
+・「普及が加速しそう」で終わる
+・「影響が大きそう」で終わる
+・「環境が変わりそう」で終わる
+・「市場が拡大しそう」で終わる
+・抽象的な感想
+・根拠のない断定
+・記事にない数字、人物、企業動向の創作
+・「注目です」「すごいですね」「今後に期待です」
+・同じ結論を毎回使う
+
+【品質チェック】
+
+完成したanalysisを内部で確認し、
+
+1. ニュースの要約になっていないか
+2. 「何が変わるか」が具体的に書かれているか
+3. 「誰の行動がどう変わるか」が最低1つ入っているか
+4. 「普及する」「影響がある」「環境が変わる」だけで終わっていないか
+5. 「今まで → これから」の変化が読み取れるか
+6. 文章の中に、具体的な利用場面・行動・選択の変化が入っているか
+7. 最後の一文が抽象論ではなく、具体的な行動や利用方法の変化になっているか
+8. 文が最後まで完結しているか
+
+特に3と6は必須。
+
+例えば、
+
+NG：
+「駅ナカサービスの質が向上し、利用頻度が高まりそう。」
+
+これは抽象論なので不合格。
+
+OK：
+「駅での空き時間を『待つ時間』ではなく、仕事や身支度を済ませる時間として使う人が増えそう。」
+
+このように、誰が何をするようになるのかを具体的に書く。
+
+analysisを完成させる前に、
+「具体的に誰が、何をするようになる？」
+への答えが文章内に存在するか確認する。
+
+答えが存在しない場合は書き直す。
+
+
+
+60〜110文字程度。
+2〜3文。
+必ず完結した文で終わる。
+文の途中で終了しない。
+自然な日本語。
+です・ます禁止。
+でやんす禁止。
+URL禁止。
+
+【内部チェック】
+
+analysisを書く前に必ず、
+
+「このニュースで、今までと何が変わる？」
+「その変化で、誰の行動がどう変わる？」
+「ニュース本文だけでは分からない一歩先は何？」
+
+を考える。
+
+この3つに明確な答えがない場合は、
+単なる「影響がありそう」という抽象論を書かず、
+ニュースから読み取れる別の具体的な変化を探す。
+
+独自分析は、
+「ニュースの説明」ではなく「ニュースの先に起きる変化」を書く。
+
+JSONのみ返してください。
+
 `,
             },
             {
@@ -231,7 +430,7 @@ ${news.category ?? "国内"}
             },
           ],
           temperature: 0.8,
-          max_tokens: 220,
+          max_tokens: 600,
           response_format: {
             type: "json_schema",
             json_schema: {
@@ -246,8 +445,14 @@ ${news.category ?? "国内"}
                   content: {
                     type: "string",
                   },
+                  analysisLabel: {
+                    type: "string",
+                  },
+                  analysis: {
+                    type: "string",
+                  },
                 },
-                required: ["hook", "content"],
+                required: ["hook", "content", "analysisLabel", "analysis"],
                 additionalProperties: false,
               },
             },
@@ -260,6 +465,8 @@ ${news.category ?? "国内"}
       let imagePost: {
         hook: string;
         content: string;
+        analysisLabel: string;
+        analysis: string;
       };
 
       try {
@@ -271,64 +478,120 @@ ${news.category ?? "国内"}
       }
 
       let imageHook = cleanText(imagePost.hook)
-        .replace(/追加情報は👇/g, "")
+        .replace(/追加情報はリプへ👇/g, "")
         .replace(/^「|」$/g, "")
         .trim();
 
       let imageContent = cleanText(imagePost.content)
-        .replace(/追加情報は👇/g, "")
+        .replace(/追加情報はリプへ👇/g, "")
         .replace(/でやんす[。！!]?$/gi, "")
         .trim();
 
-      // さらに長すぎる場合は画像投稿向けに短くする
+      let imageAnalysisLabel = cleanText(imagePost.analysisLabel)
+        .replace(/^▼\s*/g, "")
+        .replace(/追加情報はリプへ👇/g, "")
+        .replace(/でやんす[。！!]?$/gi, "")
+        .trim();
+
+      let imageAnalysis = cleanText(imagePost.analysis)
+        .replace(/追加情報はリプへ👇/g, "")
+        .replace(/でやんす[。！!]?$/gi, "")
+        .trim();
+
       if (imageContent.length > 80) {
-        imageContent = imageContent.slice(0, 80).replace(/[、。]$/, "") + "。";
+        imageContent =
+          imageContent.slice(0, 80).replace(/[、。]$/, "") + "。";
       }
 
-      // hookを「フック【タイトル】」に正規化
-      const bracketMatch = imageHook.match(
-        /^【([^】]+)】(.+)$/
-      );
+      if (imageAnalysisLabel.length > 20) {
+        imageAnalysisLabel =
+          imageAnalysisLabel.slice(0, 20).trim();
+      }
 
-      if (bracketMatch) {
-        imageHook =
-          `${bracketMatch[1].trim()}【${bracketMatch[2]
-            .replace(/^【+/, "")
-            .replace(/】+$/, "")
-            .trim()}】`;
-      } else {
-        const normalMatch = imageHook.match(
-          /^(.+?)【(.+?)】$/
+      if (!imageAnalysisLabel) {
+        imageAnalysisLabel = "AI NEWSジャパンの見方";
+      }
+
+      // analysisは生成時点で完結させる。
+      // 文の途中で切れていた場合は後処理で無理に連結しない。
+      imageAnalysis = imageAnalysis.trim();
+
+      // 文末が未完結に見える場合は、最後の完結文まで戻す
+      if (
+        imageAnalysis.length > 0 &&
+        !/[。！？!?]$/.test(imageAnalysis)
+      ) {
+        const lastSentenceEnd = Math.max(
+          imageAnalysis.lastIndexOf("。"),
+          imageAnalysis.lastIndexOf("！"),
+          imageAnalysis.lastIndexOf("？"),
+          imageAnalysis.lastIndexOf("!"),
+          imageAnalysis.lastIndexOf("?")
         );
 
-        if (normalMatch) {
-          imageHook =
-            `${normalMatch[1].replace(/[【】]/g, "").trim()}【${normalMatch[2].trim()}】`;
+        if (lastSentenceEnd >= 35) {
+          imageAnalysis =
+            imageAnalysis.slice(0, lastSentenceEnd + 1).trim();
         }
       }
 
-      if (!imageHook || !imageContent) {
+      // hookを必ず「フック【タイトル】」に統一
+      // AIの出力にタイトルが重複していても、元記事タイトルを基準に整形する
+      const sourceTitle = cleanText(news.title)
+        .replace(/[【】]/g, "")
+        .trim();
+
+      const hookPrefixMatch = imageHook.match(
+        /^(速報|新展開|注目|話題|衝撃|発表|緊急|続報|判明|決定|驚き|必見)/
+      );
+
+      const hookPrefix =
+        hookPrefixMatch?.[1] ?? "注目";
+
+      imageHook =
+        `${hookPrefix}【${sourceTitle}】`;
+
+      if (!imageHook || !imageContent || !imageAnalysis) {
         throw new Error(
           "AI画像版X投稿の生成結果が空です"
         );
       }
 
+      // ① 今までの通常版
       const tweet = `${imageHook}
 
 ${imageContent}`
-        .replace(/(?:\n\s*)*追加情報は👇/g, "")
+        .replace(/(?:\n\s*)*追加情報はリプへ👇/g, "")
         .trim() + `
 
-追加情報は👇`;
+追加情報はリプへ👇`;
+
+      // ② AI NEWSジャパン独自分析版
+      const insightTweet = `${imageHook}
+
+${imageContent}
+
+▼ ${imageAnalysisLabel}
+${imageAnalysis}`
+        .replace(/(?:\n\s*)*追加情報はリプへ👇/g, "")
+        .trim() + `
+
+追加情報はリプへ👇`;
 
       return NextResponse.json({
         tweet,
+        insightTweet,
         score,
         hook: imageHook,
         description: imageContent,
+        analysisLabel: imageAnalysisLabel,
+        analysis: imageAnalysis,
         intentUrl:
           "https://x.com/intent/post?text=" +
           encodeURIComponent(tweet),
+        insightIntentUrl:
+          "https://x.com/intent/post?text=" +
+          encodeURIComponent(insightTweet),
       });
     }
 

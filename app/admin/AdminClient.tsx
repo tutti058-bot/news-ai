@@ -120,6 +120,7 @@ export default function AdminClient() {
     id: string;
     name: string;
     username: string;
+    followers: number;
   };
   metrics: {
     impressions: number;
@@ -128,6 +129,9 @@ export default function AdminClient() {
     replies: number;
     quotes: number;
   };
+  relevanceScore?: number;
+  candidateScore?: number;
+  grade?: "S" | "A" | "B";
   url: string;
 };
 
@@ -179,6 +183,8 @@ const [copiedSupplementalId, setCopiedSupplementalId] =
 type XPostDraft = {
   newsId: number;
   tweet: string;
+  insightTweet: string;
+  insightLabel: string;
   legacyTweet: string;
   image: string | null;
   imageError?: string;
@@ -506,7 +512,31 @@ const [xPostMode, setXPostMode] =
           : rawTweet;
 
       const tweet =
-        `${tweetWithoutUrl}\n\n追加情報は👇`;
+        `${tweetWithoutUrl
+          .replace(/(?:\n\s*)*追加情報はリプへ👇\s*$/g, "")
+          .trim()}\n\n追加情報はリプへ👇`;
+
+      const rawInsightTweet =
+        String(postData.insightTweet ?? "");
+
+      const insightTweetWithoutUrl =
+        rawInsightTweet.endsWith(articleUrl)
+          ? rawInsightTweet
+              .slice(0, -articleUrl.length)
+              .trim()
+          : rawInsightTweet;
+
+      const insightLabel =
+        String(postData.analysisLabel ?? "AI NEWSジャパンの見方")
+          .replace(/^▼\s*/, "")
+          .trim();
+
+      const insightTweet =
+        insightTweetWithoutUrl
+          ? `${insightTweetWithoutUrl
+              .replace(/(?:\n\s*)*追加情報はリプへ👇\s*$/g, "")
+              .trim()}\n\n追加情報はリプへ👇`
+          : tweet;
 
       const legacyHook =
         String(postData.hook ?? "")
@@ -571,14 +601,24 @@ const [xPostMode, setXPostMode] =
       const finalImageTweet =
         xPostMode === "ai-image"
           ? tweet.replace(
-              /(?:\n\s*追加情報は👇)+\s*$/g,
-              "\n\n追加情報は👇"
+              /(?:\n\s*追加情報はリプへ👇)+\s*$/g,
+              "\n\n追加情報はリプへ👇"
             )
           : tweet;
+
+      const finalInsightTweet =
+        xPostMode === "ai-image"
+          ? insightTweet.replace(
+              /(?:\n\s*追加情報はリプへ👇)+\s*$/g,
+              "\n\n追加情報はリプへ👇"
+            )
+          : finalImageTweet;
 
       setXPostDraft({
         newsId,
         tweet: finalImageTweet,
+        insightTweet: finalInsightTweet,
+        insightLabel,
         legacyTweet,
         image,
         imageError:
@@ -2319,41 +2359,110 @@ const [xPostMode, setXPostMode] =
                         </div>
 
                         <div className="space-y-4">
-                          <div className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
-                            <div className="mb-2 text-xs font-black text-slate-500">
-                              本投稿
-                            </div>
+                          {xPostMode === "ai-image" ? (
+                            <>
+                              <div className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+                                <div className="mb-2 flex items-center justify-between">
+                                  <div className="text-xs font-black text-slate-500">
+                                    ① 通常版
+                                  </div>
+                                  <span className="rounded-full bg-slate-100 px-2 py-1 text-[10px] font-bold text-slate-500">
+                                    今までの投稿
+                                  </span>
+                                </div>
 
-                            <p className="whitespace-pre-wrap text-sm leading-7 text-slate-800">
-                              {xPostMode === "ai-image"
-                                ? xPostDraft.tweet
-                                : xPostDraft.legacyTweet}
-                            </p>
-                          </div>
+                                <p className="whitespace-pre-wrap text-sm leading-7 text-slate-800">
+                                  {xPostDraft.tweet}
+                                </p>
 
-                          <button
-                            onClick={() => {
-                              const currentTweet =
-                                xPostMode === "ai-image"
-                                  ? xPostDraft.tweet
-                                  : xPostDraft.legacyTweet;
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const intentUrl =
+                                      "https://x.com/intent/post?text=" +
+                                      encodeURIComponent(
+                                        xPostDraft.tweet
+                                      );
 
-                              const intentUrl =
-                                "https://x.com/intent/post?text=" +
-                                encodeURIComponent(
-                                  currentTweet
-                                );
+                                    window.open(
+                                      intentUrl,
+                                      "_blank",
+                                      "noopener,noreferrer"
+                                    );
+                                  }}
+                                  className="mt-4 w-full min-h-11 rounded-xl bg-black px-4 py-3 text-sm font-bold text-white transition hover:bg-slate-800"
+                                >
+                                  𝕏 通常版で投稿
+                                </button>
+                              </div>
 
-                              window.open(
-                                intentUrl,
-                                "_blank",
-                                "noopener,noreferrer"
-                              );
-                            }}
-                            className="w-full min-h-11 rounded-xl bg-black px-4 py-3 text-sm font-bold text-white transition hover:bg-slate-800"
-                          >
-                            𝕏 X投稿画面を開く
-                          </button>
+                              <div className="rounded-xl bg-white p-4 shadow-sm ring-2 ring-slate-900">
+                                <div className="mb-2 flex items-center justify-between">
+                                  <div className="text-xs font-black text-slate-900">
+                                    ② AI NEWSジャパン独自版
+                                  </div>
+                                  <span className="rounded-full bg-slate-900 px-2 py-1 text-[10px] font-bold text-white">
+                                    {xPostDraft.insightLabel}
+                                  </span>
+                                </div>
+
+                                <p className="whitespace-pre-wrap text-sm leading-7 text-slate-800">
+                                  {xPostDraft.insightTweet}
+                                </p>
+
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const intentUrl =
+                                      "https://x.com/intent/post?text=" +
+                                      encodeURIComponent(
+                                        xPostDraft.insightTweet
+                                      );
+
+                                    window.open(
+                                      intentUrl,
+                                      "_blank",
+                                      "noopener,noreferrer"
+                                    );
+                                  }}
+                                  className="mt-4 w-full min-h-11 rounded-xl bg-black px-4 py-3 text-sm font-bold text-white transition hover:bg-slate-800"
+                                >
+                                  𝕏 独自版で投稿
+                                </button>
+                              </div>
+                            </>
+                          ) : (
+                            <>
+                              <div className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+                                <div className="mb-2 text-xs font-black text-slate-500">
+                                  本投稿
+                                </div>
+
+                                <p className="whitespace-pre-wrap text-sm leading-7 text-slate-800">
+                                  {xPostDraft.legacyTweet}
+                                </p>
+                              </div>
+
+                              <button
+                                onClick={() => {
+                                  const intentUrl =
+                                    "https://x.com/intent/post?text=" +
+                                    encodeURIComponent(
+                                      xPostDraft.legacyTweet
+                                    );
+
+                                  window.open(
+                                    intentUrl,
+                                    "_blank",
+                                    "noopener,noreferrer"
+                                  );
+                                }}
+                                className="w-full min-h-11 rounded-xl bg-black px-4 py-3 text-sm font-bold text-white transition hover:bg-slate-800"
+                              >
+                                𝕏 X投稿画面を開く
+                              </button>
+                            </>
+                          )}
 
                           <p className="text-xs leading-5 text-slate-500">
                             AI画像版は生成画像を保存してXに添付。補足情報は「💡 補足情報」から選んで使います。
@@ -2448,9 +2557,14 @@ const [xPostMode, setXPostMode] =
                   {relatedXPosts[news.id] &&
                     relatedXPosts[news.id].length > 0 && (
                       <div className="mt-5 rounded-2xl bg-slate-900 p-4">
-                        <h4 className="text-sm font-black text-white">
-                          𝕏 関連投稿
-                        </h4>
+                        <div>
+                          <h4 className="text-sm font-black text-white">
+                            🔥 Xフォロワー獲得候補
+                          </h4>
+                          <p className="mt-1 text-xs text-slate-400">
+                            関連性・アカウント規模・投稿への反応を見ながら厳選
+                          </p>
+                        </div>
 
                         <div className="mt-3 space-y-3">
                           {relatedXPosts[news.id].map(
@@ -2467,6 +2581,26 @@ const [xPostMode, setXPostMode] =
                                   {post.author.username && (
                                     <span className="text-slate-400">
                                       @{post.author.username}
+                                    </span>
+                                  )}
+
+                                  <span className="font-bold text-orange-600">
+                                    👤 {post.author.followers.toLocaleString()}人
+                                  </span>
+
+                                  {post.grade && (
+                                    <span className="rounded-full bg-slate-900 px-2 py-1 text-[11px] font-black text-white">
+                                      {post.grade === "S"
+                                        ? "🔥 S"
+                                        : post.grade === "A"
+                                          ? "🟠 A"
+                                          : "⚪ B"}
+                                    </span>
+                                  )}
+
+                                  {typeof post.relevanceScore === "number" && (
+                                    <span className="text-xs font-bold text-blue-600">
+                                      関連度 {post.relevanceScore}点
                                     </span>
                                   )}
 
@@ -2552,19 +2686,19 @@ const [xPostMode, setXPostMode] =
                                 {relatedXReplies[post.id] && (
                                   <div className="mt-4 space-y-3 rounded-xl bg-slate-100 p-3">
                                     <div className="text-xs font-black text-slate-900">
-                                      💬 やんすAIのコメント案
+                                      💬 返信案
                                     </div>
 
                                     {[
                                       {
                                         label: "コメント案①",
-                                        text: relatedXReplies[post.id].replyWithUrl1,
-                                        copyId: `${post.id}-url1`,
+                                        text: relatedXReplies[post.id].reply1,
+                                        copyId: `${post.id}-reply1`,
                                       },
                                       {
                                         label: "コメント案②",
-                                        text: relatedXReplies[post.id].replyWithUrl2,
-                                        copyId: `${post.id}-url2`,
+                                        text: relatedXReplies[post.id].reply2,
+                                        copyId: `${post.id}-reply2`,
                                       },
                                     ].map((item) => (
                                       <div
