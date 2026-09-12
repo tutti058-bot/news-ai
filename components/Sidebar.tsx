@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getImportanceRanking, getViewRanking } from "@/lib/ranking";
 import RankingSwitcher from "./RankingSwitcher";
 import { prisma } from "@/lib/prisma";
+import IMobileAd from "./IMobileAd";
 
 const medalColor = [
   "bg-yellow-500",
@@ -184,39 +185,8 @@ export default async function Sidebar() {
         </div>
       )}
 
-      {/* やんすAI 公式X */}
-      <div className="rounded-3xl border border-slate-200 bg-black p-6 text-white shadow-lg">
-        <div className="flex items-center gap-3">
-          <img
-            src="/yansu-x.png"
-            alt="やんすAI"
-            className="h-11 w-11 rounded-full object-cover"
-          />
-
-          <div>
-            <p className="text-xs font-bold tracking-wide text-slate-300">
-              公式X
-            </p>
-            <h2 className="text-xl font-black">
-              やんすAI
-            </h2>
-          </div>
-        </div>
-
-        <p className="mt-4 text-sm leading-6 text-slate-300">
-          AI NEWS ジャパンの最新ニュースを
-          やんすAIがお届けするでやんす。
-        </p>
-
-        <a
-          href="https://x.com/news_ai_tutti"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-5 inline-flex w-full items-center justify-center rounded-xl bg-white px-4 py-3 text-sm font-black text-black transition hover:bg-slate-200"
-        >
-          𝕏 をフォローする →
-        </a>
-      </div>
+      {/* i-mobile PC広告 300×250 */}
+      <IMobileAd />
 
     </aside>
   );
