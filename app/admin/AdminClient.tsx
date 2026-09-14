@@ -423,12 +423,7 @@ const [xPostMode, setXPostMode] =
   const generateNewsFromLine = async (
     inboxId: number
   ) => {
-    const analysis = lineAnalysis[inboxId];
-
-    if (!analysis) {
-      setMessage("先にAI解析を実行してください");
-      return;
-    }
+    let analysis = lineAnalysis[inboxId];
 
     const confirmed = window.confirm(
       "このLINE受信データから記事を生成します。実行しますか？"
@@ -442,6 +437,57 @@ const [xPostMode, setXPostMode] =
     setMessage("");
 
     try {
+      // ページ再読み込み後など、解析結果がstateにない場合は
+      // 先にスクショを再解析する。
+      if (!analysis) {
+        const analyzeRes = await fetch(
+          "/api/line/analyze",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              inboxId,
+            }),
+          }
+        );
+
+        const analyzeData = await analyzeRes.json();
+
+        if (!analyzeRes.ok || !analyzeData.success) {
+          throw new Error(
+            analyzeData.error ??
+              "LINE画像のAI解析に失敗しました"
+          );
+        }
+
+        analysis = analyzeData.result;
+
+        setLineAnalysis((prev) => ({
+          ...prev,
+          [inboxId]: analysis as LineAnalysis,
+        }));
+
+        setLineInboxItems((prev) =>
+          prev.map((item) =>
+            item.id === inboxId
+              ? {
+                  ...item,
+                  status: "analyzed",
+                  error: null,
+                }
+              : item
+          )
+        );
+      }
+
+      if (!analysis) {
+        throw new Error(
+          "AI解析結果を取得できませんでした"
+        );
+      }
+
       const res = await fetch(
         "/api/line/generate-news",
         {
@@ -471,13 +517,17 @@ const [xPostMode, setXPostMode] =
             ? {
                 ...item,
                 status: "generated",
+                generatedNewsId:
+                  data.news?.id ?? data.newsId ?? null,
               }
             : item
         )
       );
 
       setMessage(
-        `記事生成完了：News ID ${data.news?.id ?? data.newsId}`
+        `記事生成完了：News ID ${
+          data.news?.id ?? data.newsId
+        }`
       );
     } catch (error) {
       console.error(
@@ -2535,7 +2585,7 @@ const [xPostMode, setXPostMode] =
                               : "🔎 AI解析"}
                         </button>
 
-                        {analysis && !item.generatedNewsId && (
+                        {!item.generatedNewsId && item.imageUrl && (
                           <button
                             type="button"
                             onClick={() =>
@@ -2549,7 +2599,7 @@ const [xPostMode, setXPostMode] =
                             className="ml-2 mt-4 rounded-xl bg-blue-600 px-4 py-3 text-sm font-black text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-40"
                           >
                             {lineAnalyzeLoadingId === item.id
-                              ? "記事生成中..."
+                              ? "解析・記事生成中..."
                               : "📝 この記事を生成"}
                           </button>
                         )}
