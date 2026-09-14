@@ -2,13 +2,14 @@ import { NextResponse } from "next/server";
 import OpenAI from "openai";
 import { prisma } from "@/lib/prisma";
 import { analyzeArticle, generateIndependentAnalysis } from "@/lib/ai";
+import { generateNewsImage } from "@/lib/services/news-image";
 import { isAdminAuthenticated } from "@/lib/adminAuth";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-export const maxDuration = 60;
+export const maxDuration = 120;
 
 type AnalysisInput = {
   sourceType?: string;
@@ -305,6 +306,33 @@ ${inbox.text ?? ""}
       },
     });
 
+    console.log(
+      "[line/generate-news] 記事画像生成開始",
+      createdNews.id
+    );
+
+    let generatedImage: string | null = null;
+
+    try {
+      generatedImage =
+        await generateNewsImage(
+          createdNews.id
+        );
+
+      console.log(
+        "[line/generate-news] 記事画像生成完了",
+        {
+          newsId: createdNews.id,
+          image: generatedImage,
+        }
+      );
+    } catch (imageError) {
+      console.error(
+        "[line/generate-news] 記事画像生成失敗:",
+        imageError
+      );
+    }
+
     await prisma.lineInboxItem.update({
       where: { id: inboxId },
       data: {
@@ -316,7 +344,11 @@ ${inbox.text ?? ""}
 
     return NextResponse.json({
       success: true,
-      news: createdNews,
+      news: {
+        ...createdNews,
+        image: generatedImage,
+      },
+      image: generatedImage,
     });
   } catch (error) {
     console.error(
