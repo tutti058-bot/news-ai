@@ -112,6 +112,27 @@ export default function AdminClient() {
     score: number;
   };
 
+  type XTrendingPost = {
+    id: string;
+    text: string;
+    createdAt: string | null;
+    author: {
+      id: string;
+      name: string;
+      username: string;
+      followers: number;
+    };
+    metrics: {
+      impressions: number;
+      likes: number;
+      reposts: number;
+      replies: number;
+      quotes: number;
+    };
+    buzzScore: number;
+    url: string;
+  };
+
   type RelatedXPost = {
   id: string;
   text: string;
@@ -134,6 +155,9 @@ export default function AdminClient() {
   grade?: "S" | "A" | "B";
   url: string;
 };
+
+  const [xTrendingPosts, setXTrendingPosts] = useState<XTrendingPost[]>([]);
+  const [xTrendingLoading, setXTrendingLoading] = useState(false);
 
   const [newsList, setNewsList] = useState<NewsItem[]>([]);
   const [newsListLoading, setNewsListLoading] = useState(false);
@@ -415,6 +439,59 @@ const [xPostMode, setXPostMode] =
   // 選択した記事のX投稿作成
   // =========================
 
+
+  // =========================
+  // Xで今伸びている投稿を取得
+  // =========================
+
+  const loadXTrendingPosts = async () => {
+    setXTrendingLoading(true);
+    setMessage("");
+
+    try {
+      const res = await fetch(
+        "/api/x-trending?_=" + Date.now(),
+        {
+          cache: "no-store",
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(
+          data.error ??
+            "Xバズ投稿の取得に失敗しました"
+        );
+      }
+
+      setXTrendingPosts(
+        Array.isArray(data.results)
+          ? data.results
+          : []
+      );
+
+      setMessage(
+        `Xで今伸びている投稿を${data.results?.length ?? 0}件取得しました`
+      );
+    } catch (error) {
+      console.error(
+        "Xバズ投稿取得エラー:",
+        error
+      );
+
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "不明なエラーです";
+
+      setMessage(
+        `Xバズ投稿取得失敗：${errorMessage}`
+      );
+    } finally {
+      setXTrendingLoading(false);
+    }
+  };
 
   // =========================
   // 関連記事を取得
@@ -2040,6 +2117,100 @@ const [xPostMode, setXPostMode] =
             </div>
           )}
         </div>
+
+        {/* Xで今伸びている投稿 */}
+        <section className="mb-6 rounded-2xl border border-orange-200 bg-white p-4 shadow-sm sm:rounded-3xl sm:p-7 sm:shadow-lg">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm font-black text-orange-500">
+                X TRENDING
+              </p>
+
+              <h2 className="mt-1 text-2xl font-black text-slate-900">
+                🔥 Xで今伸びている投稿
+              </h2>
+
+              <p className="mt-2 text-sm leading-6 text-slate-500">
+                過去24時間の投稿から、反応と投稿時間をもとに独自スコアでランキングします。
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={loadXTrendingPosts}
+              disabled={xTrendingLoading}
+              className="rounded-2xl bg-orange-500 px-5 py-3 font-black text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {xTrendingLoading
+                ? "取得中..."
+                : "🔥 バズ投稿を取得"}
+            </button>
+          </div>
+
+          {xTrendingPosts.length > 0 && (
+            <div className="mt-6 space-y-4">
+              {xTrendingPosts.map(
+                (post, index) => (
+                  <article
+                    key={post.id}
+                    className="rounded-2xl border border-slate-200 p-4"
+                  >
+                    <div className="flex flex-wrap items-center gap-2 text-xs">
+                      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-orange-100 font-black text-orange-600">
+                        {index + 1}
+                      </span>
+
+                      <span className="font-black text-slate-900">
+                        {post.author.name || "ユーザー"}
+                      </span>
+
+                      {post.author.username && (
+                        <span className="text-slate-400">
+                          @{post.author.username}
+                        </span>
+                      )}
+
+                      <span className="font-bold text-orange-600">
+                        ⚡ {post.buzzScore}
+                      </span>
+
+                      <span className="text-slate-400">
+                        👤 {post.author.followers.toLocaleString()}人
+                      </span>
+
+                      <span className="ml-auto text-slate-400">
+                        ❤️ {post.metrics.likes.toLocaleString()}
+                      </span>
+
+                      <span className="text-slate-400">
+                        🔁 {post.metrics.reposts.toLocaleString()}
+                      </span>
+
+                      <span className="text-slate-400">
+                        💬 {post.metrics.replies.toLocaleString()}
+                      </span>
+                    </div>
+
+                    <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-slate-700">
+                      {post.text}
+                    </p>
+
+                    <div className="mt-4">
+                      <a
+                        href={post.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-block rounded-xl bg-black px-4 py-2 text-xs font-black text-white transition hover:bg-slate-800"
+                      >
+                        𝕏 Xで見る
+                      </a>
+                    </div>
+                  </article>
+                )
+              )}
+            </div>
+          )}
+        </section>
 
         {/* ニュース・まとめ */}
         <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
