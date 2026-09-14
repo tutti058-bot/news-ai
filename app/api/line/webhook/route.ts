@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
+import { prisma } from "@/lib/prisma";
 
 function verifySignature(
   body: string,
@@ -16,10 +17,19 @@ function verifySignature(
     .update(body)
     .digest("base64");
 
-  return crypto.timingSafeEqual(
-    Buffer.from(hash),
-    Buffer.from(signature)
-  );
+  const expected = Buffer.from(hash);
+  const actual = Buffer.from(signature);
+
+  if (expected.length !== actual.length) {
+    return false;
+  }
+
+  return crypto.timingSafeEqual(expected, actual);
+}
+
+function extractUrl(text: string): string | null {
+  const match = text.match(/https?:\/\/[^\s]+/);
+  return match ? match[0] : null;
 }
 
 export async function POST(request: Request) {
@@ -44,19 +54,56 @@ export async function POST(request: Request) {
     for (const event of data.events ?? []) {
       if (event.type !== "message") continue;
 
-      if (event.message?.type === "text") {
-        console.log(
-          "LINEテキスト:",
-          event.message.text
-        );
+      const message = event.message;
+
+      if (!message?.id) continue;
+
+      const type = message.type ?? "unknown";
+      const userId = event.source?.userId ?? null;
+      const webhookEventId = event.webhookEventId ?? null;
+
+      let text: string | null = null;
+      let sourceUrl: string | null = null;
+      let imageUrl: string | null = null;
+
+      if (type === "text") {
+        text = message.text ?? null;
+
+        if (text) {
+          sourceUrl = extractUrl(text);
+        }
+
+        console.log("LINEテキスト:", text);
       }
 
-      if (event.message?.type === "image") {
-        console.log(
-          "LINE画像受信:",
-          event.message.id
-        );
+      if (type === "image") {
+        imageUrl = message.id;
+        console.log("LINE画像受信:", message.id);
       }
+
+      await prisma.lineInboxItem.upsert({
+        where: {
+          messageId: message.id,
+        },
+        update: {
+          webhookEventId,
+          userId,
+          type,
+          text,
+          sourceUrl,
+          imageUrl,
+        },
+        create: {
+          messageId: message.id,
+          webhookEventId,
+          userId,
+          type,
+          text,
+          sourceUrl,
+          imageUrl,
+          status: "pending",
+        },
+      });
     }
 
     return NextResponse.json({
