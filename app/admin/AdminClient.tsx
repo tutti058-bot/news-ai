@@ -545,6 +545,75 @@ const [xPostMode, setXPostMode] =
     }
   };
 
+  const publishLineNews = async (
+    inboxId: number
+  ) => {
+    const confirmed = window.confirm(
+      "この下書き記事を公開しますか？\n\n公開後は通常のニュースとしてサイトに表示されます。"
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setLineAnalyzeLoadingId(inboxId);
+    setMessage("");
+
+    try {
+      const res = await fetch(
+        "/api/line/publish",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            inboxId,
+          }),
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(
+          data.error ??
+            "記事の公開に失敗しました"
+        );
+      }
+
+      setLineInboxItems((prev) =>
+        prev.map((item) =>
+          item.id === inboxId
+            ? {
+                ...item,
+                status: "published",
+              }
+            : item
+        )
+      );
+
+      setMessage(
+        `記事を公開しました：News ID ${
+          data.news?.id ?? ""
+        }`
+      );
+    } catch (error) {
+      console.error(
+        "LINE記事公開エラー:",
+        error
+      );
+
+      setMessage(
+        error instanceof Error
+          ? `LINE記事公開失敗：${error.message}`
+          : "LINE記事の公開に失敗しました"
+      );
+    } finally {
+      setLineAnalyzeLoadingId(null);
+    }
+  };
+
   const deleteLineInbox = async (
     inboxId: number
   ) => {
@@ -2612,6 +2681,26 @@ const [xPostMode, setXPostMode] =
                             ✅ 生成記事を見る
                           </Link>
                         )}
+
+                        {item.generatedNewsId &&
+                          item.status !== "published" && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                publishLineNews(
+                                  item.id
+                                )
+                              }
+                              disabled={
+                                lineAnalyzeLoadingId === item.id
+                              }
+                              className="ml-2 mt-4 rounded-xl bg-emerald-600 px-4 py-3 text-sm font-black text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-40"
+                            >
+                              {lineAnalyzeLoadingId === item.id
+                                ? "公開処理中..."
+                                : "✅ 公開する"}
+                            </button>
+                          )}
 
                         <button
                           type="button"
