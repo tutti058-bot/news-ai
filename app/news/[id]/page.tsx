@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { generateYansuComment } from "@/lib/ai";
+import { isAdminAuthenticated } from "@/lib/adminAuth";
 import Link from "next/link";
 import type { Metadata } from "next";
 import NewsRakutenWidget from "@/components/NewsRakutenWidget";
@@ -21,7 +22,9 @@ export async function generateMetadata({
     },
   });
 
-  if (!news || !news.publishedAt) {
+  const isAdmin = await isAdminAuthenticated();
+
+  if (!news || (!news.publishedAt && !isAdmin)) {
     return {
       title: "AI News ジャパン",
     };
@@ -82,13 +85,17 @@ export default async function NewsDetail({
     },
   });
 
-  if (!news || !news.publishedAt) {
+  const isAdmin = await isAdminAuthenticated();
+
+  if (!news || (!news.publishedAt && !isAdmin)) {
     return (
       <div className="mx-auto max-w-6xl px-4 py-16">
         <p>記事が見つかりません</p>
       </div>
     );
   }
+
+  const isDraftPreview = !news.publishedAt;
 
   // 閲覧数を1回増やして、24時間ランキング用の履歴を保存
   await prisma.news.update({
@@ -495,6 +502,17 @@ ${url}
         </span>
 
       </div>
+
+      {isDraftPreview && isAdmin && (
+        <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-4">
+          <p className="text-sm font-black text-amber-700">
+            🔒 下書きプレビュー
+          </p>
+          <p className="mt-1 text-sm leading-6 text-amber-800">
+            このページは管理者のみ確認できます。まだ一般公開されていません。
+          </p>
+        </div>
+      )}
 
       <h1 className="mt-6 text-3xl font-black leading-tight sm:text-4xl lg:text-5xl">
         {news.title}
