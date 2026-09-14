@@ -243,6 +243,7 @@ const [xPostMode, setXPostMode] =
     sourceUrl: string | null;
     imageUrl: string | null;
     status: string;
+    generatedNewsId: number | null;
     error: string | null;
     createdAt: string;
   };
@@ -414,6 +415,140 @@ const [xPostMode, setXPostMode] =
       );
     } finally {
       setLineAnalyzeLoadingId(null);
+    }
+  };
+
+
+
+  const generateNewsFromLine = async (
+    inboxId: number
+  ) => {
+    const analysis = lineAnalysis[inboxId];
+
+    if (!analysis) {
+      setMessage("先にAI解析を実行してください");
+      return;
+    }
+
+    const confirmed = window.confirm(
+      "このLINE受信データから記事を生成します。実行しますか？"
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setLineAnalyzeLoadingId(inboxId);
+    setMessage("");
+
+    try {
+      const res = await fetch(
+        "/api/line/generate-news",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            inboxId,
+            analysis,
+          }),
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(
+          data.error ??
+            "LINEからの記事生成に失敗しました"
+        );
+      }
+
+      setLineInboxItems((prev) =>
+        prev.map((item) =>
+          item.id === inboxId
+            ? {
+                ...item,
+                status: "generated",
+              }
+            : item
+        )
+      );
+
+      setMessage(
+        `記事生成完了：News ID ${data.news?.id ?? data.newsId}`
+      );
+    } catch (error) {
+      console.error(
+        "LINE記事生成エラー:",
+        error
+      );
+
+      setMessage(
+        error instanceof Error
+          ? `LINE記事生成失敗：${error.message}`
+          : "LINE記事生成に失敗しました"
+      );
+    } finally {
+      setLineAnalyzeLoadingId(null);
+    }
+  };
+
+  const deleteLineInbox = async (
+    inboxId: number
+  ) => {
+    const confirmed = window.confirm(
+      "このLINE受信データを削除しますか？\n\n公開済みの記事は削除されません。"
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      const res = await fetch(
+        `/api/admin/line-inbox?id=${inboxId}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(
+          data.error ??
+            "LINE受信データの削除に失敗しました"
+        );
+      }
+
+      setLineInboxItems((prev) =>
+        prev.filter(
+          (item) => item.id !== inboxId
+        )
+      );
+
+      setLineAnalysis((prev) => {
+        const next = { ...prev };
+        delete next[inboxId];
+        return next;
+      });
+
+      setMessage(
+        `LINE受信データ ID ${inboxId} を削除しました`
+      );
+    } catch (error) {
+      console.error(
+        "LINE受信データ削除エラー:",
+        error
+      );
+
+      setMessage(
+        error instanceof Error
+          ? `LINE受信データ削除失敗：${error.message}`
+          : "LINE受信データの削除に失敗しました"
+      );
     }
   };
 
@@ -2398,6 +2533,44 @@ const [xPostMode, setXPostMode] =
                             : analysis
                               ? "AI解析を再実行"
                               : "🔎 AI解析"}
+                        </button>
+
+                        {analysis && !item.generatedNewsId && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              generateNewsFromLine(
+                                item.id
+                              )
+                            }
+                            disabled={
+                              lineAnalyzeLoadingId === item.id
+                            }
+                            className="ml-2 mt-4 rounded-xl bg-blue-600 px-4 py-3 text-sm font-black text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-40"
+                          >
+                            {lineAnalyzeLoadingId === item.id
+                              ? "記事生成中..."
+                              : "📝 この記事を生成"}
+                          </button>
+                        )}
+
+                        {item.generatedNewsId && (
+                          <Link
+                            href={`/news/${item.generatedNewsId}`}
+                            className="ml-2 mt-4 inline-block rounded-xl bg-green-600 px-4 py-3 text-sm font-black text-white transition hover:bg-green-700"
+                          >
+                            ✅ 生成記事を見る
+                          </Link>
+                        )}
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            deleteLineInbox(item.id)
+                          }
+                          className="ml-2 mt-4 rounded-xl bg-slate-200 px-4 py-3 text-sm font-black text-slate-700 transition hover:bg-red-100 hover:text-red-700"
+                        >
+                          🗑️ 削除
                         </button>
                       </div>
                     </div>
