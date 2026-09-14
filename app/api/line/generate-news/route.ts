@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import OpenAI from "openai";
 import { prisma } from "@/lib/prisma";
 import { analyzeArticle, generateIndependentAnalysis } from "@/lib/ai";
-import { generateNewsImage } from "@/lib/services/news-image";
+import { generateLineNewsImage } from "@/lib/services/line-news-image";
 import { isAdminAuthenticated } from "@/lib/adminAuth";
 
 const openai = new OpenAI({
@@ -315,8 +315,9 @@ ${inbox.text ?? ""}
 
     try {
       generatedImage =
-        await generateNewsImage(
-          createdNews.id
+        await generateLineNewsImage(
+          createdNews.id,
+          inbox.imageUrl
         );
 
       console.log(
