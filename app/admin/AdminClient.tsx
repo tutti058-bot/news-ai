@@ -235,6 +235,46 @@ const [xPostMode, setXPostMode] =
   const [contentRequestsLoading, setContentRequestsLoading] =
     useState(false);
 
+  type LineInboxItem = {
+    id: number;
+    messageId: string | null;
+    type: string;
+    text: string | null;
+    sourceUrl: string | null;
+    imageUrl: string | null;
+    status: string;
+    error: string | null;
+    createdAt: string;
+  };
+
+  type LineAnalysis = {
+    sourceType: string;
+    sourceName: string;
+    title: string;
+    postText: string;
+    author: string;
+    publishedAt: string;
+    metrics: {
+      likes: number | null;
+      reposts: number | null;
+      replies: number | null;
+      views: number | null;
+    };
+    facts: string[];
+    visualDescription: string;
+    urls: string[];
+    confidence: string;
+  };
+
+  const [lineInboxItems, setLineInboxItems] =
+    useState<LineInboxItem[]>([]);
+  const [lineInboxLoading, setLineInboxLoading] =
+    useState(false);
+  const [lineAnalyzeLoadingId, setLineAnalyzeLoadingId] =
+    useState<number | null>(null);
+  const [lineAnalysis, setLineAnalysis] =
+    useState<Record<number, LineAnalysis>>({});
+
   const loadContentRequests = async () => {
     setContentRequestsLoading(true);
 
@@ -269,9 +309,118 @@ const [xPostMode, setXPostMode] =
     }
   };
 
+  const loadLineInbox = async () => {
+    setLineInboxLoading(true);
+
+    try {
+      const res = await fetch(
+        "/api/admin/line-inbox?_=" + Date.now(),
+        {
+          cache: "no-store",
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(
+          data.error ??
+            "LINE受信一覧の取得に失敗しました"
+        );
+      }
+
+      setLineInboxItems(
+        Array.isArray(data.items)
+          ? data.items
+          : []
+      );
+    } catch (error) {
+      console.error(
+        "LINE受信一覧取得エラー:",
+        error
+      );
+
+      setMessage(
+        error instanceof Error
+          ? `LINE受信一覧取得失敗：${error.message}`
+          : "LINE受信一覧の取得に失敗しました"
+      );
+    } finally {
+      setLineInboxLoading(false);
+    }
+  };
+
+  const analyzeLineInbox = async (inboxId: number) => {
+    if (lineAnalyzeLoadingId !== null) {
+      return;
+    }
+
+    setLineAnalyzeLoadingId(inboxId);
+    setMessage("");
+
+    try {
+      const res = await fetch(
+        "/api/line/analyze",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            inboxId,
+          }),
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(
+          data.error ??
+            "LINE画像のAI解析に失敗しました"
+        );
+      }
+
+      setLineAnalysis((prev) => ({
+        ...prev,
+        [inboxId]: data.result,
+      }));
+
+      setLineInboxItems((prev) =>
+        prev.map((item) =>
+          item.id === inboxId
+            ? {
+                ...item,
+                status: "analyzed",
+                error: null,
+              }
+            : item
+        )
+      );
+
+      setMessage(
+        `LINE画像のAI解析が完了しました（ID: ${inboxId}）`
+      );
+    } catch (error) {
+      console.error(
+        "LINE画像AI解析エラー:",
+        error
+      );
+
+      setMessage(
+        error instanceof Error
+          ? `LINE画像AI解析失敗：${error.message}`
+          : "LINE画像AI解析に失敗しました"
+      );
+    } finally {
+      setLineAnalyzeLoadingId(null);
+    }
+  };
+
   // 初回読み込み
   useEffect(() => {
     loadContentRequests();
+    loadLineInbox();
   }, []);
 
   // =========================
@@ -2117,6 +2266,252 @@ const [xPostMode, setXPostMode] =
             </div>
           )}
         </div>
+
+        {/* LINE記事生成待ち */}
+        <section className="mb-6 rounded-2xl border border-violet-200 bg-white p-4 shadow-sm sm:rounded-3xl sm:p-7 sm:shadow-lg">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm font-black text-violet-600">
+                LINE INBOX
+              </p>
+              <h2 className="mt-1 text-2xl font-black text-slate-900">
+                📥 LINE記事生成待ち
+              </h2>
+              <p className="mt-2 text-sm leading-6 text-slate-500">
+                LINEに送ったスクショやURLを確認して、AI解析から記事化につなげます。
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={loadLineInbox}
+              disabled={lineInboxLoading}
+              className="rounded-2xl bg-violet-600 px-5 py-3 font-black text-white transition hover:bg-violet-700 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {lineInboxLoading
+                ? "読み込み中..."
+                : "↻ LINE受信を更新"}
+            </button>
+          </div>
+
+          {lineInboxItems.length === 0 ? (
+            <div className="mt-6 rounded-2xl border border-dashed border-slate-300 p-6 text-center text-sm font-bold text-slate-500">
+              {lineInboxLoading
+                ? "LINE受信データを読み込んでいます..."
+                : "LINE受信データはありません"}
+            </div>
+          ) : (
+            <div className="mt-6 space-y-5">
+              {lineInboxItems.map((item) => {
+                const analysis = lineAnalysis[item.id];
+
+                return (
+                  <article
+                    key={item.id}
+                    className="rounded-2xl border border-slate-200 p-4 sm:p-5"
+                  >
+                    <div className="flex flex-wrap items-center gap-2 text-xs">
+                      <span className="rounded-full bg-violet-100 px-3 py-1 font-black text-violet-700">
+                        {item.type === "image"
+                          ? "画像"
+                          : item.type === "text"
+                            ? "テキスト"
+                            : item.type}
+                      </span>
+
+                      <span className="rounded-full bg-slate-100 px-3 py-1 font-bold text-slate-600">
+                        {item.status}
+                      </span>
+
+                      <span className="text-slate-400">
+                        {new Date(item.createdAt).toLocaleString("ja-JP")}
+                      </span>
+                    </div>
+
+                    <div className="mt-4 grid gap-5 md:grid-cols-[minmax(0,240px)_1fr]">
+                      {item.imageUrl ? (
+                        <a
+                          href={item.imageUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="block overflow-hidden rounded-2xl border border-slate-200 bg-slate-50"
+                        >
+                          <img
+                            src={item.imageUrl}
+                            alt="LINEから受信したスクリーンショット"
+                            className="h-auto max-h-[360px] w-full object-contain"
+                          />
+                        </a>
+                      ) : (
+                        <div className="flex min-h-[160px] items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-4 text-center text-sm text-slate-500">
+                          画像なし
+                        </div>
+                      )}
+
+                      <div className="min-w-0">
+                        {item.text && (
+                          <div>
+                            <p className="text-xs font-black text-slate-400">
+                              LINEメッセージ
+                            </p>
+                            <p className="mt-2 whitespace-pre-wrap rounded-xl bg-slate-50 p-3 text-sm leading-6 text-slate-700">
+                              {item.text}
+                            </p>
+                          </div>
+                        )}
+
+                        {item.sourceUrl && (
+                          <div className="mt-3">
+                            <p className="text-xs font-black text-slate-400">
+                              URL
+                            </p>
+                            <a
+                              href={item.sourceUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="mt-1 block break-all text-sm font-bold text-blue-600 hover:underline"
+                            >
+                              {item.sourceUrl}
+                            </a>
+                          </div>
+                        )}
+
+                        {item.error && (
+                          <p className="mt-3 rounded-xl bg-red-50 p-3 text-sm font-bold leading-6 text-red-600">
+                            {item.error}
+                          </p>
+                        )}
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            analyzeLineInbox(item.id)
+                          }
+                          disabled={
+                            !item.imageUrl ||
+                            lineAnalyzeLoadingId === item.id
+                          }
+                          className="mt-4 rounded-xl bg-black px-4 py-3 text-sm font-black text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-40"
+                        >
+                          {lineAnalyzeLoadingId === item.id
+                            ? "AI解析中..."
+                            : analysis
+                              ? "AI解析を再実行"
+                              : "🔎 AI解析"}
+                        </button>
+                      </div>
+                    </div>
+
+                    {analysis && (
+                      <div className="mt-5 rounded-2xl bg-violet-50 p-4 sm:p-5">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h3 className="text-lg font-black text-slate-900">
+                            AI解析結果
+                          </h3>
+
+                          <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-violet-700">
+                            信頼度: {analysis.confidence}
+                          </span>
+                        </div>
+
+                        <div className="mt-4 grid gap-4 md:grid-cols-2">
+                          <div>
+                            <p className="text-xs font-black text-slate-400">
+                              種別
+                            </p>
+                            <p className="mt-1 font-bold text-slate-900">
+                              {analysis.sourceType || "不明"}
+                              {analysis.sourceName
+                                ? ` / ${analysis.sourceName}`
+                                : ""}
+                            </p>
+                          </div>
+
+                          <div>
+                            <p className="text-xs font-black text-slate-400">
+                              投稿者
+                            </p>
+                            <p className="mt-1 font-bold text-slate-900">
+                              {analysis.author || "不明"}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="mt-4">
+                          <p className="text-xs font-black text-slate-400">
+                            タイトル候補
+                          </p>
+                          <p className="mt-1 text-base font-black leading-7 text-slate-900">
+                            {analysis.title || "タイトルを取得できませんでした"}
+                          </p>
+                        </div>
+
+                        {analysis.postText && (
+                          <div className="mt-4">
+                            <p className="text-xs font-black text-slate-400">
+                              投稿本文
+                            </p>
+                            <p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-slate-700">
+                              {analysis.postText}
+                            </p>
+                          </div>
+                        )}
+
+                        {analysis.metrics && (
+                          <div className="mt-4 flex flex-wrap gap-2 text-xs font-bold text-slate-700">
+                            <span className="rounded-lg bg-white px-3 py-2">
+                              ❤️ {analysis.metrics.likes?.toLocaleString() ?? "-"}
+                            </span>
+                            <span className="rounded-lg bg-white px-3 py-2">
+                              🔁 {analysis.metrics.reposts?.toLocaleString() ?? "-"}
+                            </span>
+                            <span className="rounded-lg bg-white px-3 py-2">
+                              💬 {analysis.metrics.replies?.toLocaleString() ?? "-"}
+                            </span>
+                            <span className="rounded-lg bg-white px-3 py-2">
+                              👀 {analysis.metrics.views?.toLocaleString() ?? "-"}
+                            </span>
+                          </div>
+                        )}
+
+                        {analysis.facts.length > 0 && (
+                          <div className="mt-4">
+                            <p className="text-xs font-black text-slate-400">
+                              確認できた事実
+                            </p>
+                            <div className="mt-2 space-y-2">
+                              {analysis.facts.map(
+                                (fact, factIndex) => (
+                                  <p
+                                    key={`${item.id}-fact-${factIndex}`}
+                                    className="rounded-xl bg-white p-3 text-sm leading-6 text-slate-700"
+                                  >
+                                    {fact}
+                                  </p>
+                                )
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                        {analysis.visualDescription && (
+                          <div className="mt-4">
+                            <p className="text-xs font-black text-slate-400">
+                              画像内容
+                            </p>
+                            <p className="mt-1 text-sm leading-6 text-slate-700">
+                              {analysis.visualDescription}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </article>
+                );
+              })}
+            </div>
+          )}
+        </section>
 
         {/* Xで今伸びている投稿 */}
         <section className="mb-6 rounded-2xl border border-orange-200 bg-white p-4 shadow-sm sm:rounded-3xl sm:p-7 sm:shadow-lg">
