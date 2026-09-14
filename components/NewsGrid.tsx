@@ -36,6 +36,11 @@ export default async function NewsGrid({
   // 現在はゲキサカの記事をサッカー記事として判定
   const where = {
     AND: [
+      {
+        publishedAt: {
+          not: null,
+        },
+      },
       ...(searchWhere ? [searchWhere] : []),
       {
         OR: [

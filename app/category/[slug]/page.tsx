@@ -68,6 +68,9 @@ export default async function CategoryPage({
   const total = await prisma.news.count({
     where: {
       category,
+      publishedAt: {
+        not: null,
+      },
     },
   });
 
@@ -81,6 +84,9 @@ export default async function CategoryPage({
   const news = await prisma.news.findMany({
     where: {
       category,
+      publishedAt: {
+        not: null,
+      },
     },
     orderBy: {
       publishedAt: "desc",

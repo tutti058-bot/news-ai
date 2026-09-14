@@ -21,7 +21,7 @@ export async function generateMetadata({
     },
   });
 
-  if (!news) {
+  if (!news || !news.publishedAt) {
     return {
       title: "AI News ジャパン",
     };
@@ -82,7 +82,7 @@ export default async function NewsDetail({
     },
   });
 
-  if (!news) {
+  if (!news || !news.publishedAt) {
     return (
       <div className="mx-auto max-w-6xl px-4 py-16">
         <p>記事が見つかりません</p>

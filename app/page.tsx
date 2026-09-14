@@ -49,10 +49,11 @@ export default async function Home({
           id: true,
           title: true,
           views: true,
+          publishedAt: true,
         },
       });
 
-      if (!news) {
+      if (!news || !news.publishedAt) {
         return null;
       }
 

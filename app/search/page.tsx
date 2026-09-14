@@ -16,6 +16,9 @@ export default async function SearchPage({
   const news = keyword
     ? await prisma.news.findMany({
         where: {
+          publishedAt: {
+            not: null,
+          },
           OR: [
             {
               title: {
