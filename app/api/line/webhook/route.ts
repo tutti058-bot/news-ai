@@ -1,7 +1,15 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import crypto from "crypto";
 import { put } from "@vercel/blob";
 import { prisma } from "@/lib/prisma";
+import {
+  replyLineMessage,
+  pushLineMessage,
+  createApprovalMessages,
+  createProcessingMessage,
+} from "@/lib/services/line-messaging";
+import { processLineInboxItem } from "@/lib/services/line-news-pipeline";
+import { handleLineApproval } from "@/lib/services/line-approval";
 
 function verifySignature(
   body: string,
@@ -43,7 +51,9 @@ async function downloadLineContent(messageId: string) {
   }
 
   const response = await fetch(
-    `https://api-data.line.me/v2/bot/message/${encodeURIComponent(messageId)}/content`,
+    `https://api-data.line.me/v2/bot/message/${encodeURIComponent(
+      messageId
+    )}/content`,
     {
       method: "GET",
       headers: {
@@ -55,6 +65,7 @@ async function downloadLineContent(messageId: string) {
 
   if (!response.ok) {
     const errorText = await response.text().catch(() => "");
+
     throw new Error(
       `LINE画像取得失敗: ${response.status} ${errorText}`
     );
@@ -72,7 +83,9 @@ async function downloadLineContent(messageId: string) {
   };
 }
 
-function extensionFromContentType(contentType: string) {
+function extensionFromContentType(
+  contentType: string
+) {
   const normalized = contentType.toLowerCase();
 
   if (normalized.includes("jpeg")) return "jpg";
@@ -105,9 +118,34 @@ async function saveLineContent(
   return blob.url;
 }
 
+async function handleApprovalCommand(
+  userId: string,
+  replyToken: string,
+  text: string
+) {
+  const result = await handleLineApproval(
+    userId,
+    text
+  );
+
+  if (!result) {
+    return false;
+  }
+
+  await replyLineMessage(replyToken, [
+    {
+      type: "text",
+      text: result.message,
+    },
+  ]);
+
+  return true;
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.text();
+
     const signature =
       request.headers.get("x-line-signature");
 
@@ -137,10 +175,45 @@ export async function POST(request: Request) {
       }
 
       const type = message.type ?? "unknown";
+
       const userId =
         event.source?.userId ?? null;
+
+      const replyToken =
+        event.replyToken ?? null;
+
       const webhookEventId =
         event.webhookEventId ?? null;
+
+      /*
+       * 「良し」「ダメ」は記事承認コマンドとして処理。
+       * 通常のLINE素材としてDBには保存しない。
+       */
+      if (
+        type === "text" &&
+        userId &&
+        replyToken
+      ) {
+        const command = String(
+          message.text ?? ""
+        ).trim();
+
+        if (
+          command === "良し" ||
+          command === "ダメ"
+        ) {
+          const handled =
+            await handleApprovalCommand(
+              userId,
+              replyToken,
+              command
+            );
+
+          if (handled) {
+            continue;
+          }
+        }
+      }
 
       let text: string | null = null;
       let sourceUrl: string | null = null;
@@ -222,35 +295,147 @@ export async function POST(request: Request) {
             },
           });
 
+          if (replyToken) {
+            try {
+              await replyLineMessage(
+                replyToken,
+                [
+                  {
+                    type: "text",
+                    text:
+                      "❌ 画像の受信に失敗しました。\n" +
+                      "もう一度スクショを送ってください。",
+                  },
+                ]
+              );
+            } catch (replyError) {
+              console.error(
+                "LINEエラー返信失敗:",
+                replyError
+              );
+            }
+          }
+
           continue;
         }
       }
 
-      await prisma.lineInboxItem.upsert({
-        where: {
-          messageId: message.id,
-        },
-        update: {
-          webhookEventId,
-          userId,
-          type,
-          text,
-          sourceUrl,
-          imageUrl,
-          status: "pending",
-          error: null,
-        },
-        create: {
-          messageId: message.id,
-          webhookEventId,
-          userId,
-          type,
-          text,
-          sourceUrl,
-          imageUrl,
-          status: "pending",
-        },
-      });
+      const inbox =
+        await prisma.lineInboxItem.upsert({
+          where: {
+            messageId: message.id,
+          },
+          update: {
+            webhookEventId,
+            userId,
+            type,
+            text,
+            sourceUrl,
+            imageUrl,
+            status: "pending",
+            error: null,
+          },
+          create: {
+            messageId: message.id,
+            webhookEventId,
+            userId,
+            type,
+            text,
+            sourceUrl,
+            imageUrl,
+            status: "pending",
+          },
+          select: {
+            id: true,
+            imageUrl: true,
+            userId: true,
+          },
+        });
+
+      /*
+       * 画像の場合は、まずLINEへ即時受付返信。
+       * 重いAI処理はafter()でレスポンス後に実行する。
+       */
+      if (
+        type === "image" &&
+        inbox.imageUrl
+      ) {
+        if (replyToken) {
+          try {
+            await replyLineMessage(
+              replyToken,
+              createProcessingMessage()
+            );
+          } catch (replyError) {
+            console.error(
+              "LINE受付返信失敗:",
+              replyError
+            );
+          }
+        }
+
+        after(async () => {
+          try {
+            const result =
+              await processLineInboxItem(
+                inbox.id
+              );
+
+            if (
+              !result ||
+              !result.userId
+            ) {
+              return;
+            }
+
+            console.log(
+              "[line/webhook] 記事生成完了。LINEへ送信:",
+              result.newsId
+            );
+
+            await pushLineMessage(
+              result.userId,
+              createApprovalMessages({
+                title: result.title,
+                article: result.article,
+                summary: result.summary,
+                image: result.image,
+              })
+            );
+
+            console.log(
+              "[line/webhook] 完成通知送信完了:",
+              result.newsId
+            );
+          } catch (error) {
+            console.error(
+              "[line/webhook] 自動記事生成エラー:",
+              error
+            );
+
+            if (inbox.userId) {
+              try {
+                await pushLineMessage(
+                  inbox.userId,
+                  [
+                    {
+                      type: "text",
+                      text:
+                        "❌ 記事生成中にエラーが発生しました。\n\n" +
+                        "管理画面のLINE受信欄を確認してください。",
+                    },
+                  ]
+                );
+              } catch (pushError) {
+                console.error(
+                  "LINEエラー通知失敗:",
+                  pushError
+                );
+              }
+            }
+          }
+        });
+      }
     }
 
     return NextResponse.json({
