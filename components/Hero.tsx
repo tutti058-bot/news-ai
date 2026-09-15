@@ -13,6 +13,11 @@ function cleanText(text: string) {
 
 export default async function Hero() {
   const top = await prisma.news.findFirst({
+    where: {
+      publishedAt: {
+        not: null,
+      },
+    },
     orderBy: {
       publishedAt: "desc",
     },
