@@ -271,6 +271,10 @@ const [xPostMode, setXPostMode] =
     useState<LineInboxItem[]>([]);
   const [lineInboxLoading, setLineInboxLoading] =
     useState(false);
+  const [lineInboxPage, setLineInboxPage] =
+    useState(1);
+
+  const LINE_INBOX_PER_PAGE = 5;
   const [lineAnalyzeLoadingId, setLineAnalyzeLoadingId] =
     useState<number | null>(null);
   const [lineAnalysis, setLineAnalysis] =
@@ -335,6 +339,7 @@ const [xPostMode, setXPostMode] =
           ? data.items
           : []
       );
+      setLineInboxPage(1);
     } catch (error) {
       console.error(
         "LINE受信一覧取得エラー:",
@@ -2555,8 +2560,76 @@ const [xPostMode, setXPostMode] =
                 : "LINE受信データはありません"}
             </div>
           ) : (
-            <div className="mt-6 space-y-5">
-              {lineInboxItems.map((item) => {
+            <>
+              {(() => {
+                const lineInboxTotalPages = Math.max(
+                  1,
+                  Math.ceil(
+                    lineInboxItems.length / LINE_INBOX_PER_PAGE
+                  )
+                );
+
+                const lineInboxStartIndex =
+                  (lineInboxPage - 1) * LINE_INBOX_PER_PAGE;
+
+                const pagedLineInboxItems =
+                  lineInboxItems.slice(
+                    lineInboxStartIndex,
+                    lineInboxStartIndex + LINE_INBOX_PER_PAGE
+                  );
+
+                return (
+                  <>
+                    <div className="mt-6 mb-4 flex flex-wrap items-center justify-between gap-3">
+                      <p className="text-sm font-bold text-slate-500">
+                        全{lineInboxItems.length}件
+                        {lineInboxTotalPages > 1
+                          ? ` / ${lineInboxPage}ページ目`
+                          : ""}
+                      </p>
+
+                      {lineInboxTotalPages > 1 && (
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setLineInboxPage((page) =>
+                                Math.max(1, page - 1)
+                              )
+                            }
+                            disabled={lineInboxPage === 1}
+                            className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-black text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                          >
+                            ← 前へ
+                          </button>
+
+                          <span className="min-w-[80px] text-center text-sm font-black text-slate-700">
+                            {lineInboxPage} / {lineInboxTotalPages}
+                          </span>
+
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setLineInboxPage((page) =>
+                                Math.min(
+                                  lineInboxTotalPages,
+                                  page + 1
+                                )
+                              )
+                            }
+                            disabled={
+                              lineInboxPage === lineInboxTotalPages
+                            }
+                            className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-black text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                          >
+                            次へ →
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-5">
+                      {pagedLineInboxItems.map((item) => {
                 const analysis = lineAnalysis[item.id];
 
                 return (
@@ -2820,8 +2893,12 @@ const [xPostMode, setXPostMode] =
                     )}
                   </article>
                 );
-              })}
-            </div>
+                      })}
+                    </div>
+                  </>
+                );
+              })()}
+            </>
           )}
         </section>
 

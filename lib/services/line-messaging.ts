@@ -68,15 +68,14 @@ export function createApprovalMessages(params: {
   image: string | null;
 }) {
   const messages: unknown[] = [];
-
-  const article = params.article.trim();
-  const summary = params.summary?.trim() || "";
+  const summary = params.summary?.trim() || "要約なし";
 
   const text =
     `📰 AI NEWSジャパン\n` +
     `記事生成が完了しました\n\n` +
     `【${params.title}】\n\n` +
-    `${article}\n\n` +
+    `【要約】\n` +
+    `${summary}\n\n` +
     `――――――――――\n` +
     `この内容で公開しますか？\n\n` +
     `「良し」→ 公開\n` +
