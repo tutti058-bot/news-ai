@@ -2,6 +2,7 @@ import OpenAI from "openai";
 import { prisma } from "@/lib/prisma";
 import { analyzeArticle, generateIndependentAnalysis } from "@/lib/ai";
 import { generateLineNewsImage } from "@/lib/services/line-news-image";
+import { getArticle } from "@/lib/getArticle";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -178,6 +179,144 @@ JSON形式：
   };
 
   return result;
+}
+
+
+async function analyzeLineUrl(
+  inboxId: number,
+  sourceUrl: string,
+  text: string | null
+): Promise<ExtractedNews> {
+  const articleText = await getArticle(sourceUrl);
+
+  if (!articleText) {
+    await prisma.lineInboxItem.update({
+      where: { id: inboxId },
+      data: {
+        status: "error",
+        error: "URLからニュース本文を取得できませんでした",
+      },
+    });
+
+    throw new Error("URLからニュース本文を取得できませんでした");
+  }
+
+  const prompt = `
+あなたはAI NEWSジャパンの記事素材抽出AIです。
+
+以下は、LINEで送信されたニュースURLから取得した本文です。
+
+URL：
+${sourceUrl}
+
+本文：
+${articleText}
+
+LINE補足テキスト：
+${text ?? ""}
+
+取得した本文に明確に記載されている情報だけを整理してください。
+
+【絶対ルール】
+1. 本文にない情報を推測しない。
+2. 人物名、企業名、商品名、数字、日付などは本文にあるものだけ使う。
+3. 不明な情報は空文字、空配列、nullにする。
+4. 本文の内容と推測を混ぜない。
+5. 日本語で返す。
+6. JSONのみ返す。
+
+JSON形式：
+{
+  "sourceType": "ニュース",
+  "sourceName": "",
+  "title": "",
+  "postText": "",
+  "author": "",
+  "publishedAt": "",
+  "metrics": {
+    "likes": null,
+    "reposts": null,
+    "replies": null,
+    "views": null
+  },
+  "facts": [],
+  "visualDescription": "",
+  "urls": ["${sourceUrl}"],
+  "confidence": "high|medium|low"
+}
+`;
+
+  await prisma.lineInboxItem.update({
+    where: { id: inboxId },
+    data: {
+      status: "analyzing",
+      error: null,
+    },
+  });
+
+  const response = await openai.responses.create({
+    model: "gpt-4.1-mini",
+    input: prompt,
+  });
+
+  const raw = response.output_text?.trim() ?? "";
+
+  let parsed: Partial<ExtractedNews>;
+
+  try {
+    parsed = JSON.parse(
+      raw
+        .replace(/^```json\s*/i, "")
+        .replace(/\s*```$/i, "")
+        .trim()
+    );
+  } catch (error) {
+    console.error("[line-pipeline] URL解析JSONエラー", error);
+
+    await prisma.lineInboxItem.update({
+      where: { id: inboxId },
+      data: {
+        status: "error",
+        error: "URL解析結果のJSON解析に失敗しました",
+      },
+    });
+
+    throw new Error("URL解析結果のJSON解析に失敗しました");
+  }
+
+  return {
+    sourceType: cleanString(parsed.sourceType) || "ニュース",
+    sourceName: cleanString(parsed.sourceName),
+    title: cleanString(parsed.title),
+    postText: cleanString(parsed.postText),
+    author: cleanString(parsed.author),
+    publishedAt: cleanString(parsed.publishedAt),
+    metrics: {
+      likes: cleanNullableNumber(parsed.metrics?.likes),
+      reposts: cleanNullableNumber(parsed.metrics?.reposts),
+      replies: cleanNullableNumber(parsed.metrics?.replies),
+      views: cleanNullableNumber(parsed.metrics?.views),
+    },
+    facts: Array.isArray(parsed.facts)
+      ? parsed.facts.filter(
+          (value): value is string =>
+            typeof value === "string" && value.trim().length > 0
+        )
+      : [],
+    visualDescription: cleanString(parsed.visualDescription),
+    urls: Array.isArray(parsed.urls)
+      ? parsed.urls.filter(
+          (value): value is string =>
+            typeof value === "string" && value.trim().length > 0
+        )
+      : [sourceUrl],
+    confidence:
+      parsed.confidence === "high" ||
+      parsed.confidence === "medium" ||
+      parsed.confidence === "low"
+        ? parsed.confidence
+        : "low",
+  };
 }
 
 async function generateLineArticle(
@@ -440,16 +579,15 @@ export async function processLineInboxItem(inboxId: number) {
     return null;
   }
 
-  if (!inbox.imageUrl) {
+  if (!inbox.imageUrl && !inbox.sourceUrl) {
     await prisma.lineInboxItem.update({
       where: { id: inboxId },
       data: {
         status: "error",
-        error: "画像URLがありません。スクショ画像を送信してください。",
+        error: "画像またはニュースURLがありません。",
       },
     });
-
-    throw new Error("画像URLがありません");
+    throw new Error("画像またはニュースURLがありません");
   }
 
   if (
@@ -470,12 +608,18 @@ export async function processLineInboxItem(inboxId: number) {
   });
 
   try {
-    const analysis = await analyzeLineImage(
-      inbox.id,
-      inbox.imageUrl,
-      inbox.text,
-      inbox.sourceUrl
-    );
+    const analysis = inbox.imageUrl
+      ? await analyzeLineImage(
+          inbox.id,
+          inbox.imageUrl,
+          inbox.text,
+          inbox.sourceUrl
+        )
+      : await analyzeLineUrl(
+          inbox.id,
+          inbox.sourceUrl!,
+          inbox.text
+        );
 
     const result = await generateLineArticle(
       inbox.id,

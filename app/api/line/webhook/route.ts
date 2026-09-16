@@ -348,6 +348,7 @@ export async function POST(request: Request) {
           select: {
             id: true,
             imageUrl: true,
+            sourceUrl: true,
             userId: true,
           },
         });
@@ -357,8 +358,8 @@ export async function POST(request: Request) {
        * 重いAI処理はafter()でレスポンス後に実行する。
        */
       if (
-        type === "image" &&
-        inbox.imageUrl
+        (type === "image" && inbox.imageUrl) ||
+        (type === "text" && inbox.sourceUrl)
       ) {
         if (replyToken) {
           try {
