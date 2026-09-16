@@ -3317,40 +3317,6 @@ const [xPostMode, setXPostMode] =
                                 </button>
                               </div>
 
-                              <div className="rounded-xl bg-white p-4 shadow-sm ring-2 ring-slate-900">
-                                <div className="mb-2 flex items-center justify-between">
-                                  <div className="text-xs font-black text-slate-900">
-                                    ② AI NEWSジャパン独自版
-                                  </div>
-                                  <span className="rounded-full bg-slate-900 px-2 py-1 text-[10px] font-bold text-white">
-                                    {xPostDraft.insightLabel}
-                                  </span>
-                                </div>
-
-                                <p className="whitespace-pre-wrap text-sm leading-7 text-slate-800">
-                                  {xPostDraft.insightTweet}
-                                </p>
-
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    const intentUrl =
-                                      "https://x.com/intent/post?text=" +
-                                      encodeURIComponent(
-                                        xPostDraft.insightTweet
-                                      );
-
-                                    window.open(
-                                      intentUrl,
-                                      "_blank",
-                                      "noopener,noreferrer"
-                                    );
-                                  }}
-                                  className="mt-4 w-full min-h-11 rounded-xl bg-black px-4 py-3 text-sm font-bold text-white transition hover:bg-slate-800"
-                                >
-                                  𝕏 独自版で投稿
-                                </button>
-                              </div>
                             </>
                           ) : (
                             <>

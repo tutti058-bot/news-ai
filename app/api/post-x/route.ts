@@ -160,10 +160,11 @@ AI NEWSジャパンのAI画像付きX投稿を作成してください。
 JSONのみ返してください。
 
 {
-  "hook": "新展開【タイトル】",
-  "content": "ニュースの内容",
-  "analysisLabel": "今後の予想",
-  "analysis": "独自分析"
+  "hook": "何が起きたかを示す1行",
+  "attention": "なぜ今注目なのか",
+  "scoreReason": "AI NEWS評価の理由",
+  "future": "記事から確認できる今後の動きや変化",
+  "independentAnalysis": "AI NEWSジャパン独自の具体的な見方"
 }
 
 【hook】
@@ -442,17 +443,22 @@ ${news.category ?? "国内"}
                   hook: {
                     type: "string",
                   },
-                  content: {
+                  attention: {
                     type: "string",
                   },
-                  analysisLabel: {
+                  scoreReason: {
                     type: "string",
                   },
-                  analysis: {
+                  future: {
                     type: "string",
                   },
                 },
-                required: ["hook", "content", "analysisLabel", "analysis"],
+                required: [
+                  "hook",
+                  "attention",
+                  "scoreReason",
+                  "future",
+                ],
                 additionalProperties: false,
               },
             },
@@ -464,9 +470,9 @@ ${news.category ?? "国内"}
 
       let imagePost: {
         hook: string;
-        content: string;
-        analysisLabel: string;
-        analysis: string;
+        attention: string;
+        scoreReason: string;
+        future: string;
       };
 
       try {
@@ -477,115 +483,72 @@ ${news.category ?? "国内"}
         );
       }
 
-      let imageHook = cleanText(imagePost.hook)
+      const imageHook = cleanText(imagePost.hook)
         .replace(/追加情報はリプへ👇/g, "")
         .replace(/^「|」$/g, "")
         .trim();
 
-      let imageContent = cleanText(imagePost.content)
+      const imageAttention = cleanText(
+        imagePost.attention
+      )
         .replace(/追加情報はリプへ👇/g, "")
         .replace(/でやんす[。！!]?$/gi, "")
         .trim();
 
-      let imageAnalysisLabel = cleanText(imagePost.analysisLabel)
-        .replace(/^▼\s*/g, "")
+      const imageScoreReason = cleanText(
+        imagePost.scoreReason
+      )
         .replace(/追加情報はリプへ👇/g, "")
         .replace(/でやんす[。！!]?$/gi, "")
         .trim();
 
-      let imageAnalysis = cleanText(imagePost.analysis)
+      const imageFuture = cleanText(
+        imagePost.future
+      )
         .replace(/追加情報はリプへ👇/g, "")
         .replace(/でやんす[。！!]?$/gi, "")
         .trim();
 
-      if (imageContent.length > 80) {
-        imageContent =
-          imageContent.slice(0, 80).replace(/[、。]$/, "") + "。";
-      }
-
-      if (imageAnalysisLabel.length > 20) {
-        imageAnalysisLabel =
-          imageAnalysisLabel.slice(0, 20).trim();
-      }
-
-      if (!imageAnalysisLabel) {
-        imageAnalysisLabel = "AI NEWSジャパンの見方";
-      }
-
-      // analysisは生成時点で完結させる。
-      // 文の途中で切れていた場合は後処理で無理に連結しない。
-      imageAnalysis = imageAnalysis.trim();
-
-      // 文末が未完結に見える場合は、最後の完結文まで戻す
       if (
-        imageAnalysis.length > 0 &&
-        !/[。！？!?]$/.test(imageAnalysis)
+        !imageHook ||
+        !imageAttention ||
+        !imageScoreReason ||
+        !imageFuture
       ) {
-        const lastSentenceEnd = Math.max(
-          imageAnalysis.lastIndexOf("。"),
-          imageAnalysis.lastIndexOf("！"),
-          imageAnalysis.lastIndexOf("？"),
-          imageAnalysis.lastIndexOf("!"),
-          imageAnalysis.lastIndexOf("?")
-        );
-
-        if (lastSentenceEnd >= 35) {
-          imageAnalysis =
-            imageAnalysis.slice(0, lastSentenceEnd + 1).trim();
-        }
-      }
-
-      // hookを必ず「フック【タイトル】」に統一
-      // AIの出力にタイトルが重複していても、元記事タイトルを基準に整形する
-      const sourceTitle = cleanText(news.title)
-        .replace(/[【】]/g, "")
-        .trim();
-
-      const hookPrefixMatch = imageHook.match(
-        /^(速報|新展開|注目|話題|衝撃|発表|緊急|続報|判明|決定|驚き|必見)/
-      );
-
-      const hookPrefix =
-        hookPrefixMatch?.[1] ?? "注目";
-
-      imageHook =
-        `${hookPrefix}【${sourceTitle}】`;
-
-      if (!imageHook || !imageContent || !imageAnalysis) {
         throw new Error(
-          "AI画像版X投稿の生成結果が空です"
+          "AI画像版X投稿の必要項目が生成されませんでした"
         );
       }
 
-      // ① 今までの通常版
-      const tweet = `${imageHook}
+      const imageScoreText =
+        `🤖 AI NEWS評価：${score}点\n${imageScoreReason}`;
 
-${imageContent}`
-        .replace(/(?:\n\s*)*追加情報はリプへ👇/g, "")
-        .trim() + `
+      const imageTweetBody = [
+        imageHook,
+        imageAttention,
+        imageScoreText,
+        `今後：${imageFuture}`,
+      ].join("\n\n");
 
-追加情報はリプへ👇`;
+      const tweet = `${imageTweetBody}
 
-      // ② AI NEWSジャパン独自分析版
-      const insightTweet = `${imageHook}
+詳細はこちら
+${url}`;
 
-${imageContent}
-
-▼ ${imageAnalysisLabel}
-${imageAnalysis}`
-        .replace(/(?:\n\s*)*追加情報はリプへ👇/g, "")
-        .trim() + `
-
-追加情報はリプへ👇`;
+      const insightTweet = tweet;
+      const analysisLabel =
+        "AI NEWSジャパンの見方";
+      const analysis = imageFuture;
+      const description = imageTweetBody;
 
       return NextResponse.json({
         tweet,
         insightTweet,
         score,
         hook: imageHook,
-        description: imageContent,
-        analysisLabel: imageAnalysisLabel,
-        analysis: imageAnalysis,
+        description: imageAttention,
+        analysisLabel,
+        analysis,
         intentUrl:
           "https://x.com/intent/post?text=" +
           encodeURIComponent(tweet),
@@ -607,29 +570,56 @@ ${imageAnalysis}`
 
 【投稿構造】
 
-1. hook
+1. label
+
+投稿冒頭につける短いラベル。
+
+ニュース内容に合うものを1つ選ぶ。
+
+使用例：
+【話題】
+【注目】
+【発表】
+【決定】
+【新展開】
+【速報】
+【注目ニュース】
+
+ニュース内容に合わないラベルは禁止。
+毎回【話題】固定にせず、記事内容に応じて選択する。
+
+2. hook
+
 最初の1行。
+
 「何が起きたのか」を最優先にする。
+
 記事タイトルの意味を変えず、具体的な出来事を一文で示す。
+
 不要な煽りや感情表現は禁止。
 
-2. attention
-「なぜ今注目なのか」を2〜4行で説明する。
-ニュース本文・要約にある情報だけを使う。
-単なるタイトルの言い換えは禁止。
-「今回注目される理由」が具体的に分かる文章にする。
+3. attention
 
-3. scoreReason
-AI NEWS評価の採点理由。
-20〜50文字程度。
-ニュースの影響度、話題性、変化の大きさなど、記事から確認できる内容を基準に簡潔に説明する。
+「なぜ今注目なのか」を2〜4行で説明する。
+
+ニュース本文・要約にある情報だけを使う。
+
+単なるタイトルの言い換えは禁止。
+
+今回注目される理由が具体的に分かる文章にする。
 
 4. future
+
 「今後どうなるか」。
+
 ニュース本文から確認できる結果や変化、または記事に明記された今後の動きを優先する。
+
 記事にない将来予測を勝手に作らない。
+
 「普及しそう」「注目されそう」だけで終わらせない。
+
 誰が何をするようになるか、何が変わるかを具体的にする。
+
 記事から将来像を断定できない場合は、記事に書かれている範囲の変化を述べる。
 
 【最重要ルール】
@@ -645,15 +635,16 @@ AI NEWS評価の採点理由。
 ・「です・ます」は使用しない
 ・「でやんす」は使用しない
 ・顔文字は禁止
+・絵文字は禁止
 ・毎回同じ言い回しにならないようにする
 ・投稿本文だけで内容が分かるようにする
 ・文章を途中で終わらせない
 
 【X向け文字量】
 
+label：2〜8文字程度
 hook：20〜55文字程度
 attention：50〜100文字程度
-scoreReason：20〜50文字程度
 future：40〜80文字程度
 
 全体としてURLを除いて250文字以内を目安にする。
@@ -661,9 +652,9 @@ future：40〜80文字程度
 JSONのみ返してください。
 
 {
+  "label": "",
   "hook": "",
   "attention": "",
-  "scoreReason": "",
   "future": ""
 }
 `,
@@ -671,17 +662,19 @@ JSONのみ返してください。
         {
           role: "user",
           content: `
+
 タイトル：
+
 ${news.title}
 
 要約：
+
 ${news.summary ?? ""}
 
 カテゴリ：
+
 ${news.category ?? "国内"}
 
-AI NEWS評価：
-${score}点
 `,
         },
       ],
@@ -695,13 +688,13 @@ ${score}点
           schema: {
             type: "object",
             properties: {
+              label: {
+                type: "string",
+              },
               hook: {
                 type: "string",
               },
               attention: {
-                type: "string",
-              },
-              scoreReason: {
                 type: "string",
               },
               future: {
@@ -709,9 +702,9 @@ ${score}点
               },
             },
             required: [
+              "label",
               "hook",
               "attention",
-              "scoreReason",
               "future",
             ],
             additionalProperties: false,
@@ -730,9 +723,9 @@ ${score}点
     );
 
     let parsed: {
+      label: string;
       hook: string;
       attention: string;
-      scoreReason: string;
       future: string;
     };
 
@@ -744,6 +737,10 @@ ${score}点
       );
     }
 
+    const label = cleanText(parsed.label)
+      .replace(/でやんす[。！!]?/gi, "")
+      .trim();
+
     const hook = cleanHook(parsed.hook)
       .replace(/^「|」$/g, "")
       .trim();
@@ -752,44 +749,31 @@ ${score}点
       .replace(/でやんす[。！!]?/gi, "")
       .trim();
 
-    const scoreReason = cleanText(parsed.scoreReason)
-      .replace(/でやんす[。！!]?/gi, "")
-      .trim();
-
     const future = cleanText(parsed.future)
       .replace(/でやんす[。！!]?/gi, "")
       .trim();
 
-    if (
-      !hook ||
-      !attention ||
-      !scoreReason ||
-      !future
-    ) {
+    if (!label || !hook || !attention || !future) {
       throw new Error(
         "X投稿の必要項目が生成されませんでした"
       );
     }
 
-    const scoreText =
-      `🤖 AI NEWS評価：${score}点
-${scoreReason}`;
-
     const tweetBody = [
-      hook,
+      `${label}${hook}`,
       attention,
-      scoreText,
       `今後：${future}`,
-    ].join("\n");
+    ].join("\n\n");
 
     const tweet = `${tweetBody}
 
-詳細はこちら👇
+詳細はこちら
+
 ${url}`;
 
     const insightTweet = tweet;
-    const analysisLabel = "AI NEWSジャパンの見方";
-    const analysis = future;
+    const analysisLabel = "";
+    const analysis = "";
     const description = tweetBody;
 
     // 最終チェック
