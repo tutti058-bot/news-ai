@@ -25,6 +25,7 @@ type ExtractedNews = {
   visualDescription: string;
   urls: string[];
   confidence: string;
+  sourceImageUrl?: string;
 };
 
 function cleanString(value: unknown): string {
@@ -369,10 +370,13 @@ async function analyzeLineXUrl(
 
   const params = new URLSearchParams({
     "tweet.fields":
-      "created_at,public_metrics,author_id,lang",
-    expansions: "author_id",
+      "created_at,public_metrics,author_id,lang,attachments",
+    expansions:
+      "author_id,attachments.media_keys",
     "user.fields":
       "name,username,public_metrics",
+    "media.fields":
+      "media_key,type,url,preview_image_url",
   });
 
   const response = await fetch(
@@ -423,6 +427,34 @@ async function analyzeLineXUrl(
   );
 
   const metrics = tweet.public_metrics ?? {};
+
+  const media = Array.isArray(data.includes?.media)
+    ? data.includes.media
+    : [];
+
+  const firstMediaKey =
+    Array.isArray(tweet.attachments?.media_keys)
+      ? tweet.attachments.media_keys[0]
+      : null;
+
+  const sourceImageUrl =
+    media.find(
+      (item: {
+        media_key?: string;
+        type?: string;
+        url?: string;
+        preview_image_url?: string;
+      }) => item.media_key === firstMediaKey
+    )?.url ??
+    media.find(
+      (item: {
+        media_key?: string;
+        type?: string;
+        url?: string;
+        preview_image_url?: string;
+      }) => item.media_key === firstMediaKey
+    )?.preview_image_url ??
+    null;
 
   const prompt = `
 あなたはAI NEWSジャパンの記事素材抽出AIです。
@@ -586,6 +618,10 @@ JSON形式：
       parsed.confidence === "low"
         ? parsed.confidence
         : "low",
+    sourceImageUrl:
+      typeof sourceImageUrl === "string"
+        ? sourceImageUrl
+        : undefined,
   };
 }
 
@@ -800,7 +836,7 @@ ${inbox.text ?? ""}
   try {
     generatedImage = await generateLineNewsImage(
       createdNews.id,
-      inbox.imageUrl
+      analysis.sourceImageUrl ?? inbox.imageUrl
     );
   } catch (imageError) {
     console.error("[line-pipeline] 画像生成失敗", imageError);
