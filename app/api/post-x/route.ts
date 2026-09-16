@@ -601,173 +601,71 @@ ${imageAnalysis}`
         {
           role: "system",
           content: `
-あなたはAI NEWSジャパン専属AIニュースキャスター「やんすAI」です。
+あなたはAI NEWSジャパンのX投稿編集AIです。
 
-ニュース記事を読み、Xで「思わず手を止める」「内容を理解したくなる」「自然に反応したくなる」投稿文を作成してください。
+ニュース記事を読み、Xだけ読んでもニュースの価値が分かる投稿を作成してください。
 
-AI NEWSジャパンの投稿は、単なるニュースの転載やタイトルの要約ではありません。
-
-ニュースそのものの価値を伝えながら、
-やんすAIならではの視点を少し加え、
-読んだ人の中に自然な興味や会話の余白が生まれる投稿を作ってください。
-
-ただし、無理に質問したり、
-毎回「どう思いますか？」と聞いたり、
-コメントや拡散をお願いしたりすることは禁止です。
-
-【投稿の基本構造】
-
-投稿は以下の2つで構成します。
+【投稿構造】
 
 1. hook
-2. description
+最初の1行。
+「何が起きたのか」を最優先にする。
+記事タイトルの意味を変えず、具体的な出来事を一文で示す。
+不要な煽りや感情表現は禁止。
 
-最終的な投稿は、
+2. attention
+「なぜ今注目なのか」を2〜4行で説明する。
+ニュース本文・要約にある情報だけを使う。
+単なるタイトルの言い換えは禁止。
+「今回注目される理由」が具体的に分かる文章にする。
 
-【ラベル】タイトル
+3. scoreReason
+AI NEWS評価の採点理由。
+20〜50文字程度。
+ニュースの影響度、話題性、変化の大きさなど、記事から確認できる内容を基準に簡潔に説明する。
 
-description
-
-という形になります。
-
-記事URLはシステム側で自動追加します。
-
-────────────────
-
-【hook】
-
-ニュース記事のタイトル部分を作成してください。
-
-基本は、
-
-【タイトル】
-
-ではなく、
-
-【必要なら強いラベル】タイトル
-
-という1行にしてください。
-
-タイトルは元記事の内容が一目で分かるものにする。
-
-元記事タイトルをそのまま使ってもよいが、
-読みやすさのために軽く整えてよい。
-
-タイトルの意味を変えてはいけません。
-
-【ラベルについて】
-
-ニュース内容に強いインパクトがある場合だけ、
-タイトルの前に短いラベルを1つ付けてください。
-
-例：
-
-【完全終了】
-【衝撃】
-【速報】
-【激震】
-【緊急】
-【激変】
-【まさか】
-【歴史的】
-
-ただし、
-ニュース内容に明確に合う場合だけ使用してください。
-
-毎回ラベルを付けるのは禁止。
-
-特に【完全終了】は、
-本当に重大な終了・破綻・撤退などの内容である場合だけ使用してください。
-
-根拠のない煽りは禁止です。
-
-タイトルだけを見ても
-何のニュースか分かるようにしてください。
-
-────────────────
-
-────────────────
-
-【description】
-
-40〜80文字程度。
-
-基本構成は必ず、
-
-① 何が起きたか
-↓
-② その結果どうなったか
-
-の2段階にしてください。
-
-例：
-
-「○○が発表され、△△を進めることになった。
-↓
-これにより□□への影響が広がりそうです。」
-
-「○○で問題が発生。
-↓
-その影響で△△が停止しました。」
-
-「○○が実現。
-↓
-これまで難しかった△△が可能になりました。」
-
-【重要】
-
-「ニュースの説明 → 感想」ではなく、
-
-「ニュースの内容 → 結果・変化」
-
-として書いてください。
-
-結果や変化が記事に明確に書かれていない場合は、
-記事に書かれている範囲で
-「その結果」「これにより」「今後」などを使って
-自然につなげてください。
-
-記事にない結果を勝手に推測してはいけません。
-
-「注目です」
-「重要です」
-「今後に期待です」
-だけで終わらせないでください。
-
-記事の内容から、
-実際に何が変わったのか、
-何が起きるのかを具体的に書いてください。
-
-description内にURLを入れないでください。
-
-「詳しくはこちら」
-「続きはこちら」
-などのURL誘導も禁止です。
-
-顔文字は禁止。
-
-毎回同じ言い回しや語尾を繰り返さないでください。
-
-「でやんす」を固定で付けないでください。
-
-ニュースの内容に合った自然な文章にしてください。
-
-────────────────
+4. future
+「今後どうなるか」。
+ニュース本文から確認できる結果や変化、または記事に明記された今後の動きを優先する。
+記事にない将来予測を勝手に作らない。
+「普及しそう」「注目されそう」だけで終わらせない。
+誰が何をするようになるか、何が変わるかを具体的にする。
+記事から将来像を断定できない場合は、記事に書かれている範囲の変化を述べる。
 
 【最重要ルール】
 
-・記事に存在しない事実は禁止
+・記事にない事実は禁止
 ・記事にない数字は禁止
 ・記事にない人物情報は禁止
 ・根拠のない推測は禁止
 ・過度な煽りは禁止
-・内容を隠してクリックを誘導しない
-・タイトル → 内容 → 結果の流れを優先する
-・毎回同じ文章にならないよう表現を変える
+・「衝撃」「ヤバい」「歴史的」など根拠のない表現は禁止
+・URLは出力しない
+・「詳しくはこちら」「続きはこちら」などの誘導は禁止
+・「です・ます」は使用しない
+・「でやんす」は使用しない
+・顔文字は禁止
+・毎回同じ言い回しにならないようにする
+・投稿本文だけで内容が分かるようにする
+・文章を途中で終わらせない
 
-構造化されたJSONとして返してください。
+【X向け文字量】
 
-hook と description の2項目だけを返してください。
+hook：20〜55文字程度
+attention：50〜100文字程度
+scoreReason：20〜50文字程度
+future：40〜80文字程度
+
+全体としてURLを除いて250文字以内を目安にする。
+
+JSONのみ返してください。
+
+{
+  "hook": "",
+  "attention": "",
+  "scoreReason": "",
+  "future": ""
+}
 `,
         },
         {
@@ -782,13 +680,13 @@ ${news.summary ?? ""}
 カテゴリ：
 ${news.category ?? "国内"}
 
-AI評価：
+AI NEWS評価：
 ${score}点
 `,
         },
       ],
       temperature: 0.8,
-      max_tokens: 220,
+      max_tokens: 320,
       response_format: {
         type: "json_schema",
         json_schema: {
@@ -800,11 +698,22 @@ ${score}点
               hook: {
                 type: "string",
               },
-              description: {
+              attention: {
+                type: "string",
+              },
+              scoreReason: {
+                type: "string",
+              },
+              future: {
                 type: "string",
               },
             },
-            required: ["hook", "description"],
+            required: [
+              "hook",
+              "attention",
+              "scoreReason",
+              "future",
+            ],
             additionalProperties: false,
           },
         },
@@ -815,11 +724,16 @@ ${score}点
       response.choices[0]?.message?.content?.trim() ?? "";
 
     console.log("OpenAI rawContent:", rawContent);
-    console.log("OpenAI refusal:", response.choices[0]?.message?.refusal);
+    console.log(
+      "OpenAI refusal:",
+      response.choices[0]?.message?.refusal
+    );
 
     let parsed: {
       hook: string;
-      description: string;
+      attention: string;
+      scoreReason: string;
+      future: string;
     };
 
     try {
@@ -830,106 +744,53 @@ ${score}点
       );
     }
 
-    const hook = cleanHook(parsed.hook);
-
-    // X冒頭用の短いリアクションを別AIで生成
-    const reactionResponse = await openai.chat.completions.create({
-      model: "gpt-4.1-mini",
-      messages: [
-        {
-          role: "system",
-          content:
-            "ニュースを見た瞬間にXへ書きそうな自然な短いリアクションを1文だけ作ってください。ニュースの説明や要約は禁止。ニュースを読んだ人が自然に漏らす感想・驚き・興味・納得・意外性などを、そのニュースに合わせて毎回違う表現で作ってください。25〜70文字程度。「でやんす」「です」「ます」「注目」「重要」「ポイント」「今後の展開」などは禁止。顔文字・顔文字記号・定型リアクションは使用しないでください。同じ表現や語尾を繰り返さず、ニュースの内容に応じて文章の形も変えてください。"
-        },
-        {
-          role: "user",
-          content:
-            `タイトル：
-${news.title}
-
-要約：
-${news.summary ?? ""}`,
-        },
-      ],
-      temperature: 1,
-      max_tokens: 80,
-    });
-
-    let reaction = cleanDescription(
-      reactionResponse.choices[0]?.message?.content ?? ""
-    );
-
-    // キャラクター口調を機械的に除去
-    reaction = reaction
-      .replace(/でやんす[。！!]?/gi, "")
-      .replace(/でやんすね[。！!]?/gi, "")
+    const hook = cleanHook(parsed.hook)
       .replace(/^「|」$/g, "")
       .trim();
 
-    // リアクションが長すぎる場合は説明文になっている可能性が高いので不採用
-    if (reaction.length > 70) {
-      reaction = "";
-    }
+    const attention = cleanText(parsed.attention)
+      .replace(/でやんす[。！!]?/gi, "")
+      .trim();
 
-    // 解説調・キャスター調になった場合は不採用
-    const badReactionPatterns = [
-      "注目したいのは",
-      "今回のポイント",
-      "重要なのは",
-      "注目される",
-      "期待される",
-      "可能性がある",
-      "大きな動き",
-      "新たな風を吹き込",
-      "時代へ",
-      "時代の幕開け",
-      "〜点だ",
-      "点だ",
-    ];
+    const scoreReason = cleanText(parsed.scoreReason)
+      .replace(/でやんす[。！!]?/gi, "")
+      .trim();
+
+    const future = cleanText(parsed.future)
+      .replace(/でやんす[。！!]?/gi, "")
+      .trim();
 
     if (
-      badReactionPatterns.some((pattern) =>
-        reaction.includes(pattern)
-      )
+      !hook ||
+      !attention ||
+      !scoreReason ||
+      !future
     ) {
-      reaction = "";
+      throw new Error(
+        "X投稿の必要項目が生成されませんでした"
+      );
     }
 
-    // 見出しの内容をリアクションで繰り返していたら不採用
-    const segmenter = new Intl.Segmenter("ja", {
-      granularity: "word",
-    });
+    const scoreText =
+      `🤖 AI NEWS評価：${score}点
+${scoreReason}`;
 
-    const titleWords = Array.from(
-      segmenter.segment(news.title)
-    )
-      .filter((item) => item.isWordLike)
-      .map((item) => item.segment)
-      .filter((word) => word.length >= 2);
+    const tweetBody = [
+      hook,
+      attention,
+      scoreText,
+      `今後：${future}`,
+    ].join("\n");
 
-    const matchedWords = titleWords.filter((word) =>
-      reaction.includes(word)
-    );
+    const tweet = `${tweetBody}
 
-    const explanationLike =
-      reaction.includes("注目") ||
-      reaction.includes("ポイント") ||
-      reaction.includes("新時代") && reaction.length > 22 ||
-      reaction.includes("可能性") ||
-      reaction.includes("期待") ||
-      reaction.includes("成功とか") ||
-      reaction.includes("産ロケット");
-
-    const repeatedHeadlineInfo =
-      matchedWords.length >= 2 || explanationLike;
-
-    const description = reaction;
-
-    const tweet = `${description}
-
-【${hook}】
-
+詳細はこちら👇
 ${url}`;
+
+    const insightTweet = tweet;
+    const analysisLabel = "AI NEWSジャパンの見方";
+    const analysis = future;
+    const description = tweetBody;
 
     // 最終チェック
     if (
@@ -947,12 +808,18 @@ ${url}`;
 
     return NextResponse.json({
       tweet,
+      insightTweet,
       score,
       hook,
       description,
+      analysisLabel,
+      analysis,
       intentUrl:
         "https://x.com/intent/post?text=" +
         encodeURIComponent(tweet),
+      insightIntentUrl:
+        "https://x.com/intent/post?text=" +
+        encodeURIComponent(insightTweet),
     });
   } catch (error) {
     console.error("X投稿生成エラー:", error);

@@ -987,49 +987,29 @@ const [xPostMode, setXPostMode] =
       const articleUrl =
         `https://tutti-news-ai-bay.vercel.app/news/${newsId}`;
 
-      const rawTweet = String(postData.tweet);
-
-      const tweetWithoutUrl =
-        rawTweet.endsWith(articleUrl)
-          ? rawTweet
-              .slice(0, -articleUrl.length)
-              .trim()
-          : rawTweet;
-
       const tweet =
-        `${tweetWithoutUrl
-          .replace(/(?:\n\s*)*追加情報はリプへ👇\s*$/g, "")
-          .trim()}\n\n追加情報はリプへ👇`;
-
-      const rawInsightTweet =
-        String(postData.insightTweet ?? "");
-
-      const insightTweetWithoutUrl =
-        rawInsightTweet.endsWith(articleUrl)
-          ? rawInsightTweet
-              .slice(0, -articleUrl.length)
-              .trim()
-          : rawInsightTweet;
+        String(postData.tweet ?? "").trim();
 
       const insightLabel =
-        String(postData.analysisLabel ?? "AI NEWSジャパンの見方")
-          .replace(/^▼\s*/, "")
+        String(
+          postData.analysisLabel ??
+            "AI NEWSジャパンの見方"
+        )
+          .replace(/^▼\s*/g, "")
           .trim();
 
       const insightTweet =
-        insightTweetWithoutUrl
-          ? `${insightTweetWithoutUrl
-              .replace(/(?:\n\s*)*追加情報はリプへ👇\s*$/g, "")
-              .trim()}\n\n追加情報はリプへ👇`
-          : tweet;
+        String(
+          postData.insightTweet ??
+            postData.tweet ??
+            ""
+        ).trim();
 
       const legacyHook =
-        String(postData.hook ?? "")
-          .trim();
+        String(postData.hook ?? "").trim();
 
       const legacyTweet =
         `${legacyHook}${articleUrl}`;
-
       let image: string | null = null;
       let imageError = "";
 
@@ -1083,22 +1063,8 @@ const [xPostMode, setXPostMode] =
         }
       }
 
-      const finalImageTweet =
-        xPostMode === "ai-image"
-          ? tweet.replace(
-              /(?:\n\s*追加情報はリプへ👇)+\s*$/g,
-              "\n\n追加情報はリプへ👇"
-            )
-          : tweet;
-
-      const finalInsightTweet =
-        xPostMode === "ai-image"
-          ? insightTweet.replace(
-              /(?:\n\s*追加情報はリプへ👇)+\s*$/g,
-              "\n\n追加情報はリプへ👇"
-            )
-          : finalImageTweet;
-
+      const finalImageTweet = tweet;
+      const finalInsightTweet = insightTweet;
       setXPostDraft({
         newsId,
         tweet: finalImageTweet,
