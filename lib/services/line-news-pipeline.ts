@@ -319,6 +319,276 @@ JSON形式：
   };
 }
 
+
+function extractXPostId(url: string): string | null {
+  const match = url.match(
+    /(?:x\.com|twitter\.com)\/[^/]+\/status\/(\d+)/i
+  );
+
+  return match?.[1] ?? null;
+}
+
+async function analyzeLineXUrl(
+  inboxId: number,
+  sourceUrl: string,
+  text: string | null
+): Promise<ExtractedNews> {
+  const postId = extractXPostId(sourceUrl);
+
+  if (!postId) {
+    await prisma.lineInboxItem.update({
+      where: { id: inboxId },
+      data: {
+        status: "error",
+        error: "X投稿URLから投稿IDを取得できませんでした",
+      },
+    });
+
+    throw new Error("X投稿URLから投稿IDを取得できませんでした");
+  }
+
+  if (!process.env.X_Bearer_Token) {
+    await prisma.lineInboxItem.update({
+      where: { id: inboxId },
+      data: {
+        status: "error",
+        error: "X_Bearer_Tokenが設定されていません",
+      },
+    });
+
+    throw new Error("X_Bearer_Tokenが設定されていません");
+  }
+
+  await prisma.lineInboxItem.update({
+    where: { id: inboxId },
+    data: {
+      status: "analyzing",
+      error: null,
+    },
+  });
+
+  const params = new URLSearchParams({
+    "tweet.fields":
+      "created_at,public_metrics,author_id,lang",
+    expansions: "author_id",
+    "user.fields":
+      "name,username,public_metrics",
+  });
+
+  const response = await fetch(
+    `https://api.x.com/2/tweets/${postId}?${params.toString()}`,
+    {
+      headers: {
+        Authorization: `Bearer ${process.env.X_Bearer_Token}`,
+      },
+      cache: "no-store",
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok || !data?.data) {
+    console.error(
+      "[line-pipeline] X投稿取得失敗",
+      response.status,
+      data
+    );
+
+    await prisma.lineInboxItem.update({
+      where: { id: inboxId },
+      data: {
+        status: "error",
+        error:
+          data?.detail ??
+          data?.title ??
+          "X投稿の取得に失敗しました",
+      },
+    });
+
+    throw new Error(
+      data?.detail ??
+        data?.title ??
+        "X投稿の取得に失敗しました"
+    );
+  }
+
+  const tweet = data.data;
+  const users = Array.isArray(data.includes?.users)
+    ? data.includes.users
+    : [];
+
+  const author = users.find(
+    (user: { id?: string }) =>
+      user.id === tweet.author_id
+  );
+
+  const metrics = tweet.public_metrics ?? {};
+
+  const prompt = `
+あなたはAI NEWSジャパンの記事素材抽出AIです。
+
+以下はX APIから取得した実際の投稿データです。
+
+投稿URL：
+${sourceUrl}
+
+投稿本文：
+${tweet.text ?? ""}
+
+投稿日時：
+${tweet.created_at ?? ""}
+
+投稿者：
+${author?.name ?? ""} (@${author?.username ?? ""})
+
+いいね：
+${metrics.like_count ?? "不明"}
+
+リポスト：
+${metrics.retweet_count ?? "不明"}
+
+返信：
+${metrics.reply_count ?? "不明"}
+
+表示数：
+${metrics.impression_count ?? "不明"}
+
+LINE補足：
+${text ?? ""}
+
+【絶対ルール】
+1. X APIで取得した情報だけを事実として扱う。
+2. 投稿本文に書かれていない出来事を推測しない。
+3. 投稿者名、ユーザー名、数字、日時は取得できた値だけ使う。
+4. いいね・リポスト・返信・表示数はAPIで取得できた値だけ使う。
+5. 投稿本文から人物や企業の意図を推測しない。
+6. 日本語で返す。
+7. JSONのみ返す。
+
+JSON形式：
+{
+  "sourceType": "X",
+  "sourceName": "",
+  "title": "",
+  "postText": "",
+  "author": "",
+  "publishedAt": "",
+  "metrics": {
+    "likes": null,
+    "reposts": null,
+    "replies": null,
+    "views": null
+  },
+  "facts": [],
+  "visualDescription": "",
+  "urls": ["${sourceUrl}"],
+  "confidence": "high|medium|low"
+}
+`;
+
+  const aiResponse = await openai.responses.create({
+    model: "gpt-4.1-mini",
+    input: prompt,
+  });
+
+  const raw = aiResponse.output_text?.trim() ?? "";
+
+  let parsed: Partial<ExtractedNews>;
+
+  try {
+    parsed = JSON.parse(
+      raw
+        .replace(/^```json\s*/i, "")
+        .replace(/\s*```$/i, "")
+        .trim()
+    );
+  } catch (error) {
+    console.error(
+      "[line-pipeline] X URL解析JSONエラー",
+      error
+    );
+
+    await prisma.lineInboxItem.update({
+      where: { id: inboxId },
+      data: {
+        status: "error",
+        error: "X投稿解析結果のJSON解析に失敗しました",
+      },
+    });
+
+    throw new Error(
+      "X投稿解析結果のJSON解析に失敗しました"
+    );
+  }
+
+  return {
+    sourceType: "X",
+    sourceName:
+      cleanString(parsed.sourceName) ||
+      "X",
+    title: cleanString(parsed.title),
+    postText:
+      cleanString(parsed.postText) ||
+      cleanString(tweet.text),
+    author:
+      cleanString(parsed.author) ||
+      (author?.name
+        ? `${author.name} (@${author.username ?? ""})`
+        : ""),
+    publishedAt:
+      cleanString(parsed.publishedAt) ||
+      cleanString(tweet.created_at),
+    metrics: {
+      likes:
+        cleanNullableNumber(
+          parsed.metrics?.likes
+        ) ??
+        cleanNullableNumber(
+          metrics.like_count
+        ),
+      reposts:
+        cleanNullableNumber(
+          parsed.metrics?.reposts
+        ) ??
+        cleanNullableNumber(
+          metrics.retweet_count
+        ),
+      replies:
+        cleanNullableNumber(
+          parsed.metrics?.replies
+        ) ??
+        cleanNullableNumber(
+          metrics.reply_count
+        ),
+      views:
+        cleanNullableNumber(
+          parsed.metrics?.views
+        ) ??
+        cleanNullableNumber(
+          metrics.impression_count
+        ),
+    },
+    facts: Array.isArray(parsed.facts)
+      ? parsed.facts.filter(
+          (value): value is string =>
+            typeof value === "string" &&
+            value.trim().length > 0
+        )
+      : [],
+    visualDescription:
+      cleanString(
+        parsed.visualDescription
+      ),
+    urls: [sourceUrl],
+    confidence:
+      parsed.confidence === "high" ||
+      parsed.confidence === "medium" ||
+      parsed.confidence === "low"
+        ? parsed.confidence
+        : "low",
+  };
+}
+
 async function generateLineArticle(
   inboxId: number,
   analysis: ExtractedNews,
@@ -615,11 +885,19 @@ export async function processLineInboxItem(inboxId: number) {
           inbox.text,
           inbox.sourceUrl
         )
-      : await analyzeLineUrl(
-          inbox.id,
-          inbox.sourceUrl!,
-          inbox.text
-        );
+      : /(?:x\.com|twitter\.com)\/[^/]+\/status\/\d+/i.test(
+          inbox.sourceUrl!
+        )
+        ? await analyzeLineXUrl(
+            inbox.id,
+            inbox.sourceUrl!,
+            inbox.text
+          )
+        : await analyzeLineUrl(
+            inbox.id,
+            inbox.sourceUrl!,
+            inbox.text
+          );
 
     const result = await generateLineArticle(
       inbox.id,
