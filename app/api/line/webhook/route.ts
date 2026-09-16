@@ -9,7 +9,12 @@ import {
   createProcessingMessage,
 } from "@/lib/services/line-messaging";
 import { processLineInboxItem } from "@/lib/services/line-news-pipeline";
-import { handleLineApproval } from "@/lib/services/line-approval";
+import {
+  handleLineApproval,
+  getRecentPublishedNewsForDeletion,
+  deletePublishedNews,
+  handleLineDeletionCommand,
+} from "@/lib/services/line-approval";
 
 function verifySignature(
   body: string,
@@ -118,6 +123,32 @@ async function saveLineContent(
   return blob.url;
 }
 
+async function handleDeletionCommand(
+  userId: string,
+  replyToken: string,
+  text: string,
+  messageId: string
+) {
+  const result = await handleLineDeletionCommand(
+    userId,
+    text,
+    messageId
+  );
+
+  if (!result) {
+    return false;
+  }
+
+  await replyLineMessage(replyToken, [
+    {
+      type: "text",
+      text: result.message,
+    },
+  ]);
+
+  return true;
+}
+
 async function handleApprovalCommand(
   userId: string,
   replyToken: string,
@@ -208,7 +239,24 @@ export async function POST(request: Request) {
               replyToken,
               command
             );
+          if (handled) {
+            continue;
+          }
+        }
 
+        if (
+          command === "消去" ||
+          command === "削除" ||
+          command === "キャンセル" ||
+          /^[1-5]$/.test(command)
+        ) {
+          const handled =
+            await handleDeletionCommand(
+              userId,
+              replyToken,
+              command,
+              message.id
+            );
           if (handled) {
             continue;
           }
