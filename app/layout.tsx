@@ -70,12 +70,6 @@ export default function RootLayout({
     crossOrigin="anonymous"
   />
 
-  {/* 忍者AdMax */}
-  <Script
-    async
-    src="https://adm.shinobi.jp/st/auto.js"
-    data-admax-id="7cf7a85e729873455f5f86de2e11a8d8"
-  />
   
   <Header />
 
