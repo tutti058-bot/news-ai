@@ -192,9 +192,20 @@ export function generateScore(title: string) {
 }
 
 // AI記事分析
+type AnalyzeArticleContext = {
+  sourceType?: string;
+  postText?: string;
+  facts?: string[];
+  likes?: number | null;
+  reposts?: number | null;
+  replies?: number | null;
+  views?: number | null;
+};
+
 export async function analyzeArticle(
   title: string,
-  article: string
+  article: string,
+  context?: AnalyzeArticleContext
 ) {
   try {
     const response = await openai.chat.completions.create(
@@ -465,6 +476,33 @@ ${title}
 
 本文:
 ${article.slice(0, 1800)}
+
+${context ? `
+【元ネタ補足情報】
+この記事がLINE経由で生成された場合、以下は記事生成前に元ネタから確認できた情報です。
+
+種別:
+${context.sourceType ?? ""}
+
+元投稿本文:
+${context.postText ?? ""}
+
+確認できた事実:
+${(context.facts ?? []).join("\n")}
+
+SNS反応:
+いいね: ${context.likes ?? "不明"}
+リポスト: ${context.reposts ?? "不明"}
+返信: ${context.replies ?? "不明"}
+表示数: ${context.views ?? "不明"}
+
+【元ネタ情報の評価ルール】
+・上記情報はニュース価値を判断するための補助情報として使用する
+・反応数をそのまま点数に変換したり、機械的に加点したりしない
+・実際に確認できる反響が大きい場合は、話題性・注目範囲を適切に評価する
+・元投稿本文や確認事実に含まれる重要な出来事が、生成記事で簡略化されていても見落とさない
+・元ネタにない事実を追加してはいけない
+` : ""}
 
 上記の記事を分析してください。`,
           },

@@ -779,7 +779,15 @@ ${inbox.text ?? ""}
     throw new Error("記事タイトルまたは本文を生成できませんでした");
   }
 
-  const ai = await analyzeArticle(title, article);
+  const ai = await analyzeArticle(title, article, {
+    sourceType: analysis.sourceType,
+    postText: analysis.postText,
+    facts: analysis.facts,
+    likes: analysis.metrics.likes,
+    reposts: analysis.metrics.reposts,
+    replies: analysis.metrics.replies,
+    views: analysis.metrics.views,
+  });
 
   if (!ai.summary) {
     throw new Error("記事AI分析に失敗しました");

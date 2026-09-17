@@ -240,7 +240,15 @@ ${inbox.text ?? ""}
       );
     }
 
-    const ai = await analyzeArticle(title, article);
+    const ai = await analyzeArticle(title, article, {
+      sourceType: analysis.sourceType,
+      postText: analysis.postText,
+      facts: analysis.facts,
+      likes: analysis.metrics?.likes ?? null,
+      reposts: analysis.metrics?.reposts ?? null,
+      replies: analysis.metrics?.replies ?? null,
+      views: analysis.metrics?.views ?? null,
+    });
 
     if (!ai.summary) {
       return NextResponse.json(
