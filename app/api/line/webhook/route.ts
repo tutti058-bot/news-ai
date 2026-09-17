@@ -448,6 +448,7 @@ export async function POST(request: Request) {
                 title: result.title,
                 article: result.article,
                 summary: result.summary,
+                supplement: result.supplement,
                 image: result.image,
               })
             );

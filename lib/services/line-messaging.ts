@@ -65,21 +65,28 @@ export function createApprovalMessages(params: {
   title: string;
   article: string;
   summary: string | null;
+  supplement: string | null;
   image: string | null;
 }) {
   const messages: unknown[] = [];
   const summary = params.summary?.trim() || "要約なし";
+  const supplement = params.supplement?.trim() || "";
 
-  const text =
-    `📰 AI NEWSジャパン\n` +
-    `記事生成が完了しました\n\n` +
-    `【${params.title}】\n\n` +
-    `【要約】\n` +
-    `${summary}\n\n` +
-    `――――――――――\n` +
-    `この内容で公開しますか？\n\n` +
-    `「良し」→ 公開\n` +
-    `「ダメ」→ 削除`;
+  const text = [
+    "AI NEWSジャパン",
+    "記事生成が完了しました",
+    "",
+    params.title.trim(),
+    "",
+    summary,
+    ...(supplement ? ["", supplement] : []),
+    "",
+    "――――――――――",
+    "この内容で公開しますか？",
+    "",
+    "「良し」→ 公開",
+    "「ダメ」→ 削除",
+  ].join("\n");
 
   messages.push({
     type: "text",
