@@ -3285,10 +3285,10 @@ const [xPostMode, setXPostMode] =
                               <div className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
                                 <div className="mb-2 flex items-center justify-between">
                                   <div className="text-xs font-black text-slate-500">
-                                    ① 通常版
+                                    X投稿
                                   </div>
                                   <span className="rounded-full bg-slate-100 px-2 py-1 text-[10px] font-bold text-slate-500">
-                                    今までの投稿
+
                                   </span>
                                 </div>
 
