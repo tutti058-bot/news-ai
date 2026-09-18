@@ -286,3 +286,130 @@ export async function getArticle(url: string) {
     return "";
   }
 }
+export async function getArticleImage(url: string): Promise<string | null> {
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => {
+      controller.abort();
+    }, 10000);
+
+    let res: Response;
+
+    try {
+      res = await fetch(url, {
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0 Safari/537.36",
+          "Accept":
+            "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+          "Accept-Language":
+            "ja-JP,ja;q=0.9,en-US;q=0.8,en;q=0.7",
+        },
+        redirect: "follow",
+        signal: controller.signal,
+      });
+    } finally {
+      clearTimeout(timeout);
+    }
+
+    if (!res.ok) {
+      console.log("画像元HTML取得失敗:", res.status, url);
+      return null;
+    }
+
+    const html = await res.text();
+    const $ = cheerio.load(html);
+
+    const resolveImageUrl = (imageUrl: string | undefined): string | null => {
+      if (!imageUrl) return null;
+
+      const trimmed = imageUrl.trim();
+
+      if (!trimmed || trimmed.startsWith("data:")) {
+        return null;
+      }
+
+      try {
+        return new URL(trimmed, res.url || url).toString();
+      } catch {
+        return null;
+      }
+    };
+
+    // ① OGP画像
+    const ogImage =
+      $('meta[property="og:image"]').attr("content") ||
+      $('meta[property="og:image:url"]').attr("content");
+
+    const resolvedOgImage = resolveImageUrl(ogImage);
+
+    if (resolvedOgImage) {
+      console.log("OGP画像取得成功:", resolvedOgImage);
+      return resolvedOgImage;
+    }
+
+    // ② Twitter Card画像
+    const twitterImage =
+      $('meta[name="twitter:image"]').attr("content") ||
+      $('meta[name="twitter:image:src"]').attr("content");
+
+    const resolvedTwitterImage = resolveImageUrl(twitterImage);
+
+    if (resolvedTwitterImage) {
+      console.log("Twitter画像取得成功:", resolvedTwitterImage);
+      return resolvedTwitterImage;
+    }
+
+    // ③ article内の画像
+    let articleImage: string | null = null;
+
+    $("article img").each((_, el) => {
+      if (articleImage) return;
+
+      const src =
+        $(el).attr("src") ||
+        $(el).attr("data-src") ||
+        $(el).attr("data-lazy-src");
+
+      const resolved = resolveImageUrl(src);
+
+      if (resolved) {
+        articleImage = resolved;
+      }
+    });
+
+    if (articleImage) {
+      console.log("article画像取得成功:", articleImage);
+      return articleImage;
+    }
+
+    // ④ main内の画像
+    let mainImage: string | null = null;
+
+    $("main img").each((_, el) => {
+      if (mainImage) return;
+
+      const src =
+        $(el).attr("src") ||
+        $(el).attr("data-src") ||
+        $(el).attr("data-lazy-src");
+
+      const resolved = resolveImageUrl(src);
+
+      if (resolved) {
+        mainImage = resolved;
+      }
+    });
+
+    if (mainImage) {
+      console.log("main画像取得成功:", mainImage);
+      return mainImage;
+    }
+
+    console.log("元記事画像が見つかりませんでした:", url);
+    return null;
+  } catch (error) {
+    console.error("getArticleImage error:", url, error);
+    return null;
+  }
+}

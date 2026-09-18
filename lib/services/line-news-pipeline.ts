@@ -1,8 +1,8 @@
 import OpenAI from "openai";
 import { prisma } from "@/lib/prisma";
 import { analyzeArticle, generateIndependentAnalysis } from "@/lib/ai";
-import { generateLineNewsImage } from "@/lib/services/line-news-image";
-import { getArticle } from "@/lib/getArticle";
+import { generateLineNewsImage, saveLineNewsSourceImage } from "@/lib/services/line-news-image";
+import { getArticle, getArticleImage } from "@/lib/getArticle";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -39,6 +39,86 @@ function cleanNullableNumber(value: unknown): number | null {
 
   const n = Number(value);
   return Number.isFinite(n) ? n : null;
+}
+
+
+async function extractUrlsFromLineImage(
+  imageUrl: string,
+  text: string | null
+): Promise<string[]> {
+  try {
+    const response = await openai.responses.create({
+      model: "gpt-4.1-mini",
+      input: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "input_text",
+              text: `
+添付されたスクリーンショットを確認してください。
+
+目的は「画像内に表示されているURL・リンク先URLの抽出」だけです。
+
+【ルール】
+・画像内に実際に表示されているURLだけを抽出する
+・推測でURLを作らない
+・完全なURLが読める場合は https:// または http:// から始まる形で返す
+・ドメインだけしか読めない場合は無理にURL化しない
+・短縮URLも、画像に読める状態で表示されている場合はそのまま返す
+・URLが見つからなければ空配列にする
+・日本語禁止
+・JSONのみ返す
+
+LINE補足テキスト：
+${text ?? ""}
+
+返却形式：
+{
+  "urls": []
+}
+`,
+            },
+            {
+              type: "input_image",
+              image_url: imageUrl,
+              detail: "high",
+            },
+          ],
+        },
+      ],
+    });
+
+    const raw = response.output_text?.trim() ?? "";
+
+    let parsed: { urls?: unknown[] };
+
+    try {
+      parsed = JSON.parse(
+        raw
+          .replace(/^```json\s*/i, "")
+          .replace(/\s*```$/i, "")
+          .trim()
+      );
+    } catch {
+      console.error("[line-pipeline] URL専用解析のJSON解析に失敗");
+      return [];
+    }
+
+    const urls = Array.isArray(parsed.urls)
+      ? parsed.urls.filter(
+          (value): value is string =>
+            typeof value === "string" &&
+            (value.trim().startsWith("http://") ||
+              value.trim().startsWith("https://"))
+        )
+      : [];
+
+    return [...new Set(urls.map((url) => url.trim()))];
+  } catch (error) {
+    console.error("[line-pipeline] URL専用解析エラー", error);
+    return [];
+  }
 }
 
 async function analyzeLineImage(inboxId: number, imageUrl: string, text: string | null, sourceUrl: string | null): Promise<ExtractedNews> {
@@ -143,6 +223,26 @@ JSON形式：
     });
 
     throw new Error("AI解析結果のJSON解析に失敗しました");
+  }
+
+  // 通常解析でURLが取れなかった場合だけ、URL抽出専用解析を実行
+  if (!Array.isArray(parsed.urls) || parsed.urls.length === 0) {
+    const fallbackUrls = await extractUrlsFromLineImage(
+      imageUrl,
+      text
+    );
+
+    if (fallbackUrls.length > 0) {
+      console.log(
+        "[line-pipeline] URL専用解析でURLを取得:",
+        fallbackUrls
+      );
+      parsed.urls = fallbackUrls;
+    } else {
+      console.log(
+        "[line-pipeline] スクショからURLを取得できませんでした"
+      );
+    }
   }
 
   const result: ExtractedNews = {
@@ -883,12 +983,36 @@ ${inbox.text ?? ""}
   let generatedImage: string | null = null;
 
   try {
-    generatedImage = await generateLineNewsImage(
-      createdNews.id,
-      analysis.sourceImageUrl ?? inbox.imageUrl
-    );
+    // ① 元記事のOGP / main画像を最優先で取得
+    if (sourceUrl.startsWith("http")) {
+      const articleImageUrl = await getArticleImage(sourceUrl);
+
+      if (articleImageUrl) {
+        console.log(
+          "[line-pipeline] 元記事画像を使用します:",
+          articleImageUrl
+        );
+
+        generatedImage = await saveLineNewsSourceImage(
+          createdNews.id,
+          articleImageUrl
+        );
+      }
+    }
+
+    // ② 元記事画像が取得できなかった場合だけ、従来のAI画像生成
+    if (!generatedImage) {
+      console.log(
+        "[line-pipeline] 元記事画像が使えないためAI画像を生成します"
+      );
+
+      generatedImage = await generateLineNewsImage(
+        createdNews.id,
+        analysis.sourceImageUrl ?? inbox.imageUrl
+      );
+    }
   } catch (imageError) {
-    console.error("[line-pipeline] 画像生成失敗", imageError);
+    console.error("[line-pipeline] 画像処理失敗", imageError);
   }
 
   await prisma.lineInboxItem.update({

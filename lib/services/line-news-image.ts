@@ -184,3 +184,105 @@ ${visualDescription}
 
   return blob.url;
 }
+
+export async function saveLineNewsSourceImage(
+  newsId: number,
+  imageUrl: string
+): Promise<string | null> {
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => {
+      controller.abort();
+    }, 15000);
+
+    let response: Response;
+
+    try {
+      response = await fetch(imageUrl, {
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0 Safari/537.36",
+          "Accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
+          "Referer": imageUrl,
+        },
+        redirect: "follow",
+        signal: controller.signal,
+      });
+    } finally {
+      clearTimeout(timeout);
+    }
+
+    if (!response.ok) {
+      console.log(
+        "[line-pipeline] 元記事画像の取得失敗:",
+        response.status,
+        imageUrl
+      );
+      return null;
+    }
+
+    const contentType =
+      response.headers.get("content-type")?.split(";")[0].trim() || "";
+
+    if (!contentType.startsWith("image/")) {
+      console.log(
+        "[line-pipeline] 元記事画像ではないレスポンス:",
+        contentType,
+        imageUrl
+      );
+      return null;
+    }
+
+    const buffer = Buffer.from(await response.arrayBuffer());
+
+    if (buffer.length < 1000) {
+      console.log(
+        "[line-pipeline] 元記事画像のサイズが小さすぎます:",
+        buffer.length,
+        imageUrl
+      );
+      return null;
+    }
+
+    const extension =
+      contentType === "image/jpeg"
+        ? "jpg"
+        : contentType === "image/webp"
+          ? "webp"
+          : contentType === "image/gif"
+            ? "gif"
+            : contentType === "image/svg+xml"
+              ? "svg"
+              : "png";
+
+    const blob = await put(
+      `line-news-images/source-${newsId}-${Date.now()}.${extension}`,
+      buffer,
+      {
+        access: "public",
+        contentType,
+      }
+    );
+
+    await prisma.news.update({
+      where: { id: newsId },
+      data: {
+        image: blob.url,
+      },
+    });
+
+    console.log(
+      "[line-pipeline] 元記事画像を保存しました:",
+      blob.url
+    );
+
+    return blob.url;
+  } catch (error) {
+    console.error(
+      "[line-pipeline] 元記事画像保存エラー:",
+      imageUrl,
+      error
+    );
+    return null;
+  }
+}
