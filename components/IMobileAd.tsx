@@ -24,7 +24,7 @@ export default function IMobileAd() {
     window.adsbyimobile.push({
       pid: 85395,
       mid: 596062,
-      asid: 1944289,
+      asid: 1944290,
       type: "banner",
       display: "inline",
       elementid: ELEMENT_ID,
