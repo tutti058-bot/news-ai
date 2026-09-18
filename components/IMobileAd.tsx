@@ -15,7 +15,7 @@ declare global {
   }
 }
 
-const ELEMENT_ID = "im-e6bbe34fc4c3477981c4545afaeddf53";
+const ELEMENT_ID = "im-a0996bf2c3a043e7b5a63a485f0ea4e2";
 
 export default function IMobileAd() {
   const initializeAd = () => {
