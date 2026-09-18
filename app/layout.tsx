@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import IMobileMobileFooterAd from "@/components/IMobileMobileFooterAd";
 
 export const metadata: Metadata = {
   title: {
@@ -63,7 +64,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja">
-      <body>
+      <body className="pb-[50px] md:pb-0">
   <Script
     async
     src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6538997075638239"
@@ -76,6 +77,7 @@ export default function RootLayout({
         {children}
 
         <Footer />
+        <IMobileMobileFooterAd />
       </body>
     </html>
   );
