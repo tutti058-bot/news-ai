@@ -6,6 +6,7 @@ import ColumnPreview from "./ColumnPreview";
 import ContentRequestBox from "./ContentRequestBox";
 import NewsAnalysisGuide from "./NewsAnalysisGuide";
 import RakutenWidget from "./RakutenWidget";
+import XTimeline from "./XTimeline";
 
 type Props = {
   keyword: string;
@@ -22,6 +23,11 @@ export default function HomeLayout({
 
         {/* Hero */}
         <Hero />
+
+        {/* Xタイムライン */}
+        <div className="mt-5 sm:mt-8">
+          <XTimeline />
+        </div>
 
         {/* 楽天ページマッチ */}
         <RakutenWidget type="page-match" />
