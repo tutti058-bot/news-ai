@@ -491,9 +491,36 @@ export async function syncNews(limit?: number) {
   const currentLimit =
     isNightHours ? 3 : 5;
 
+  // 自動取得ニュースは1日最大8件
+  // LINEから生成した記事は日次集計から除外
+  const todayAutoNewsCount = await prisma.news.count({
+    where: {
+      createdAt: {
+        gte: todayStart,
+        lt: todayEnd,
+      },
+      NOT: {
+        sourceUrl: {
+          startsWith: "line://inbox/",
+        },
+      },
+    },
+  });
+
+  const dailyNewsLimit = 8;
+  const dailyNewsRemaining = Math.max(
+    0,
+    dailyNewsLimit - todayAutoNewsCount
+  );
+
   const actualTargetCount = Math.min(
     targetCount,
-    currentLimit
+    currentLimit,
+    dailyNewsRemaining
+  );
+
+  console.log(
+    `本日の自動取得記事: ${todayAutoNewsCount}/${dailyNewsLimit}`
   );
 
   // サッカーは「1日単位」で制御する
@@ -603,7 +630,11 @@ export async function syncNews(limit?: number) {
   }
 
   for (const item of prioritizedItems) {
-    if (candidateItems.length >= 20) {
+    // 1回の同期でAIにかける候補も最大8件
+    if (
+      candidateItems.length >=
+      Math.min(8, dailyNewsRemaining)
+    ) {
       break;
     }
 
@@ -715,7 +746,7 @@ export async function syncNews(limit?: number) {
   );
 
   console.log(
-    `採用目標: ${targetCount}件`
+    `採用目標: ${actualTargetCount}件`
   );
 
   for (const item of candidateItems) {
@@ -1031,31 +1062,8 @@ export async function syncNews(limit?: number) {
 
 const aiCategory = ai?.category ?? "";
 
-let MIN_SCORE = 60;
-
-if (soccer || aiCategory === "サッカー") {
-  MIN_SCORE = 75;
-} else if (
-  entertainment ||
-  aiCategory === "芸能"
-) {
-  MIN_SCORE = 75;
-} else if (
-  aiCategory === "テクノロジー"
-) {
-  MIN_SCORE = 80;
-}
-
-if (ai.score < MIN_SCORE) {
-  console.log(
-    `低スコアのためスキップ: ${ai.score}点（基準: ${MIN_SCORE}点）`,
-    title
-  );
-
-  skipped++;
-  skippedLowScore++;
-  continue;
-}
+// 全ジャンル85点以上を掲載基準にする
+const MIN_SCORE = 85;
 
     /*
      * =========================
