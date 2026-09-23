@@ -38,7 +38,31 @@ export default function JLeagueDayCard() {
   const nextDay = getNextJLeagueDay(today);
 
   if (!nextDay) {
-    return null;
+    return (
+      <section className="jleague-home-card">
+        <div className="jleague-home-card-inner">
+          <div className="jleague-home-badge">
+            ⚽ J.LEAGUE DAY
+          </div>
+
+          <div className="jleague-home-count">
+            <span>次回のJリーグDAYは</span>
+            <strong>準備中</strong>
+          </div>
+
+          <p>
+            Jリーグ・サッカー関連ニュースをチェック
+          </p>
+
+          <Link
+            href="/j-league-day"
+            className="jleague-home-link"
+          >
+            サッカー記事はこちら →
+          </Link>
+        </div>
+      </section>
+    );
   }
 
   const [year, month, day] = nextDay.date.split("-").map(Number);
