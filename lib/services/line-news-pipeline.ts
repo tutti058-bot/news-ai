@@ -14,6 +14,7 @@ type ExtractedNews = {
   title: string;
   postText: string;
   author: string;
+  authorUsername?: string;
   publishedAt: string;
   metrics: {
     likes: number | null;
@@ -158,6 +159,7 @@ JSON形式：
   "title": "",
   "postText": "",
   "author": "",
+  "authorUsername": "",
   "publishedAt": "",
   "metrics": {
     "likes": null,
@@ -251,6 +253,7 @@ JSON形式：
     title: cleanString(parsed.title),
     postText: cleanString(parsed.postText),
     author: cleanString(parsed.author),
+    authorUsername: cleanString(parsed.authorUsername),
     publishedAt: cleanString(parsed.publishedAt),
     metrics: {
       likes: cleanNullableNumber(parsed.metrics?.likes),
@@ -427,6 +430,188 @@ function extractXPostId(url: string): string | null {
   );
 
   return match?.[1] ?? null;
+}
+
+
+function normalizeForXSearch(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/https?:\/\/\S+/g, " ")
+    .replace(/[「」『』【】（）()[\]、。，．！？!?：:・"'「」]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+async function findOriginalXPost(
+  analysis: ExtractedNews
+): Promise<string | null> {
+  try {
+    const token = process.env.X_Bearer_Token;
+
+    if (!token) {
+      console.error("[line-pipeline] X_Bearer_Tokenが設定されていません");
+      return null;
+    }
+
+    const authorUsername = analysis.authorUsername?.trim().replace(/^@/, "") || "";
+    const postText = normalizeForXSearch(analysis.postText || "");
+    const title = normalizeForXSearch(analysis.title || "");
+
+    const baseText = postText || title;
+
+    if (!baseText && !authorUsername) {
+      console.log("[line-pipeline] X検索に使える情報がありません");
+      return null;
+    }
+
+    const searchPhrase = baseText
+      .replace(/\s+/g, " ")
+      .trim()
+      .slice(0, 30);
+
+    let query = "";
+
+    if (authorUsername && searchPhrase) {
+      query =
+        `from:${authorUsername} "${searchPhrase}" lang:ja -is:retweet`;
+    } else if (authorUsername) {
+      query = `from:${authorUsername} lang:ja -is:retweet`;
+    } else if (searchPhrase) {
+      query = `"${searchPhrase}" lang:ja -is:retweet`;
+    } else {
+      console.log("[line-pipeline] X検索に使える文字列がありません");
+      return null;
+    }
+
+    const params = new URLSearchParams({
+      query,
+      max_results: "50",
+      "tweet.fields": "created_at,public_metrics,author_id,attachments",
+      expansions: "author_id,attachments.media_keys",
+      "user.fields": "name,username",
+      "media.fields": "media_key,type,url,preview_image_url",
+    });
+
+    const response = await fetch(
+      `https://api.x.com/2/tweets/search/recent?${params.toString()}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        cache: "no-store",
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error(
+        "[line-pipeline] X元投稿検索失敗",
+        response.status,
+        data
+      );
+      return null;
+    }
+
+    const tweets = Array.isArray(data?.data) ? data.data : [];
+    const users = Array.isArray(data?.includes?.users)
+      ? data.includes.users
+      : [];
+    const media = Array.isArray(data?.includes?.media)
+      ? data.includes.media
+      : [];
+
+    const userMap = new Map(
+      users.map((user: { id?: string; username?: string }) => [
+        user.id,
+        user.username ?? "",
+      ])
+    );
+
+    const normalizedTarget = baseText;
+
+    const candidates = tweets
+      .map((tweet: any) => {
+        const username = String(
+          userMap.get(tweet.author_id) ?? ""
+        );
+
+        const tweetText = normalizeForXSearch(
+          String(tweet.text ?? "")
+        );
+
+        let score = 0;
+
+        if (
+          authorUsername &&
+          username.toLowerCase() === authorUsername.toLowerCase()
+        ) {
+          score += 60;
+        }
+
+        if (normalizedTarget && tweetText === normalizedTarget) {
+          score += 100;
+        } else if (
+          normalizedTarget &&
+          (tweetText.includes(normalizedTarget) ||
+            normalizedTarget.includes(tweetText))
+        ) {
+          score += 70;
+        }
+
+        if (
+          searchPhrase &&
+          tweetText.includes(searchPhrase)
+        ) {
+          score += 8;
+        }
+
+        return {
+          tweet,
+          username,
+          tweetText,
+          score,
+        };
+      })
+      .sort(
+        (a: { score: number }, b: { score: number }) =>
+          b.score - a.score
+      );
+
+    const best = candidates[0];
+
+    if (!best || best.score < 60) {
+      console.log(
+        "[line-pipeline] X元投稿を特定できませんでした",
+        {
+          query,
+          bestScore: best?.score ?? 0,
+        }
+      );
+      return null;
+    }
+
+    const tweetId = String(best.tweet.id);
+    const username = best.username;
+
+    if (!tweetId || !username) {
+      return null;
+    }
+
+    const originalUrl = `https://x.com/${username}/status/${tweetId}`;
+
+    console.log(
+      "[line-pipeline] X元投稿を特定:",
+      originalUrl,
+      "score:",
+      best.score
+    );
+
+    return originalUrl;
+  } catch (error) {
+    console.error("[line-pipeline] X元投稿検索エラー", error);
+    return null;
+  }
 }
 
 async function analyzeLineXUrl(
@@ -983,8 +1168,21 @@ ${inbox.text ?? ""}
   let generatedImage: string | null = null;
 
   try {
-    // ① 元記事のOGP / main画像を最優先で取得
-    if (sourceUrl.startsWith("http")) {
+    // ① X APIから取得した元投稿画像を最優先
+    if (analysis.sourceImageUrl) {
+      console.log(
+        "[line-pipeline] X元投稿画像を使用します:",
+        analysis.sourceImageUrl
+      );
+
+      generatedImage = await saveLineNewsSourceImage(
+        createdNews.id,
+        analysis.sourceImageUrl
+      );
+    }
+
+    // ② X以外は元記事のOGP / main画像を取得
+    if (!generatedImage && sourceUrl.startsWith("http")) {
       const articleImageUrl = await getArticleImage(sourceUrl);
 
       if (articleImageUrl) {
@@ -1000,7 +1198,7 @@ ${inbox.text ?? ""}
       }
     }
 
-    // ② 元記事画像が取得できなかった場合だけ、従来のAI画像生成
+    // ③ 元画像が取得できなかった場合だけ、従来のAI画像生成
     if (!generatedImage) {
       console.log(
         "[line-pipeline] 元記事画像が使えないためAI画像を生成します"
@@ -1088,26 +1286,66 @@ export async function processLineInboxItem(inboxId: number) {
   });
 
   try {
-    const analysis = inbox.imageUrl
-      ? await analyzeLineImage(
-          inbox.id,
-          inbox.imageUrl,
-          inbox.text,
-          inbox.sourceUrl
-        )
-      : /(?:x\.com|twitter\.com)\/[^/]+\/status\/\d+/i.test(
-          inbox.sourceUrl!
-        )
-        ? await analyzeLineXUrl(
-            inbox.id,
-            inbox.sourceUrl!,
-            inbox.text
-          )
-        : await analyzeLineUrl(
-            inbox.id,
-            inbox.sourceUrl!,
-            inbox.text
-          );
+    let analysis: ExtractedNews;
+
+    if (inbox.imageUrl) {
+      analysis = await analyzeLineImage(
+        inbox.id,
+        inbox.imageUrl,
+        inbox.text,
+        inbox.sourceUrl
+      );
+
+      // Xスクショの場合、URLがなければX検索で元投稿を探す
+      if (analysis.sourceType === "X") {
+        let xUrl =
+          analysis.urls.find((url) =>
+            /(?:x\.com|twitter\.com)\/[^/]+\/status\/\d+/i.test(url)
+          ) ?? null;
+
+        if (!xUrl) {
+          xUrl = await findOriginalXPost(analysis);
+        }
+
+        // 元X投稿を特定できたら、既存のX API取得処理で
+        // 本文・投稿者・画像URLまで取得する
+        if (xUrl) {
+          try {
+            console.log(
+              "[line-pipeline] X元投稿を解析します:",
+              xUrl
+            );
+
+            analysis = await analyzeLineXUrl(
+              inbox.id,
+              xUrl,
+              inbox.text
+            );
+          } catch (xError) {
+            console.error(
+              "[line-pipeline] X元投稿解析に失敗したためスクショ解析を継続:",
+              xError
+            );
+          }
+        }
+      }
+    } else if (
+      /(?:x\.com|twitter\.com)\/[^/]+\/status\/\d+/i.test(
+        inbox.sourceUrl!
+      )
+    ) {
+      analysis = await analyzeLineXUrl(
+        inbox.id,
+        inbox.sourceUrl!,
+        inbox.text
+      );
+    } else {
+      analysis = await analyzeLineUrl(
+        inbox.id,
+        inbox.sourceUrl!,
+        inbox.text
+      );
+    }
 
     const result = await generateLineArticle(
       inbox.id,
