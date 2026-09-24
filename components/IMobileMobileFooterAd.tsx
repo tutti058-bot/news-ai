@@ -2,7 +2,7 @@
 
 import Script from "next/script";
 
-const ELEMENT_ID = "im-abb61e4cad7243f1922c7d1619ea129c";
+const ELEMENT_ID = "im-f40fd98776dc406d8937f18fd989631b";
 
 type IMobileConfig = {
   pid: number;
