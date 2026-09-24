@@ -42,7 +42,7 @@ async function getMyXPosts(): Promise<XApiResponse> {
   }
 
   const params = new URLSearchParams({
-    max_results: "5",
+    max_results: "3",
     exclude: "retweets,replies",
     "tweet.fields": "created_at,public_metrics,attachments",
     expansions: "attachments.media_keys",
@@ -130,7 +130,7 @@ export default async function XTimeline() {
           X投稿を取得できませんでした
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="max-h-[600px] space-y-4 overflow-y-auto pr-1 sm:max-h-[620px]">
           {posts.map((post) => {
             const postMedia =
               post.attachments?.media_keys
@@ -149,7 +149,7 @@ export default async function XTimeline() {
             return (
               <article
                 key={post.id}
-                className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                className="rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:p-4"
               >
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-2">
@@ -181,7 +181,7 @@ export default async function XTimeline() {
                   </Link>
                 </div>
 
-                <p className="mt-4 whitespace-pre-wrap text-sm leading-6 text-slate-800">
+                <p className="mt-3 whitespace-pre-wrap text-sm leading-5 text-slate-800">
                   {post.text}
                 </p>
 
@@ -189,11 +189,11 @@ export default async function XTimeline() {
                   <img
                     src={imageUrl}
                     alt=""
-                    className="mt-4 max-h-[520px] w-full rounded-2xl object-cover"
+                    className="mt-3 max-h-[260px] w-full rounded-2xl object-cover"
                   />
                 )}
 
-                <div className="mt-4 flex gap-5 text-xs font-bold text-slate-400">
+                <div className="mt-3 flex gap-5 text-xs font-bold text-slate-400">
                   <span>
                     💬 {post.public_metrics?.reply_count ?? 0}
                   </span>
