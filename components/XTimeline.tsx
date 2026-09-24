@@ -62,10 +62,15 @@ async function getMyXPosts(): Promise<XApiResponse> {
   );
 
   if (!response.ok) {
+    const errorText = await response.text();
+
     console.error(
       "X投稿取得エラー:",
-      response.status,
-      await response.text()
+      JSON.stringify({
+        status: response.status,
+        statusText: response.statusText,
+        body: errorText,
+      })
     );
 
     return {
