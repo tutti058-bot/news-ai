@@ -42,7 +42,7 @@ async function getMyXPosts(): Promise<XApiResponse> {
   }
 
   const params = new URLSearchParams({
-    max_results: "3",
+    max_results: "5",
     exclude: "retweets,replies",
     "tweet.fields": "created_at,public_metrics,attachments",
     expansions: "attachments.media_keys",
