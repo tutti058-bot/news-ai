@@ -2,7 +2,6 @@ import Link from "next/link";
 import { getImportanceRanking, getViewRanking } from "@/lib/ranking";
 import RankingSwitcher from "./RankingSwitcher";
 import { prisma } from "@/lib/prisma";
-import IMobileAd from "./IMobileAd";
 
 const medalColor = [
   "bg-yellow-500",
@@ -185,8 +184,6 @@ export default async function Sidebar() {
         </div>
       )}
 
-      {/* i-mobile PC広告 300×250 */}
-      <IMobileAd />
 
     </aside>
   );
