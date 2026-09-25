@@ -1,45 +1,14 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+const ELEMENT_ID = "im-d92fc425e703499da044614d9e3e31b6";
 
-const ELEMENT_ID = "im-d92fc425e703499da044614d9e3e31b";
-const SCRIPT_SRC = [
-  "https:",
-  "//",
-  "imp-adedge.i-mobile.co.jp",
-  "/script/v1/spot.js?20220104",
-].join("");
+const SCRIPT_SRC =
+  "https" +
+  "://" +
+  "imp-adedge.i-mobile.co.jp" +
+  "/script/v1/spot.js?20220104";
 
 export default function IMobileMobileFooterAd() {
-  const adRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const root = adRef.current;
-    if (!root) return;
-
-    const adsbyimobile = (window as Window & { adsbyimobile?: Record<string, unknown>[] }).adsbyimobile || [];
-    (window as Window & { adsbyimobile?: Record<string, unknown>[] }).adsbyimobile = adsbyimobile;
-
-    adsbyimobile.push({
-      pid: 85395,
-      mid: 596504,
-      asid: 1945474,
-      type: "banner",
-      display: "inline",
-      elementid: ELEMENT_ID,
-    });
-
-    const script = document.createElement("script");
-    script.async = true;
-    script.src = SCRIPT_SRC;
-
-    root.appendChild(script);
-
-    return () => {
-      root.innerHTML = "";
-    };
-  }, []);
-
   return (
     <div
       className="md:hidden"
@@ -55,13 +24,15 @@ export default function IMobileMobileFooterAd() {
         transform: "translate3d(0, 0, 0)",
       }}
     >
-      <div
-        style={{
-          margin: "auto",
-          zIndex: 99999,
-        }}
-      >
-        <div id={ELEMENT_ID} ref={adRef} />
+      <div style={{ margin: "auto", zIndex: 99999 }}>
+        <div id={ELEMENT_ID}>
+          <script async src={SCRIPT_SRC}></script>
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `(window.adsbyimobile=window.adsbyimobile||[]).push({pid:85395,mid:596504,asid:1945474,type:"banner",display:"inline",elementid:"${ELEMENT_ID}"})`,
+            }}
+          />
+        </div>
       </div>
     </div>
   );
