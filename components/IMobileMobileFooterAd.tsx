@@ -22,10 +22,14 @@ export default function IMobileMobileFooterAd() {
         }}
       >
         <div id={ELEMENT_ID}>
+          <Script
+            src="https://imp-adedge.i-mobile.co.jp/script/v1/spot.js?20220104"
+            strategy="afterInteractive"
+          />
+
           <Script id="imobile-config" strategy="afterInteractive">
             {`
-              window.adsbyimobile = window.adsbyimobile || [];
-              window.adsbyimobile.push({
+              (window.adsbyimobile = window.adsbyimobile || []).push({
                 pid: 85395,
                 mid: 596504,
                 asid: 1945474,
@@ -35,11 +39,6 @@ export default function IMobileMobileFooterAd() {
               });
             `}
           </Script>
-
-          <Script
-            src="https://imp-adedge.i-mobile.co.jp/script/v1/spot.js?20220104"
-            strategy="afterInteractive"
-          />
         </div>
       </div>
     </div>
