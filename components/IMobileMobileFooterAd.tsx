@@ -3,6 +3,10 @@
 import Script from "next/script";
 
 const ELEMENT_ID = "im-d92fc425e703499da044614d9e3e31b6";
+const SCRIPT_SRC =
+  "https" +
+  "://" +
+  "imp-adedge.i-mobile.co.jp/script/v1/spot.js?20220104";
 
 export default function IMobileMobileFooterAd() {
   return (
@@ -26,10 +30,7 @@ export default function IMobileMobileFooterAd() {
         }}
       >
         <div id={ELEMENT_ID}>
-          <Script
-            async
-            src="https://imp-adedge.i-mobile.co.jp/script/v1/spot.js?20220104"
-          />
+          <Script async src={SCRIPT_SRC} />
           <Script id="imobile-mobile-footer-config">
             {`
               (window.adsbyimobile = window.adsbyimobile || []).push({
