@@ -14,10 +14,14 @@ export default function IMobileAd() {
       </div>
 
       <div id={ELEMENT_ID}>
+        <Script
+          src="https://imp-adedge.i-mobile.co.jp/script/v1/spot.js?20220104"
+          strategy="afterInteractive"
+        />
+
         <Script id="imobile-pc-config" strategy="afterInteractive">
           {`
-            window.adsbyimobile = window.adsbyimobile || [];
-            window.adsbyimobile.push({
+            (window.adsbyimobile = window.adsbyimobile || []).push({
               pid: 85395,
               mid: 596062,
               asid: 1944290,
@@ -27,11 +31,6 @@ export default function IMobileAd() {
             });
           `}
         </Script>
-
-        <Script
-          src="https://imp-adedge.i-mobile.co.jp/script/v1/spot.js?20220104"
-          strategy="afterInteractive"
-        />
       </div>
     </div>
   );
