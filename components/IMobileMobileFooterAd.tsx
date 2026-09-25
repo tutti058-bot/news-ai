@@ -1,14 +1,40 @@
 "use client";
 
-import Script from "next/script";
+import { useEffect, useRef } from "react";
 
 const ELEMENT_ID = "im-d92fc425e703499da044614d9e3e31b6";
-const SCRIPT_SRC =
-  "https" +
-  "://" +
-  "imp-adedge.i-mobile.co.jp/script/v1/spot.js?20220104";
 
 export default function IMobileMobileFooterAd() {
+  const adRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const root = adRef.current;
+    if (!root) return;
+
+    const script = document.createElement("script");
+    script.async = true;
+    script.src = ["https:", "//", "imp-adedge.i-mobile.co.jp", "/script/v1/spot.js?20220104"].join("");
+
+    const config = document.createElement("script");
+    config.text = `
+      (window.adsbyimobile = window.adsbyimobile || []).push({
+        pid: 85395,
+        mid: 596504,
+        asid: 1945474,
+        type: "banner",
+        display: "inline",
+        elementid: "${ELEMENT_ID}"
+      });
+    `;
+
+    root.appendChild(script);
+    root.appendChild(config);
+
+    return () => {
+      root.innerHTML = "";
+    };
+  }, []);
+
   return (
     <div
       style={{
@@ -23,27 +49,8 @@ export default function IMobileMobileFooterAd() {
         transform: "translate3d(0, 0, 0)",
       }}
     >
-      <div
-        style={{
-          margin: "auto",
-          zIndex: 99999,
-        }}
-      >
-        <div id={ELEMENT_ID}>
-          <Script async src={SCRIPT_SRC} />
-          <Script id="imobile-mobile-footer-config">
-            {`
-              (window.adsbyimobile = window.adsbyimobile || []).push({
-                pid: 85395,
-                mid: 596504,
-                asid: 1945474,
-                type: "banner",
-                display: "inline",
-                elementid: "${ELEMENT_ID}"
-              });
-            `}
-          </Script>
-        </div>
+      <div style={{ margin: "auto", zIndex: 99999 }}>
+        <div id={ELEMENT_ID} ref={adRef} />
       </div>
     </div>
   );
