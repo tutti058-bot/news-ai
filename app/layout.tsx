@@ -4,6 +4,7 @@ import Script from "next/script";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import IMobileMobileFooterAd from "@/components/IMobileMobileFooterAd";
+import IMobileMobileOpeningAd from "@/components/IMobileMobileOpeningAd";
 
 export const metadata: Metadata = {
   title: {
@@ -77,7 +78,8 @@ export default function RootLayout({
         {children}
 
         <Footer />
-        <IMobileMobileFooterAd />
+        <IMobileMobileOpeningAd />
+<IMobileMobileFooterAd />
       </body>
     </html>
   );
