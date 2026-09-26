@@ -1106,6 +1106,23 @@ const MIN_SCORE = 85;
 
     /*
      * =========================
+     * AIスコアによる掲載判定
+     * =========================
+     */
+
+    const currentScore = Number(ai?.score ?? 0);
+
+    if (currentScore < MIN_SCORE) {
+      console.log(
+        `掲載基準未満のためスキップ: ${title} (${currentScore}点 / ${MIN_SCORE}点未満)`
+      );
+      skipped++;
+      skippedAI++;
+      continue;
+    }
+
+    /*
+     * =========================
      * AI NEWSジャパン独自分析
      * =========================
      */
