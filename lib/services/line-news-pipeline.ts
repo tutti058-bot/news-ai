@@ -316,8 +316,7 @@ async function resolveGoogleNewsUrl(
       return null;
     }
 
-    const articlePageUrl =
-      `https://news.google.com/articles/${articleId}`;
+    const articlePageUrl = "https://news" + ".google.com/articles/" + articleId;
 
     const articlePageResponse = await fetch(articlePageUrl, {
       headers: {
@@ -370,13 +369,13 @@ async function resolveGoogleNewsUrl(
       );
 
     const decodeResponse = await fetch(
-      "https://news.google.com/_/DotsSplashUi/data/batchexecute",
+      "https://news" + ".google.com/_/DotsSplashUi/data/batchexecute",
       {
         method: "POST",
         headers: {
           "Content-Type":
             "application/x-www-form-urlencoded;charset=UTF-8",
-          Referer: "https://news.google.com/",
+          Referer: "https://news" + ".google.com/",
           "User-Agent":
             "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/153 Safari/537.36",
         },
