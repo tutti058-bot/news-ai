@@ -1063,7 +1063,7 @@ export async function syncNews(limit?: number) {
 const aiCategory = ai?.category ?? "";
 
 // 全ジャンル85点以上を掲載基準にする
-const MIN_SCORE = 85;
+const MIN_SCORE = 81;
 
     /*
      * =========================
