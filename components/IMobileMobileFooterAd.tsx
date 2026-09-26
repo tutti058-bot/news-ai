@@ -8,7 +8,7 @@ export default function IMobileMobileFooterAd() {
         title="i-mobile広告"
         style={{
           display: "block",
-          width: "100%",
+          width: "100vw",
           height: "50px",
           border: "0",
           margin: "0 auto",
