@@ -540,21 +540,12 @@ async function findOriginalArticleFromLine(
         .replace(/&quot;/g, '"')
         .replace(/&#39;/g, "'");
 
-    const normalizedTitle = title
-      .replace(
-        /[「」『』【】（）()[\]、。，．！？!?：:・]/g,
-        " "
-      )
-      .replace(/\s+/g, " ")
-      .trim();
-
-    for (const match of itemMatches.slice(0, 8)) {
-      const resultTitle = decodeXml(match[1])
+    const normalizeArticleTitle = (value: string) =>
+      value
         .replace(/<[^>]+>/g, "")
-        .trim();
-
-      const normalizedResultTitle = resultTitle
         .replace(/[-｜|].*$/, "")
+        .replace(/（[^（）]*）$/g, "")
+        .replace(/\([^()]*\)$/g, "")
         .replace(
           /[「」『』【】（）()[\]、。，．！？!?：:・]/g,
           " "
@@ -562,7 +553,16 @@ async function findOriginalArticleFromLine(
         .replace(/\s+/g, " ")
         .trim();
 
+    const normalizedTitle = normalizeArticleTitle(title);
+
+    for (const match of itemMatches.slice(0, 8)) {
+      const resultTitle = decodeXml(match[1]).trim();
+
+      const normalizedResultTitle =
+        normalizeArticleTitle(resultTitle);
+
       const matched =
+        normalizedResultTitle === normalizedTitle ||
         normalizedResultTitle.includes(normalizedTitle) ||
         normalizedTitle.includes(normalizedResultTitle);
 
