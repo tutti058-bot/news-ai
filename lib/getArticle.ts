@@ -120,6 +120,12 @@ export async function getArticle(url: string) {
 
     let text = "";
 
+    const articleUrl = res.url || url;
+
+    if (articleUrl !== url) {
+      console.log("LINE共有URLを最終URLへ解決:", url, "=>", articleUrl);
+    }
+
     /*
      * ========================================
      * ④ NHK
@@ -127,8 +133,8 @@ export async function getArticle(url: string) {
      */
 
     if (
-      url.includes("nhk.or.jp") ||
-      url.includes("www3.nhk.or.jp")
+      articleUrl.includes("nhk.or.jp") ||
+      articleUrl.includes("www3.nhk.or.jp")
     ) {
       text =
         $(".content--body").text() ||
@@ -142,7 +148,7 @@ export async function getArticle(url: string) {
      * ========================================
      */
 
-    if (url.includes("itmedia.co.jp")) {
+    if (articleUrl.includes("itmedia.co.jp")) {
       text =
         $(".article_body").text() ||
         $(".article-body").text() ||
@@ -156,7 +162,7 @@ export async function getArticle(url: string) {
      */
 
     if (
-      url.includes("watch.impress.co.jp")
+      articleUrl.includes("watch.impress.co.jp")
     ) {
       text =
         $(".article-body").text() ||
@@ -170,7 +176,7 @@ export async function getArticle(url: string) {
      * ========================================
      */
 
-    if (url.includes("gigazine.net")) {
+    if (articleUrl.includes("gigazine.net")) {
       text =
         $(".entry-content").text() ||
         $(".post").text() ||
@@ -184,7 +190,7 @@ export async function getArticle(url: string) {
      */
 
     if (
-      url.includes("oricon.co.jp")
+      articleUrl.includes("oricon.co.jp")
     ) {
       text =
         $("article").text() ||
@@ -201,8 +207,8 @@ export async function getArticle(url: string) {
      */
 
     if (
-      url.includes("news.mynavi.jp") ||
-      url.includes("beauty.mynavi.jp")
+      articleUrl.includes("news.mynavi.jp") ||
+      articleUrl.includes("beauty.mynavi.jp")
     ) {
       text =
         $("article").text() ||
