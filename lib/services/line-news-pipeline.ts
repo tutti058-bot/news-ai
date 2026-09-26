@@ -354,15 +354,19 @@ async function resolveGoogleNewsUrl(
       return null;
     }
 
-    const requestPayload = [
+    // Google Newsの元記事URL解決に使うリクエスト。
+    // ローカル検証で成功した形式をそのまま使用する。
+    const articlesReq = [
       "Fbv4je",
-      `["garturlreq",[["X","X",["X","X"],null,null,1,1,"US:en",null,1,null,null,null,null,null,0,1],"X","X",1,[1,1,1],1,1,null,0,0,null,0],"${sourceId}",${timestamp},"${signature}"]`,
+      `["garturlreq",[["X","X",["X","X"],null,null,1,1,"US:en",null,1,null,null,null,null,null,0,1],"X","X",1,[1,1,1],1,0,"655000234",0,0,null,0],"${sourceId}",${timestamp},"${signature}"]`,
     ];
 
     const body =
       "f.req=" +
       encodeURIComponent(
-        JSON.stringify([[requestPayload]])
+        JSON.stringify([[articlesReq]], {
+          separators: [",", ":"],
+        } as any)
       );
 
     const decodeResponse = await fetch(
@@ -391,25 +395,64 @@ async function resolveGoogleNewsUrl(
 
     const raw = await decodeResponse.text();
 
-    const match = raw.match(
-      /\[\\"garturlres\\",\\"([^"]+)\\"/
-    );
+    // 先頭のXSSI対策文字列を除去してJSONとして解析
+    const jsonText = raw.replace(/^\)\]\}'\s*/, "");
 
-    if (!match?.[1]) {
+    let outer: unknown;
+
+    try {
+      outer = JSON.parse(jsonText);
+    } catch (parseError) {
       console.error(
-        "[line-pipeline] Google News元記事URLをレスポンスから取得できませんでした"
+        "[line-pipeline] Google NewsレスポンスJSON解析失敗:",
+        parseError
       );
       return null;
     }
 
-    const resolvedUrl = match[1]
-      .replace(/\\\\/g, "\\")
-      .replace(/\\"/g, '"')
-      .replace(/\\u003d/gi, "=")
-      .replace(/\\u0026/gi, "&")
-      .replace(/\\u003f/gi, "?")
-      .replace(/\\u002F/gi, "/")
-      .replace(/\\\//g, "/");
+    if (!Array.isArray(outer)) {
+      return null;
+    }
+
+    const wrb = outer.find(
+      (item) =>
+        Array.isArray(item) &&
+        item[0] === "wrb.fr" &&
+        item[1] === "Fbv4je" &&
+        typeof item[2] === "string"
+    ) as unknown[] | undefined;
+
+    if (!wrb || typeof wrb[2] !== "string") {
+      console.error(
+        "[line-pipeline] Google News URL解決レスポンスが見つかりませんでした"
+      );
+      return null;
+    }
+
+    let decoded: unknown;
+
+    try {
+      decoded = JSON.parse(wrb[2]);
+    } catch (parseError) {
+      console.error(
+        "[line-pipeline] Google News元URLデータ解析失敗:",
+        parseError
+      );
+      return null;
+    }
+
+    if (
+      !Array.isArray(decoded) ||
+      decoded[0] !== "garturlres" ||
+      typeof decoded[1] !== "string"
+    ) {
+      console.error(
+        "[line-pipeline] Google News元記事URLがレスポンスにありません"
+      );
+      return null;
+    }
+
+    const resolvedUrl = decoded[1];
 
     if (
       /^https?:\/\//i.test(resolvedUrl) &&
