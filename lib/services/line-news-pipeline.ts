@@ -358,7 +358,7 @@ async function resolveGoogleNewsUrl(
     // ローカル検証で成功した形式をそのまま使用する。
     const articlesReq = [
       "Fbv4je",
-      `["garturlreq",[["X","X",["X","X"],null,null,1,1,"US:en",null,1,null,null,null,null,null,0,1],"X","X",1,[1,1,1],1,0,"655000234",0,0,null,0],"${sourceId}",${timestamp},"${signature}"]`,
+      `["garturlreq",[["X","X",["X","X"],null,null,1,1,"US:en",null,1,null,null,null,null,null,0,1],"X","X",1,[1,1,1],1,1,null,0,0,null,0],"${sourceId}",${timestamp},"${signature}"]`,
     ];
 
     const body =
