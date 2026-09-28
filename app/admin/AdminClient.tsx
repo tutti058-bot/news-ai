@@ -212,12 +212,16 @@ type XPostDraft = {
   legacyTweet: string;
   image: string | null;
   imageError?: string;
+  candidates?: string[];
 };
 
 const [xPostDraft, setXPostDraft] =
   useState<XPostDraft | null>(null);
 
-type XPostMode = "ai-image" | "legacy";
+const [selectedImagePostCandidate, setSelectedImagePostCandidate] =
+  useState(0);
+
+type XPostMode = "ai-image" | "legacy" | "image-post";
 
 const [xPostMode, setXPostMode] =
   useState<XPostMode>("ai-image");
@@ -961,6 +965,7 @@ const [xPostMode, setXPostMode] =
     setXPostConfirmLoadingId(newsId);
     setMessage("");
     setXPostDraft(null);
+    setSelectedImagePostCandidate(0);
 
     try {
       // X本文だけ先に生成
@@ -971,7 +976,12 @@ const [xPostMode, setXPostMode] =
         },
         body: JSON.stringify({
           newsId,
-          mode: xPostMode,
+          mode:
+            xPostMode === "legacy"
+              ? "legacy"
+              : xPostMode === "image-post"
+                ? "image-post"
+                : "ai-image",
         }),
       });
 
@@ -1015,7 +1025,10 @@ const [xPostMode, setXPostMode] =
 
       // AI画像版は、保存済みAI画像があれば再利用。
       // 未生成の場合だけ生成して保存する。
-      if (xPostMode === "ai-image") {
+      if (
+        xPostMode === "ai-image" ||
+        xPostMode === "image-post"
+      ) {
         const existingAiImage =
           news.image && news.image.includes("/news-images/");
 
@@ -1061,8 +1074,8 @@ const [xPostMode, setXPostMode] =
               "記事AI画像の生成に失敗しました";
           }
         }
-      }
 
+      }
       const finalImageTweet = tweet;
       const finalInsightTweet = insightTweet;
       setXPostDraft({
@@ -1072,6 +1085,17 @@ const [xPostMode, setXPostMode] =
         insightLabel,
         legacyTweet,
         image,
+        candidates:
+          xPostMode === "image-post" &&
+          Array.isArray(postData.candidates)
+            ? postData.candidates
+                .filter(
+                  (value: unknown): value is string =>
+                    typeof value === "string" &&
+                    value.trim().length > 0
+                )
+                .slice(0, 4)
+            : undefined,
         imageError:
           imageError || undefined,
       });
@@ -3148,7 +3172,21 @@ const [xPostMode, setXPostMode] =
                         🖼️ AI画像版
                       </button>
 
-                      <button
+                                            <button
+                        type="button"
+                        onClick={() =>
+                          setXPostMode("image-post")
+                        }
+                        disabled={xPostLoadingId === news.id}
+                        className={`border-l border-slate-200 px-4 py-2 text-sm font-black transition ${
+                          xPostMode === "image-post"
+                            ? "bg-black text-white"
+                            : "text-slate-600 hover:bg-slate-50"
+                        }`}
+                      >
+                        🎨 イメージ投稿
+                      </button>
+<button
                         type="button"
                         onClick={() =>
                           setXPostMode("legacy")
@@ -3230,7 +3268,7 @@ const [xPostMode, setXPostMode] =
 
                       <div className="mt-4 grid gap-4 lg:grid-cols-2">
                         <div>
-                          {xPostMode === "ai-image" && xPostDraft.image ? (
+                          {(xPostMode === "ai-image" || xPostMode === "image-post") && xPostDraft.image ? (
                             <>
                               <img
                                 src={xPostDraft.image}
@@ -3280,9 +3318,49 @@ const [xPostMode, setXPostMode] =
                         </div>
 
                         <div className="space-y-4">
-                          {xPostMode === "ai-image" ? (
+                          {xPostMode === "ai-image" || xPostMode === "image-post" ? (
                             <>
-                              <div className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+                              {xPostMode === "image-post" &&
+                            xPostDraft.candidates &&
+                            xPostDraft.candidates.length >= 4 && (
+                              <div className="mb-4 rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
+                                <div className="mb-3 text-sm font-black text-slate-900">
+                                  ✍️ 投稿文候補（4案）
+                                </div>
+
+                                <div className="space-y-2">
+                                  {xPostDraft.candidates.map(
+                                    (candidate, index) => (
+                                      <button
+                                        key={`${candidate}-${index}`}
+                                        type="button"
+                                        onClick={() =>
+                                          setSelectedImagePostCandidate(index)
+                                        }
+                                        className={`w-full rounded-xl border p-3 text-left transition ${
+                                          selectedImagePostCandidate === index
+                                            ? "border-black bg-slate-50 ring-2 ring-black"
+                                            : "border-slate-200 bg-white hover:bg-slate-50"
+                                        }`}
+                                      >
+                                        <div className="mb-1 text-xs font-black text-slate-400">
+                                          {index + 1}案目
+                                        </div>
+                                        <div className="whitespace-pre-wrap text-sm leading-6 text-slate-800">
+                                          {candidate}
+                                        </div>
+                                      </button>
+                                    )
+                                  )}
+                                </div>
+
+                                <p className="mt-3 text-xs leading-5 text-slate-500">
+                                  選択した文章がX投稿に使われます。
+                                </p>
+                              </div>
+                            )}
+
+                          <div className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
                                 <div className="mb-2 flex items-center justify-between">
                                   <div className="text-xs font-black text-slate-500">
                                     X投稿
@@ -3293,7 +3371,11 @@ const [xPostMode, setXPostMode] =
                                 </div>
 
                                 <p className="whitespace-pre-wrap text-sm leading-7 text-slate-800">
-                                  {xPostDraft.tweet}
+                                  {xPostMode === "image-post"
+                                    ? xPostDraft.candidates?.[
+                                        selectedImagePostCandidate
+                                      ] ?? xPostDraft.tweet
+                                    : xPostDraft.tweet}
                                 </p>
 
                                 <button
@@ -3302,7 +3384,11 @@ const [xPostMode, setXPostMode] =
                                     const intentUrl =
                                       "https://x.com/intent/post?text=" +
                                       encodeURIComponent(
-                                        xPostDraft.tweet
+                                        xPostMode === "image-post"
+                                          ? xPostDraft.candidates?.[
+                                              selectedImagePostCandidate
+                                            ] ?? xPostDraft.tweet
+                                          : xPostDraft.tweet
                                       );
 
                                     window.open(
@@ -3313,7 +3399,7 @@ const [xPostMode, setXPostMode] =
                                   }}
                                   className="mt-4 w-full min-h-11 rounded-xl bg-black px-4 py-3 text-sm font-bold text-white transition hover:bg-slate-800"
                                 >
-                                  𝕏 通常版で投稿
+                                  {xPostMode === "image-post" ? "𝕏 選択した文章で投稿" : "𝕏 通常版で投稿"}
                                 </button>
                               </div>
 
