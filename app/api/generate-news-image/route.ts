@@ -613,6 +613,23 @@ Use:
 
 - rounded cheeks
 - gentle jawline
+
+- highly expressive comedic facial acting
+- a wide emotional range depending on the news topic
+- expressions should be exaggerated enough to be immediately readable
+- cute but genuinely funny facial expressions, never stiff or emotionless
+- large expressive eyes with strong changes in shape and intensity
+- when surprised or shocked, use larger cat-like pupils, widened eyes, raised eyebrows, and a dramatically open mouth
+- when confused, use uneven eyes, a slightly crooked mouth, and a silly blank expression
+- when nervous or panicking, add sweat drops, trembling eyes, hurried mouth shapes, and exaggerated tension
+- when sad, use watery eyes, trembling lips, and exaggerated sadness while keeping her cute
+- when happy, use a huge cheerful smile and bright sparkling eyes
+- when annoyed or unimpressed, use half-lidded eyes, a flat mouth, or a deadpan expression
+- for comedic reactions, exaggerated silly faces are allowed, including runny nose, goofy mouth shapes, puffed cheeks, crossed eyes, or a vacant expression
+- facial expressions may become temporarily cat-like during strong reactions
+- do not keep the same neutral cute expression in every image
+- the facial reaction should visually communicate the emotional tone of the news before the viewer reads any text
+
 - large expressive eyes
 - small nose
 - small mouth
