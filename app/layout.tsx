@@ -78,8 +78,8 @@ export default function RootLayout({
         {children}
 
         <Footer />
-        <IMobileMobileOpeningAd />
-<IMobileMobileFooterAd />
+<IMobileMobileOpeningAd />
+        <IMobileMobileFooterAd />
       </body>
     </html>
   );
