@@ -8,6 +8,7 @@ import NewsAnalysisGuide from "./NewsAnalysisGuide";
 import RakutenWidget from "./RakutenWidget";
 import XTimeline from "./XTimeline";
 import AmazonPrimeVideoAd from "./AmazonPrimeVideoAd";
+import AudibleAd from "./AudibleAd";
 
 type Props = {
   keyword: string;
@@ -46,6 +47,7 @@ export default function HomeLayout({
 
         {/* 注目コラム */}
         <ColumnPreview />
+        <AudibleAd />
 
         {/* Main */}
         <div className="mt-7 grid grid-cols-1 gap-7 lg:mt-10 lg:gap-10 lg:grid-cols-[2fr_360px]">
