@@ -7,6 +7,7 @@ import ContentRequestBox from "./ContentRequestBox";
 import NewsAnalysisGuide from "./NewsAnalysisGuide";
 import RakutenWidget from "./RakutenWidget";
 import XTimeline from "./XTimeline";
+import AmazonPrimeVideoAd from "./AmazonPrimeVideoAd";
 
 type Props = {
   keyword: string;
@@ -31,6 +32,9 @@ export default function HomeLayout({
 
         {/* 楽天ページマッチ */}
         <RakutenWidget type="page-match" />
+
+        {/* Amazon Prime Video */}
+        <AmazonPrimeVideoAd />
 
         {/* Search */}
         <div className="mt-5 sm:mt-8">
