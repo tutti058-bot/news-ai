@@ -4,6 +4,8 @@ import { isAdminAuthenticated } from "@/lib/adminAuth";
 import Link from "next/link";
 import type { Metadata } from "next";
 import NewsRakutenWidget from "@/components/NewsRakutenWidget";
+import AmazonPrimeVideoAd from "@/components/AmazonPrimeVideoAd";
+import AudibleAd from "@/components/AudibleAd";
 
 type Props = {
   params: Promise<{
@@ -451,6 +453,10 @@ export default async function NewsDetail({
         "このニュース、詳しく見ていくでやんす🤖";
   }
 
+  // 記事内広告はPrime Video / Audibleをランダム表示
+  const articleAffiliate =
+    Math.random() < 0.5 ? "prime" : "audible";
+
   // X投稿用
   const tweetText = `🚨 ${news.title}
 
@@ -747,6 +753,13 @@ ${url}
 
         </div>
       </div>
+
+      {/* 記事内アフィリエイト広告 */}
+      {articleAffiliate === "prime" ? (
+        <AmazonPrimeVideoAd />
+      ) : (
+        <AudibleAd />
+      )}
 
       {/* やんすAIの視点 */}
       <section className="mt-8 overflow-hidden rounded-3xl border border-blue-200 bg-blue-50 shadow-lg">
