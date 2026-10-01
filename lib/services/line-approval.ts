@@ -88,6 +88,7 @@ export async function handleLineApproval(
       action: "published" as const,
       message: `✅ 公開しました。\n\n「${news.title}」`,
       newsId: news.id,
+      inboxId: inbox.id,
     };
   }
 

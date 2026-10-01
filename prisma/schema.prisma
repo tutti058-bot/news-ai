@@ -121,6 +121,12 @@ model LineInboxItem {
   status          String   @default("pending")
   generatedNewsId Int?
   error           String?
+  xCandidates     String?
+  xStatus         String?
+  xSelectedIndex  Int?
+  xPostedAt       DateTime?
+  xPostedText     String?
+  xPostId         String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 

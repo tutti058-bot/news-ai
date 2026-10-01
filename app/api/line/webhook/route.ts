@@ -7,8 +7,19 @@ import {
   pushLineMessage,
   createApprovalMessages,
   createProcessingMessage,
+  createXCandidateMessages,
+  createXImageChoiceMessages,
+  createXPostingMessage,
+  createXPostedMessage,
+  createXPostErrorMessage,
 } from "@/lib/services/line-messaging";
 import { processLineInboxItem } from "@/lib/services/line-news-pipeline";
+import { generateXPostCandidates } from "@/lib/services/x-candidates";
+import {
+  executeLineXPost,
+  handleLineXNumericCommand,
+  markLineXPostError,
+} from "@/lib/services/line-x";
 import {
   handleLineApproval,
   getRecentPublishedNewsForDeletion,
@@ -149,6 +160,194 @@ async function handleDeletionCommand(
   return true;
 }
 
+async function generateAndPushXCandidates(
+  userId: string,
+  inboxId: number,
+  newsId: number
+) {
+  try {
+    const news = await prisma.news.findUnique({
+      where: {
+        id: newsId,
+      },
+      select: {
+        title: true,
+        summary: true,
+        category: true,
+      },
+    });
+
+    if (!news) {
+      throw new Error("公開した記事が見つかりません");
+    }
+
+    const candidates =
+      await generateXPostCandidates({
+        title: news.title,
+        summary: news.summary,
+        category: news.category,
+      });
+
+    await prisma.lineInboxItem.update({
+      where: {
+        id: inboxId,
+      },
+      data: {
+        xCandidates: JSON.stringify(candidates),
+        xStatus: "pending",
+        xSelectedIndex: null,
+        xPostedAt: null,
+        xPostedText: null,
+        xPostId: null,
+        error: null,
+      },
+    });
+
+    await pushLineMessage(
+      userId,
+      createXCandidateMessages({
+        title: news.title,
+        candidates,
+      })
+    );
+  } catch (error) {
+    console.error(
+      "LINE X候補生成エラー:",
+      error
+    );
+
+    const message =
+      error instanceof Error
+        ? error.message
+        : String(error);
+
+    await prisma.lineInboxItem.update({
+      where: {
+        id: inboxId,
+      },
+      data: {
+        xStatus: "error",
+        error: message,
+      },
+    });
+
+    try {
+      await pushLineMessage(userId, [
+        {
+          type: "text",
+          text:
+            "❌ X投稿候補の生成に失敗しました。\n\n" +
+            "記事公開は完了しています。",
+        },
+      ]);
+    } catch (pushError) {
+      console.error(
+        "LINE X候補エラー通知失敗:",
+        pushError
+      );
+    }
+  }
+}
+
+async function handleXNumericCommand(
+  userId: string,
+  replyToken: string,
+  command: string
+) {
+  const result =
+    await handleLineXNumericCommand(
+      userId,
+      command
+    );
+
+  if (!result) {
+    return false;
+  }
+
+  if (result.kind === "posting") {
+    await replyLineMessage(
+      replyToken,
+      createXPostingMessage(
+        result.imageChoice
+      )
+    );
+
+    after(async () => {
+      try {
+        const posted =
+          await executeLineXPost({
+            inboxId: result.inboxId,
+            newsId: result.newsId,
+            candidate: result.candidate,
+            imageChoice: result.imageChoice,
+          });
+
+        if (!posted) {
+          return;
+        }
+
+        await pushLineMessage(
+          userId,
+          createXPostedMessage({
+            text: posted.text,
+            url: posted.url,
+            imageChoice: result.imageChoice,
+          })
+        );
+      } catch (error) {
+        const message =
+          await markLineXPostError(
+            result.inboxId,
+            error
+          );
+
+        try {
+          await pushLineMessage(
+            userId,
+            createXPostErrorMessage(message)
+          );
+        } catch (pushError) {
+          console.error(
+            "LINE X投稿エラー通知失敗:",
+            pushError
+          );
+        }
+      }
+    });
+
+    return true;
+  }
+
+  if (result.message) {
+    if (result.kind === "candidate") {
+      /*
+       * 候補選択後は画像選択UIを送る。
+       * エラー系メッセージの場合でも安全に同じ分岐で処理。
+       */
+      await replyLineMessage(replyToken, [
+        {
+          type: "text",
+          text: result.message,
+        },
+      ]);
+
+      if (
+        result.newsId > 0 &&
+        result.candidate
+      ) {
+        await pushLineMessage(
+          userId,
+          createXImageChoiceMessages()
+        );
+      }
+    }
+
+    return true;
+  }
+
+  return false;
+}
+
 async function handleApprovalCommand(
   userId: string,
   replyToken: string,
@@ -169,6 +368,34 @@ async function handleApprovalCommand(
       text: result.message,
     },
   ]);
+
+  if (
+    result.action === "published" &&
+    result.inboxId &&
+    result.newsId
+  ) {
+    await prisma.lineInboxItem.update({
+      where: {
+        id: result.inboxId,
+      },
+      data: {
+        xStatus: "generating",
+        xCandidates: null,
+        xSelectedIndex: null,
+        xPostedAt: null,
+        xPostedText: null,
+        xPostId: null,
+      },
+    });
+
+    after(async () => {
+      await generateAndPushXCandidates(
+        userId,
+        result.inboxId!,
+        result.newsId!
+      );
+    });
+  }
 
   return true;
 }
@@ -241,6 +468,41 @@ export async function POST(request: Request) {
             );
           if (handled) {
             continue;
+          }
+        }
+
+        /*
+         * 数字入力は削除操作とX投稿操作が共存する。
+         * 削除選択中なら削除を最優先。
+         */
+        if (/^[1-4]$/.test(command)) {
+          const deletionSelecting =
+            await prisma.lineInboxItem.findFirst({
+              where: {
+                userId,
+                status: {
+                  in: [
+                    "delete_selecting",
+                    "delete_confirming",
+                  ],
+                },
+              },
+              select: {
+                id: true,
+              },
+            });
+
+          if (!deletionSelecting) {
+            const xHandled =
+              await handleXNumericCommand(
+                userId,
+                replyToken,
+                command
+              );
+
+            if (xHandled) {
+              continue;
+            }
           }
         }
 
