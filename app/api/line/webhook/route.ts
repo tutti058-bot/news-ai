@@ -271,7 +271,7 @@ async function handleXNumericCommand(
         text:
           "✅ 「" +
           String(result.selectedIndex + 1) +
-          "」を選択しました。\\n\\n" +
+          "」を選択しました。" + String.fromCharCode(10, 10) +
           "Xへ投稿しています。",
       },
     ]);
@@ -293,7 +293,7 @@ async function handleXNumericCommand(
           {
             type: "text",
             text:
-              "✅ Xに投稿しました！\n\n" +
+              "✅ Xに投稿しました！" + String.fromCharCode(10, 10) +
               posted.text +
               "\n\n" +
               posted.url,
@@ -310,7 +310,7 @@ async function handleXNumericCommand(
             {
               type: "text",
               text:
-                "❌ X投稿に失敗しました。\n\n" +
+                "❌ X投稿に失敗しました。" + String.fromCharCode(10, 10) +
                 message,
             },
           ]);
