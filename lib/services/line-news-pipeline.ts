@@ -287,313 +287,115 @@ JSON形式：
 
 
 
-function extractLineSharedTitle(text: string | null): string {
-  if (!text) return "";
-
-  return text
-    .replace(/https?:\/\/[^\s]+/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-async function resolveGoogleNewsUrl(
-  googleUrl: string
-): Promise<string | null> {
-  try {
-    const url = new URL(googleUrl);
-
-    if (
-      url.hostname !== "news.google.com" ||
-      !url.pathname.includes("/rss/articles/")
-    ) {
-      return null;
-    }
-
-    const articleId =
-      url.pathname.split("/").filter(Boolean).pop() ?? "";
-
-    if (!articleId) {
-      return null;
-    }
-
-    const articlePageUrl = "https://news" + ".google.com/articles/" + articleId;
-
-    const articlePageResponse = await fetch(articlePageUrl, {
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/153 Safari/537.36",
-      },
-      cache: "no-store",
-    });
-
-    if (!articlePageResponse.ok) {
-      console.error(
-        "[line-pipeline] Google News記事ページ取得失敗:",
-        articlePageResponse.status
-      );
-      return null;
-    }
-
-    const html = await articlePageResponse.text();
-
-    const signature =
-      html.match(/data-n-a-sg="([^"]+)"/)?.[1] ?? null;
-
-    const timestamp =
-      html.match(/data-n-a-ts="([^"]+)"/)?.[1] ?? null;
-
-    const sourceId =
-      html.match(/data-n-a-id="([^"]+)"/)?.[1] ??
-      articleId;
-
-    if (!signature || !timestamp) {
-      console.error(
-        "[line-pipeline] Google Newsの署名情報を取得できませんでした"
-      );
-      return null;
-    }
-
-    // Google Newsの元記事URL解決に使うリクエスト。
-    // ローカル検証で成功した形式をそのまま使用する。
-    const articlesReq = [
-      "Fbv4je",
-      `["garturlreq",[["X","X",["X","X"],null,null,1,1,"US:en",null,1,null,null,null,null,null,0,1],"X","X",1,[1,1,1],1,1,null,0,0,null,0],"${sourceId}",${timestamp},"${signature}"]`,
-    ];
-
-    const body =
-      "f.req=" +
-      encodeURIComponent(
-        JSON.stringify([[articlesReq]], {
-          separators: [",", ":"],
-        } as any)
-      );
-
-    const decodeResponse = await fetch(
-      "https://news" + ".google.com/_/DotsSplashUi/data/batchexecute",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type":
-            "application/x-www-form-urlencoded;charset=UTF-8",
-          Referer: "https://news" + ".google.com/",
-          "User-Agent":
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/153 Safari/537.36",
-        },
-        body,
-        cache: "no-store",
-      }
-    );
-
-    if (!decodeResponse.ok) {
-      console.error(
-        "[line-pipeline] Google News URL解決失敗:",
-        decodeResponse.status
-      );
-      return null;
-    }
-
-    const raw = await decodeResponse.text();
-
-    // 先頭のXSSI対策文字列を除去してJSONとして解析
-    const jsonText = raw.replace(/^\)\]\}'\s*/, "");
-
-    let outer: unknown;
-
-    try {
-      outer = JSON.parse(jsonText);
-    } catch (parseError) {
-      console.error(
-        "[line-pipeline] Google NewsレスポンスJSON解析失敗:",
-        parseError
-      );
-      return null;
-    }
-
-    if (!Array.isArray(outer)) {
-      return null;
-    }
-
-    const wrb = outer.find(
-      (item) =>
-        Array.isArray(item) &&
-        item[0] === "wrb.fr" &&
-        item[1] === "Fbv4je" &&
-        typeof item[2] === "string"
-    ) as unknown[] | undefined;
-
-    if (!wrb || typeof wrb[2] !== "string") {
-      console.error(
-        "[line-pipeline] Google News URL解決レスポンスが見つかりませんでした"
-      );
-      return null;
-    }
-
-    let decoded: unknown;
-
-    try {
-      decoded = JSON.parse(wrb[2]);
-    } catch (parseError) {
-      console.error(
-        "[line-pipeline] Google News元URLデータ解析失敗:",
-        parseError
-      );
-      return null;
-    }
-
-    if (
-      !Array.isArray(decoded) ||
-      decoded[0] !== "garturlres" ||
-      typeof decoded[1] !== "string"
-    ) {
-      console.error(
-        "[line-pipeline] Google News元記事URLがレスポンスにありません"
-      );
-      return null;
-    }
-
-    const resolvedUrl = decoded[1];
-
-    if (
-      /^https?:\/\//i.test(resolvedUrl) &&
-      !resolvedUrl.startsWith("https://news.google.com/")
-    ) {
-      console.log(
-        "[line-pipeline] Google Newsから元記事URLを解決:",
-        resolvedUrl
-      );
-      return resolvedUrl;
-    }
-
-    return null;
-  } catch (error) {
-    console.error(
-      "[line-pipeline] Google News URL解決エラー:",
-      error
-    );
-    return null;
-  }
-}
-
 async function findOriginalArticleFromLine(
   sourceUrl: string,
-  text: string | null
+  _text: string | null
 ): Promise<string | null> {
   try {
-    const hostname = new URL(sourceUrl).hostname;
+    const source = new URL(sourceUrl);
 
-    if (hostname !== "u.lin.ee") {
+    if (source.hostname.toLowerCase() !== "u.lin.ee") {
       return null;
     }
 
-    const title = extractLineSharedTitle(text);
-
-    if (!title || title.length < 8) {
-      console.log(
-        "[line-pipeline] LINE共有タイトルを取得できませんでした"
-      );
-      return null;
-    }
-
-    const rssUrl =
-      "https://news.google.com/rss/search?q=" +
-      encodeURIComponent(title) +
-      "&hl=ja&gl=JP&ceid=JP:ja";
-
-    const response = await fetch(rssUrl, {
+    /*
+     * LINE共有URLはGoogle News検索せず、
+     * LINE NEWSページのcanonicalから実際の元記事URLを取得する。
+     */
+    const response = await fetch(sourceUrl, {
+      method: "GET",
+      redirect: "follow",
       headers: {
         "User-Agent":
           "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/153 Safari/537.36",
+        "Accept":
+          "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language":
+          "ja-JP,ja;q=0.9,en-US;q=0.8,en;q=0.7",
       },
       cache: "no-store",
     });
 
     if (!response.ok) {
       console.error(
-        "[line-pipeline] Googleニュース検索失敗:",
-        response.status
+        "[line-pipeline] LINE共有URL取得失敗:",
+        response.status,
+        sourceUrl
       );
       return null;
     }
 
-    const xml = await response.text();
+    const html = await response.text();
 
-    const itemMatches = [
-      ...xml.matchAll(
-        /<item>[\s\S]*?<title>([\s\S]*?)<\/title>[\s\S]*?<link>(https:\/\/news\.google\.com\/rss\/articles\/[^<]+)<\/link>[\s\S]*?<source[^>]*>([\s\S]*?)<\/source>[\s\S]*?<\/item>/g
-      ),
-    ];
+    /*
+     * LINE NEWSページのcanonicalを取得。
+     */
+    const canonical =
+      html.match(
+        /<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)["']/i
+      )?.[1] ??
+      html.match(
+        /<link[^>]+href=["']([^"']+)["'][^>]+rel=["']canonical["']/i
+      )?.[1] ??
+      null;
 
-    if (!itemMatches.length) {
-      console.log(
-        "[line-pipeline] Googleニュース検索結果なし:",
-        title
-      );
-      return null;
-    }
+    if (canonical) {
+      try {
+        const canonicalUrl = new URL(canonical, response.url);
 
-    const decodeXml = (value: string) =>
-      value
-        .replace(/&amp;/g, "&")
-        .replace(/&lt;/g, "<")
-        .replace(/&gt;/g, ">")
-        .replace(/&quot;/g, '"')
-        .replace(/&#39;/g, "'");
+        if (
+          /^https?:$/i.test(canonicalUrl.protocol) &&
+          canonicalUrl.hostname.toLowerCase() !== "news.line.me" &&
+          canonicalUrl.hostname.toLowerCase() !== "u.lin.ee"
+        ) {
+          const resolvedUrl = canonicalUrl.toString();
 
-    const normalizeArticleTitle = (value: string) =>
-      value
-        .replace(/<[^>]+>/g, "")
-        .replace(/[-｜|].*$/, "")
-        .replace(/（[^（）]*）$/g, "")
-        .replace(/\([^()]*\)$/g, "")
-        .replace(
-          /[「」『』【】（）()[\]、。，．！？!?：:・]/g,
-          " "
-        )
-        .replace(/\s+/g, " ")
-        .trim();
+          console.log(
+            "[line-pipeline] LINE NEWS canonicalから元記事URLを取得:",
+            resolvedUrl
+          );
 
-    const normalizedTitle = normalizeArticleTitle(title);
-
-    for (const match of itemMatches.slice(0, 8)) {
-      const resultTitle = decodeXml(match[1]).trim();
-
-      const normalizedResultTitle =
-        normalizeArticleTitle(resultTitle);
-
-      const matched =
-        normalizedResultTitle === normalizedTitle ||
-        normalizedResultTitle.includes(normalizedTitle) ||
-        normalizedTitle.includes(normalizedResultTitle);
-
-      if (!matched) {
-        continue;
-      }
-
-      const googleUrl = decodeXml(match[2]);
-
-      const originalUrl =
-        await resolveGoogleNewsUrl(googleUrl);
-
-      if (originalUrl) {
-        console.log(
-          "[line-pipeline] LINE共有URLから元記事を特定:",
-          originalUrl
+          return resolvedUrl;
+        }
+      } catch {
+        console.error(
+          "[line-pipeline] canonical URLの解析に失敗:",
+          canonical
         );
-        return originalUrl;
       }
     }
 
-    console.log(
-      "[line-pipeline] タイトル一致する元記事を特定できませんでした:",
-      title
+    /*
+     * canonicalが取得できない場合だけ、最終リダイレクト先を確認。
+     * 外部サイトへ直接到達したケースを救済する。
+     */
+    const finalUrl = response.url?.trim() ?? "";
+
+    if (
+      /^https?:\/\//i.test(finalUrl) &&
+      !finalUrl.toLowerCase().startsWith("https" + ":" + "//" + "u.lin.ee/") &&
+      !finalUrl.toLowerCase().startsWith("https" + ":" + "//" + "news.line.me/")
+    ) {
+      console.log(
+        "[line-pipeline] LINE共有URLの最終URLを元記事として使用:",
+        finalUrl
+      );
+
+      return finalUrl;
+    }
+
+    console.error(
+      "[line-pipeline] LINE NEWSから元記事URLを取得できませんでした:",
+      response.url
     );
 
     return null;
   } catch (error) {
     console.error(
-      "[line-pipeline] LINE共有URLの元記事検索エラー:",
+      "[line-pipeline] LINE共有URLの元記事URL解決エラー:",
       error
     );
+
     return null;
   }
 }
