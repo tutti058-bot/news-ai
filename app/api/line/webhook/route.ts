@@ -265,47 +265,55 @@ async function handleXNumericCommand(
   }
 
   if (result.kind === "posting") {
-    await replyLineMessage(
-      replyToken,
-      createXPostingMessage(
-        result.imageChoice
-      )
-    );
+    await replyLineMessage(replyToken, [
+      {
+        type: "text",
+        text:
+          "✅ 「" +
+          String(result.selectedIndex + 1) +
+          "」を選択しました。\\n\\n" +
+          "Xへ投稿しています。",
+      },
+    ]);
 
     after(async () => {
       try {
-        const posted =
-          await executeLineXPost({
-            inboxId: result.inboxId,
-            newsId: result.newsId,
-            candidate: result.candidate,
-            imageChoice: result.imageChoice,
-          });
+        const posted = await executeLineXPost({
+          inboxId: result.inboxId,
+          newsId: result.newsId,
+          candidate: result.candidate,
+          imageChoice: 0,
+        });
 
         if (!posted) {
           return;
         }
 
-        await pushLineMessage(
-          userId,
-          createXPostedMessage({
-            text: posted.text,
-            url: posted.url,
-            imageChoice: result.imageChoice,
-          })
-        );
+        await pushLineMessage(userId, [
+          {
+            type: "text",
+            text:
+              "✅ Xに投稿しました！\n\n" +
+              posted.text +
+              "\n\n" +
+              posted.url,
+          },
+        ]);
       } catch (error) {
-        const message =
-          await markLineXPostError(
-            result.inboxId,
-            error
-          );
+        const message = await markLineXPostError(
+          result.inboxId,
+          error
+        );
 
         try {
-          await pushLineMessage(
-            userId,
-            createXPostErrorMessage(message)
-          );
+          await pushLineMessage(userId, [
+            {
+              type: "text",
+              text:
+                "❌ X投稿に失敗しました。\n\n" +
+                message,
+            },
+          ]);
         } catch (pushError) {
           console.error(
             "LINE X投稿エラー通知失敗:",
