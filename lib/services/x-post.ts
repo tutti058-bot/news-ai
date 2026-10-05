@@ -163,7 +163,6 @@ export async function postTweet(
     throw new Error("X投稿文が空です");
   }
 
-  const accessToken = getAccessToken();
   const mediaId = imageUrl ? await uploadImage(imageUrl) : null;
 
   const body: {
@@ -182,7 +181,7 @@ export async function postTweet(
   const response = await fetch(X_TWEETS_URL, {
     method: "POST",
     headers: {
-      Authorization: "Bearer " + accessToken,
+      Authorization: createOAuth1Header("POST", X_TWEETS_URL, getOAuth1Credentials()),
       "Content-Type": "application/json",
     },
     body: JSON.stringify(body),
