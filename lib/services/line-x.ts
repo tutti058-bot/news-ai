@@ -183,7 +183,8 @@ export async function executeLineXPost(params: {
   }
 
   const result = await postTweet(
-    params.candidate
+    params.candidate,
+    params.imageChoice === 2 ? null : news.image
   );
 
   await prisma.news.update({
