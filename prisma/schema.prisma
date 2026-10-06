@@ -110,26 +110,37 @@ model ContentRequest {
 }
 
 model LineInboxItem {
-  id              Int      @id @default(autoincrement())
-  messageId       String?  @unique
-  webhookEventId  String?  @unique
+  id              Int       @id @default(autoincrement())
+  messageId       String?   @unique
+  webhookEventId  String?   @unique
   userId          String?
   type            String
   text            String?
   sourceUrl       String?
   imageUrl        String?
-  status          String   @default("pending")
+  status          String    @default("pending")
   generatedNewsId Int?
   error           String?
   xCandidates     String?
   xStatus         String?
   xSelectedIndex  Int?
+  xImageChoice    Int?
+  xImageUrl       String?
   xPostedAt       DateTime?
   xPostedText     String?
   xPostId         String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
   @@index([status])
   @@index([createdAt])
+}
+
+model XOAuthToken {
+  id           Int      @id @default(1)
+  accessToken  String
+  refreshToken String
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }

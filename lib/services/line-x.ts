@@ -23,7 +23,7 @@ type LineXSelectionResult =
       selectedIndex: number;
       candidate: string;
       imageChoice: number;
-      hasLineImage: boolean;
+      waitingForLineImage: boolean;
     };
 
 function parseCandidates(value: string | null): string[] {
@@ -85,8 +85,7 @@ export async function handleLineXNumericCommand(
     return {
       handled: true,
       kind: "candidate",
-      message:
-        "X投稿候補は「1」〜「4」から選択してください。",
+      message: "X投稿候補は「1」〜「4」から選択してください。",
       inboxId: pending.id,
       newsId: pending.generatedNewsId,
       title: "",
@@ -103,6 +102,8 @@ export async function handleLineXNumericCommand(
     data: {
       xStatus: "posting",
       xSelectedIndex: selectedIndex,
+      xImageChoice: null,
+      xImageUrl: null,
     },
   });
 
@@ -110,8 +111,7 @@ export async function handleLineXNumericCommand(
     return {
       handled: true,
       kind: "candidate",
-      message:
-        "このX投稿候補はすでに処理中です。少し待ってください。",
+      message: "このX投稿候補はすでに処理中です。少し待ってください。",
       inboxId: pending.id,
       newsId: pending.generatedNewsId,
       title: "",
@@ -129,15 +129,6 @@ export async function handleLineXNumericCommand(
     },
   });
 
-  const inbox = await prisma.lineInboxItem.findUnique({
-    where: {
-      id: pending.id,
-    },
-    select: {
-      imageUrl: true,
-    },
-  });
-
   return {
     handled: true,
     kind: "image",
@@ -148,7 +139,7 @@ export async function handleLineXNumericCommand(
     selectedIndex,
     candidate,
     imageChoice: 0,
-    hasLineImage: Boolean(inbox?.imageUrl),
+    waitingForLineImage: false,
   };
 }
 
@@ -179,7 +170,6 @@ export async function handleLineXImageChoice(
       generatedNewsId: true,
       xCandidates: true,
       xSelectedIndex: true,
-      imageUrl: true,
     },
   });
 
@@ -195,23 +185,6 @@ export async function handleLineXImageChoice(
     return null;
   }
 
-  const hasLineImage = Boolean(pending.imageUrl);
-
-  if (!hasLineImage && command !== "1") {
-    return {
-      handled: true,
-      kind: "image",
-      message: "LINE画像がないため、「1」を選択してください。",
-      inboxId: pending.id,
-      newsId: pending.generatedNewsId,
-      title: "",
-      selectedIndex,
-      candidate,
-      imageChoice: 0,
-      hasLineImage: false,
-    };
-  }
-
   const imageChoice = Number(command);
 
   const news = await prisma.news.findUnique({
@@ -223,18 +196,117 @@ export async function handleLineXImageChoice(
     },
   });
 
+  // 1 = 記事画像 → そのまま投稿
+  if (imageChoice === 1) {
+    await prisma.lineInboxItem.update({
+      where: {
+        id: pending.id,
+      },
+      data: {
+        xImageChoice: 1,
+        xImageUrl: null,
+        xStatus: "posting",
+      },
+    });
+
+    return {
+      handled: true,
+      kind: "image",
+      message: "画像選択完了",
+      inboxId: pending.id,
+      newsId: pending.generatedNewsId,
+      title: news?.title ?? "",
+      selectedIndex,
+      candidate,
+      imageChoice: 1,
+      waitingForLineImage: false,
+    };
+  }
+
+  // 2 / 3 = 新しいLINE画像を待つ
+  await prisma.lineInboxItem.update({
+    where: {
+      id: pending.id,
+    },
+    data: {
+      xImageChoice: imageChoice,
+      xImageUrl: null,
+      xStatus: "waiting_x_image",
+    },
+  });
+
   return {
     handled: true,
     kind: "image",
-    message: "画像選択完了",
+    message: "LINE画像を送ってください。",
     inboxId: pending.id,
     newsId: pending.generatedNewsId,
     title: news?.title ?? "",
     selectedIndex,
     candidate,
     imageChoice,
-    hasLineImage,
+    waitingForLineImage: true,
   };
+}
+
+export async function attachLineXImageAndPost(params: {
+  userId: string;
+  imageUrl: string;
+}) {
+  const pending = await prisma.lineInboxItem.findFirst({
+    where: {
+      userId: params.userId,
+      xStatus: "waiting_x_image",
+      xCandidates: {
+        not: null,
+      },
+      xSelectedIndex: {
+        not: null,
+      },
+      xImageChoice: {
+        in: [2, 3],
+      },
+    },
+    orderBy: {
+      updatedAt: "desc",
+    },
+    select: {
+      id: true,
+      generatedNewsId: true,
+      xCandidates: true,
+      xSelectedIndex: true,
+      xImageChoice: true,
+    },
+  });
+
+  if (!pending || !pending.generatedNewsId || !pending.xImageChoice) {
+    return null;
+  }
+
+  const candidates = parseCandidates(pending.xCandidates);
+  const selectedIndex = pending.xSelectedIndex ?? -1;
+  const candidate = candidates[selectedIndex];
+
+  if (!candidate) {
+    return null;
+  }
+
+  await prisma.lineInboxItem.update({
+    where: {
+      id: pending.id,
+    },
+    data: {
+      xImageUrl: params.imageUrl,
+      xStatus: "posting",
+    },
+  });
+
+  return executeLineXPost({
+    inboxId: pending.id,
+    newsId: pending.generatedNewsId,
+    candidate,
+    imageChoice: pending.xImageChoice,
+  });
 }
 
 export async function executeLineXPost(params: {
@@ -251,7 +323,8 @@ export async function executeLineXPost(params: {
       id: true,
       xStatus: true,
       xSelectedIndex: true,
-      imageUrl: true,
+      xImageUrl: true,
+      xImageChoice: true,
       generatedNewsId: true,
     },
   });
@@ -277,22 +350,23 @@ export async function executeLineXPost(params: {
 
   const imageUrls =
     params.imageChoice === 1
-      ? (news.image ? [news.image] : [])
+      ? news.image
+        ? [news.image]
+        : []
       : params.imageChoice === 2
-        ? (item.imageUrl ? [item.imageUrl] : [])
+        ? item.xImageUrl
+          ? [item.xImageUrl]
+          : []
         : [
             ...(news.image ? [news.image] : []),
-            ...(item.imageUrl ? [item.imageUrl] : []),
+            ...(item.xImageUrl ? [item.xImageUrl] : []),
           ];
 
   if (imageUrls.length === 0) {
     throw new Error("投稿する画像がありません");
   }
 
-  const result = await postTweet(
-    params.candidate,
-    imageUrls
-  );
+  const result = await postTweet(params.candidate, imageUrls);
 
   await prisma.news.update({
     where: {

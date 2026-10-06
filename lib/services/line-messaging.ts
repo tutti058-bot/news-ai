@@ -159,20 +159,12 @@ export function createXCandidateMessages(params: {
   ];
 }
 
-export function createXImageChoiceMessages(hasLineImage: boolean) {
-  const choices = hasLineImage
-    ? [
-        "1. 記事の画像",
-        "2. LINEで送った画像",
-        "3. 記事の画像＋LINE画像",
-      ]
-    : [
-        "1. 記事の画像",
-      ];
-
-  const quickReplyItems = hasLineImage
-    ? [1, 2, 3]
-    : [1];
+export function createXImageChoiceMessages() {
+  const choices = [
+    "1. 記事の画像",
+    "2. LINE画像を送る",
+    "3. 記事の画像＋LINE画像",
+  ];
 
   return [{
     type: "text",
@@ -182,7 +174,7 @@ export function createXImageChoiceMessages(hasLineImage: boolean) {
       ...choices,
     ].join("\n"),
     quickReply: {
-      items: quickReplyItems.map((number) => ({
+      items: [1, 2, 3].map((number) => ({
         type: "action",
         action: {
           type: "message",

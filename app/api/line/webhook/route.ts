@@ -16,6 +16,7 @@ import {
 import { processLineInboxItem } from "@/lib/services/line-news-pipeline";
 import { generateXPostCandidates } from "@/lib/services/x-candidates";
 import {
+  attachLineXImageAndPost,
   executeLineXPost,
   handleLineXNumericCommand,
   handleLineXImageChoice,
@@ -265,7 +266,7 @@ async function handleXNumericCommand(
   );
 
   if (imageResult?.kind === "image") {
-    if (imageResult.imageChoice === 0) {
+    if (imageResult.waitingForLineImage) {
       await replyLineMessage(replyToken, [
         {
           type: "text",
@@ -366,9 +367,7 @@ async function handleXNumericCommand(
 
     await pushLineMessage(
       userId,
-      createXImageChoiceMessages(
-        result.hasLineImage
-      )
+      createXImageChoiceMessages()
     );
 
     return true;
@@ -668,6 +667,128 @@ export async function POST(request: Request) {
 
           continue;
         }
+      }
+
+      /*
+       * X投稿用に「新しいLINE画像」を待っている場合は、
+       * 通常の記事生成には流さず、その画像をX投稿へ使う。
+       */
+      const pendingXImage =
+        type === "image" && imageUrl
+          ? await prisma.lineInboxItem.findFirst({
+              where: {
+                userId,
+                xStatus: "waiting_x_image",
+                xCandidates: {
+                  not: null,
+                },
+                xSelectedIndex: {
+                  not: null,
+                },
+                xImageChoice: {
+                  in: [2, 3],
+                },
+              },
+              orderBy: {
+                updatedAt: "desc",
+              },
+              select: {
+                id: true,
+              },
+            })
+          : null;
+
+      if (pendingXImage && imageUrl) {
+        await prisma.lineInboxItem.upsert({
+          where: {
+            messageId: message.id,
+          },
+          update: {
+            webhookEventId,
+            userId,
+            type,
+            text,
+            sourceUrl,
+            imageUrl,
+            status: "x-image",
+            error: null,
+          },
+          create: {
+            messageId: message.id,
+            webhookEventId,
+            userId,
+            type,
+            text,
+            sourceUrl,
+            imageUrl,
+            status: "x-image",
+          },
+        });
+
+        if (replyToken) {
+          try {
+            await replyLineMessage(replyToken, [
+              {
+                type: "text",
+                text: "📷 画像を受け取りました。\n\nXへ投稿しています。",
+              },
+            ]);
+          } catch (replyError) {
+            console.error(
+              "X画像受付返信失敗:",
+              replyError
+            );
+          }
+        }
+
+        after(async () => {
+          try {
+            const posted =
+              await attachLineXImageAndPost({
+                userId,
+                imageUrl,
+              });
+
+            if (!posted) {
+              return;
+            }
+
+            await pushLineMessage(userId, [
+              {
+                type: "text",
+                text:
+                  "✅ Xに投稿しました！\n\n" +
+                  posted.text +
+                  "\n\n" +
+                  posted.url,
+              },
+            ]);
+          } catch (error) {
+            const message =
+              await markLineXPostError(
+                pendingXImage.id,
+                error
+              );
+
+            try {
+              await pushLineMessage(userId, [
+                {
+                  type: "text",
+                  text:
+                    "❌ X投稿に失敗しました。\n\n" +
+                    message,
+                },
+              ]);
+            } catch (pushError) {
+              console.error(
+                "X投稿失敗通知送信エラー:",
+                pushError
+              );
+            }
+          }
+        });
+
+        continue;
       }
 
       const inbox =
