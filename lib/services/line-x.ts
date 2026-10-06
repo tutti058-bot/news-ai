@@ -100,7 +100,7 @@ export async function handleLineXNumericCommand(
       xStatus: "pending",
     },
     data: {
-      xStatus: "posting",
+      xStatus: "waiting_x_image_choice",
       xSelectedIndex: selectedIndex,
       xImageChoice: null,
       xImageUrl: null,
@@ -154,7 +154,7 @@ export async function handleLineXImageChoice(
   const pending = await prisma.lineInboxItem.findFirst({
     where: {
       userId,
-      xStatus: "posting",
+      xStatus: "waiting_x_image_choice",
       xCandidates: {
         not: null,
       },
@@ -250,25 +250,12 @@ export async function handleLineXImageChoice(
 }
 
 export async function attachLineXImageAndPost(params: {
-  userId: string;
+  inboxId: number;
   imageUrl: string;
 }) {
-  const pending = await prisma.lineInboxItem.findFirst({
+  const pending = await prisma.lineInboxItem.findUnique({
     where: {
-      userId: params.userId,
-      xStatus: "waiting_x_image",
-      xCandidates: {
-        not: null,
-      },
-      xSelectedIndex: {
-        not: null,
-      },
-      xImageChoice: {
-        in: [2, 3],
-      },
-    },
-    orderBy: {
-      updatedAt: "desc",
+      id: params.inboxId,
     },
     select: {
       id: true,
@@ -276,10 +263,17 @@ export async function attachLineXImageAndPost(params: {
       xCandidates: true,
       xSelectedIndex: true,
       xImageChoice: true,
+      xStatus: true,
     },
   });
 
-  if (!pending || !pending.generatedNewsId || !pending.xImageChoice) {
+  if (
+    !pending ||
+    pending.xStatus !== "waiting_x_image" ||
+    !pending.generatedNewsId ||
+    !pending.xImageChoice ||
+    ![2, 3].includes(pending.xImageChoice)
+  ) {
     return null;
   }
 

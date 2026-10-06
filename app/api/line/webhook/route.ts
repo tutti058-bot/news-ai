@@ -745,7 +745,7 @@ export async function POST(request: Request) {
           try {
             const posted =
               await attachLineXImageAndPost({
-                userId,
+                inboxId: pendingXImage.id,
                 imageUrl,
               });
 
