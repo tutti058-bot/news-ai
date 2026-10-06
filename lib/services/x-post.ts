@@ -155,7 +155,7 @@ async function uploadImage(imageUrl: string) {
 
 export async function postTweet(
   text: string,
-  imageUrl?: string | null
+  imageUrls?: string | string[] | null
 ) {
   const trimmedText = text.trim();
 
@@ -163,7 +163,15 @@ export async function postTweet(
     throw new Error("X投稿文が空です");
   }
 
-  const mediaId = imageUrl ? await uploadImage(imageUrl) : null;
+  const imageUrlList = Array.isArray(imageUrls)
+    ? imageUrls.filter(Boolean)
+    : imageUrls
+      ? [imageUrls]
+      : [];
+
+  const mediaIds = await Promise.all(
+    imageUrlList.slice(0, 4).map((url) => uploadImage(url))
+  );
 
   const body: {
     text: string;
@@ -172,9 +180,9 @@ export async function postTweet(
     text: trimmedText,
   };
 
-  if (mediaId) {
+  if (mediaIds.length > 0) {
     body.media = {
-      media_ids: [mediaId],
+      media_ids: mediaIds,
     };
   }
 

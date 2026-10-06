@@ -18,6 +18,7 @@ import { generateXPostCandidates } from "@/lib/services/x-candidates";
 import {
   executeLineXPost,
   handleLineXNumericCommand,
+  handleLineXImageChoice,
   markLineXPostError,
 } from "@/lib/services/line-x";
 import {
@@ -254,24 +255,33 @@ async function handleXNumericCommand(
   replyToken: string,
   command: string
 ) {
-  const result =
-    await handleLineXNumericCommand(
-      userId,
-      command
-    );
+  /*
+   * まず「候補選択後・画像選択待ち」の状態を確認する。
+   * xStatus === "posting" の場合は画像選択として扱う。
+   */
+  const imageResult = await handleLineXImageChoice(
+    userId,
+    command
+  );
 
-  if (!result) {
-    return false;
-  }
+  if (imageResult?.kind === "image") {
+    if (imageResult.imageChoice === 0) {
+      await replyLineMessage(replyToken, [
+        {
+          type: "text",
+          text: imageResult.message,
+        },
+      ]);
 
-  if (result.kind === "posting") {
+      return true;
+    }
+
     await replyLineMessage(replyToken, [
       {
         type: "text",
         text:
-          "✅ 「" +
-          String(result.selectedIndex + 1) +
-          "」を選択しました。" + String.fromCharCode(10, 10) +
+          "✅ 画像を選択しました。" +
+          String.fromCharCode(10, 10) +
           "Xへ投稿しています。",
       },
     ]);
@@ -279,10 +289,10 @@ async function handleXNumericCommand(
     after(async () => {
       try {
         const posted = await executeLineXPost({
-          inboxId: result.inboxId,
-          newsId: result.newsId,
-          candidate: result.candidate,
-          imageChoice: 0,
+          inboxId: imageResult.inboxId,
+          newsId: imageResult.newsId,
+          candidate: imageResult.candidate,
+          imageChoice: imageResult.imageChoice,
         });
 
         if (!posted) {
@@ -293,7 +303,8 @@ async function handleXNumericCommand(
           {
             type: "text",
             text:
-              "✅ Xに投稿しました！" + String.fromCharCode(10, 10) +
+              "✅ Xに投稿しました！" +
+              String.fromCharCode(10, 10) +
               posted.text +
               "\n\n" +
               posted.url,
@@ -301,7 +312,7 @@ async function handleXNumericCommand(
         ]);
       } catch (error) {
         const message = await markLineXPostError(
-          result.inboxId,
+          imageResult.inboxId,
           error
         );
 
@@ -310,7 +321,8 @@ async function handleXNumericCommand(
             {
               type: "text",
               text:
-                "❌ X投稿に失敗しました。" + String.fromCharCode(10, 10) +
+                "❌ X投稿に失敗しました。" +
+                String.fromCharCode(10, 10) +
                 message,
             },
           ]);
@@ -326,29 +338,49 @@ async function handleXNumericCommand(
     return true;
   }
 
-  if (result.message) {
-    if (result.kind === "candidate") {
-      /*
-       * 候補選択後は画像選択UIを送る。
-       * エラー系メッセージの場合でも安全に同じ分岐で処理。
-       */
-      await replyLineMessage(replyToken, [
-        {
-          type: "text",
-          text: result.message,
-        },
-      ]);
+  /*
+   * 画像選択待ちでなければ、通常のX候補選択として扱う。
+   */
+  const result =
+    await handleLineXNumericCommand(
+      userId,
+      command
+    );
 
-      if (
-        result.newsId > 0 &&
-        result.candidate
-      ) {
-        await pushLineMessage(
-          userId,
-          createXImageChoiceMessages()
-        );
-      }
-    }
+  if (!result) {
+    return false;
+  }
+
+  if (result.kind === "image") {
+    await replyLineMessage(replyToken, [
+      {
+        type: "text",
+        text:
+          "✅ 「" +
+          String(result.selectedIndex + 1) +
+          "」を選択しました。" +
+          String.fromCharCode(10, 10) +
+          "投稿する画像を選択してください。",
+      },
+    ]);
+
+    await pushLineMessage(
+      userId,
+      createXImageChoiceMessages(
+        result.hasLineImage
+      )
+    );
+
+    return true;
+  }
+
+  if (result.message) {
+    await replyLineMessage(replyToken, [
+      {
+        type: "text",
+        text: result.message,
+      },
+    ]);
 
     return true;
   }

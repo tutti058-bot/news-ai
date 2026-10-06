@@ -1,7 +1,4 @@
 import { prisma } from "@/lib/prisma";
-import {
-  generateXImageBase64,
-} from "@/lib/services/x-image";
 import { postTweet } from "@/lib/services/x-post";
 
 type LineXSelectionResult =
@@ -18,13 +15,15 @@ type LineXSelectionResult =
     }
   | {
       handled: true;
-      kind: "posting";
+      kind: "image";
+      message: string;
       inboxId: number;
       newsId: number;
       title: string;
       selectedIndex: number;
       candidate: string;
       imageChoice: number;
+      hasLineImage: boolean;
     };
 
 function parseCandidates(value: string | null): string[] {
@@ -78,10 +77,7 @@ export async function handleLineXNumericCommand(
     return null;
   }
 
-  const candidates = parseCandidates(
-    pending.xCandidates
-  );
-
+  const candidates = parseCandidates(pending.xCandidates);
   const selectedIndex = Number(command) - 1;
   const candidate = candidates[selectedIndex];
 
@@ -133,15 +129,111 @@ export async function handleLineXNumericCommand(
     },
   });
 
+  const inbox = await prisma.lineInboxItem.findUnique({
+    where: {
+      id: pending.id,
+    },
+    select: {
+      imageUrl: true,
+    },
+  });
+
   return {
     handled: true,
-    kind: "posting",
+    kind: "image",
+    message: "画像を選択してください。",
     inboxId: pending.id,
     newsId: pending.generatedNewsId,
     title: news?.title ?? "",
     selectedIndex,
     candidate,
     imageChoice: 0,
+    hasLineImage: Boolean(inbox?.imageUrl),
+  };
+}
+
+export async function handleLineXImageChoice(
+  userId: string,
+  command: string
+): Promise<LineXSelectionResult> {
+  if (!/^[1-3]$/.test(command)) {
+    return null;
+  }
+
+  const pending = await prisma.lineInboxItem.findFirst({
+    where: {
+      userId,
+      xStatus: "posting",
+      xCandidates: {
+        not: null,
+      },
+      xSelectedIndex: {
+        not: null,
+      },
+    },
+    orderBy: {
+      updatedAt: "desc",
+    },
+    select: {
+      id: true,
+      generatedNewsId: true,
+      xCandidates: true,
+      xSelectedIndex: true,
+      imageUrl: true,
+    },
+  });
+
+  if (!pending || !pending.generatedNewsId) {
+    return null;
+  }
+
+  const candidates = parseCandidates(pending.xCandidates);
+  const selectedIndex = pending.xSelectedIndex ?? -1;
+  const candidate = candidates[selectedIndex];
+
+  if (!candidate) {
+    return null;
+  }
+
+  const hasLineImage = Boolean(pending.imageUrl);
+
+  if (!hasLineImage && command !== "1") {
+    return {
+      handled: true,
+      kind: "image",
+      message: "LINE画像がないため、「1」を選択してください。",
+      inboxId: pending.id,
+      newsId: pending.generatedNewsId,
+      title: "",
+      selectedIndex,
+      candidate,
+      imageChoice: 0,
+      hasLineImage: false,
+    };
+  }
+
+  const imageChoice = Number(command);
+
+  const news = await prisma.news.findUnique({
+    where: {
+      id: pending.generatedNewsId,
+    },
+    select: {
+      title: true,
+    },
+  });
+
+  return {
+    handled: true,
+    kind: "image",
+    message: "画像選択完了",
+    inboxId: pending.id,
+    newsId: pending.generatedNewsId,
+    title: news?.title ?? "",
+    selectedIndex,
+    candidate,
+    imageChoice,
+    hasLineImage,
   };
 }
 
@@ -159,6 +251,7 @@ export async function executeLineXPost(params: {
       id: true,
       xStatus: true,
       xSelectedIndex: true,
+      imageUrl: true,
       generatedNewsId: true,
     },
   });
@@ -182,9 +275,23 @@ export async function executeLineXPost(params: {
     throw new Error("記事が見つかりません");
   }
 
+  const imageUrls =
+    params.imageChoice === 1
+      ? (news.image ? [news.image] : [])
+      : params.imageChoice === 2
+        ? (item.imageUrl ? [item.imageUrl] : [])
+        : [
+            ...(news.image ? [news.image] : []),
+            ...(item.imageUrl ? [item.imageUrl] : []),
+          ];
+
+  if (imageUrls.length === 0) {
+    throw new Error("投稿する画像がありません");
+  }
+
   const result = await postTweet(
     params.candidate,
-    params.imageChoice === 2 ? null : news.image
+    imageUrls
   );
 
   await prisma.news.update({

@@ -159,52 +159,55 @@ export function createXCandidateMessages(params: {
   ];
 }
 
-export function createXImageChoiceMessages() {
-  return [
-    {
-      type: "text",
-      text: [
-        "X投稿画像を選択してください",
-        "",
-        "1. 記事の既存画像",
-        "2. ヤニねこ画像を生成",
-        "",
-        "※ヤニねこ画像はX投稿専用です。",
-        "記事の画像は変更しません。",
-      ].join("\n"),
-      quickReply: {
-        items: [
-          {
-            type: "action",
-            action: {
-              type: "message",
-              label: "1",
-              text: "1",
-            },
-          },
-          {
-            type: "action",
-            action: {
-              type: "message",
-              label: "2",
-              text: "2",
-            },
-          },
-        ],
-      },
+export function createXImageChoiceMessages(hasLineImage: boolean) {
+  const choices = hasLineImage
+    ? [
+        "1. 記事の画像",
+        "2. LINEで送った画像",
+        "3. 記事の画像＋LINE画像",
+      ]
+    : [
+        "1. 記事の画像",
+      ];
+
+  const quickReplyItems = hasLineImage
+    ? [1, 2, 3]
+    : [1];
+
+  return [{
+    type: "text",
+    text: [
+      "X投稿画像を選択してください",
+      "",
+      ...choices,
+    ].join("\n"),
+    quickReply: {
+      items: quickReplyItems.map((number) => ({
+        type: "action",
+        action: {
+          type: "message",
+          label: String(number),
+          text: String(number),
+        },
+      })),
     },
-  ];
+  }];
 }
 
 export function createXPostingMessage(imageChoice: number) {
+  const imageLabel =
+    imageChoice === 1
+      ? "記事の画像"
+      : imageChoice === 2
+        ? "LINEで送った画像"
+        : "記事の画像＋LINE画像";
+
   return [
     {
       type: "text",
       text:
         "⏳ Xへの投稿を処理しています。\n\n" +
-        (imageChoice === 2
-          ? "ヤニねこ画像を生成して投稿します。"
-          : "記事の既存画像を使用して投稿します。"),
+        `画像：${imageLabel}`,
     },
   ];
 }
@@ -214,6 +217,13 @@ export function createXPostedMessage(params: {
   url: string;
   imageChoice: number;
 }) {
+  const imageLabel =
+    params.imageChoice === 1
+      ? "記事の画像"
+      : params.imageChoice === 2
+        ? "LINEで送った画像"
+        : "記事の画像＋LINE画像";
+
   return [
     {
       type: "text",
@@ -222,11 +232,7 @@ export function createXPostedMessage(params: {
         "",
         params.text,
         "",
-        `画像：${
-          params.imageChoice === 2
-            ? "ヤニねこ画像"
-            : "記事の既存画像"
-        }`,
+        `画像：${imageLabel}`,
         "",
         params.url,
       ].join("\n"),
